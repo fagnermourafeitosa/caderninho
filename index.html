@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: caderno-media:; object-src 'none'; base-uri 'none'">
+  <title>Caderninho</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="renderer.js"></script>
+  <script defer src="cuts.js"></script>
+</head>
+<body>
+  <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="icon-notes" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11L50 7Q55 6 55 12L59 52Q59 56 53 57L20 61Q15 62 15 55L11 18Q10 12 17 11Z" fill="#fff4d8"/><path d="M23 23L43 20M24 32L45 29M25 42L37 40"/><path d="M39 53L43 38L58 17Q61 13 65 17L68 20L51 43Z" fill="#f6ba45"/><path d="M43 38L51 43M58 17L66 23M39 53L42 44"/><path d="M7 52L3 56M64 51L69 54"/></g></symbol>
+      <symbol id="icon-tasks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16H56Q61 16 60 23L57 61H15L15 23Q15 17 18 16Z" fill="#fff4d8"/><path d="M28 12H33V7Q33 1 38 3Q43 4 41 11H47V21H27Z" fill="#c3d29a"/><path d="M25 39L34 49L49 31" stroke="#d55135" stroke-width="5"/></g></symbol>
+      <symbol id="icon-reminders" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M31 15V10Q31 3 37 3Q44 3 42 14" fill="#f7b244"/><path d="M15 53Q24 40 24 29Q23 15 38 14Q52 15 52 30Q51 43 61 52Q42 63 15 53Z" fill="#de6945"/><path d="M31 57Q35 66 44 58" fill="#f6ba45"/><path d="M36 21Q32 30 34 45M12 16Q5 26 8 37M19 20Q14 25 15 32M58 18Q65 28 62 38M63 12Q73 23 69 40" fill="none"/></g></symbol>
+
+
+      <symbol id="icon-archive" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 27L58 25L57 62L15 64Z" fill="#e9ad39"/><path d="M9 17L59 13L64 24L12 29Z" fill="#f8cc65"/><path d="M12 29L64 24L63 32L12 36Z" fill="#e6a83e"/><path d="M28 44L45 43L45 49L28 50Z" fill="#fff4d8"/></g></symbol>
+    </defs>
+  </svg>
+  <main class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+      <nav>
+        <button data-view="notes" class="nav-item active" aria-current="page"><svg aria-hidden="true"><use href="#icon-notes"/></svg><span>Notas</span></button>
+        <button data-view="tasks" class="nav-item"><svg aria-hidden="true"><use href="#icon-tasks"/></svg><span>Tarefas</span></button>
+        <button data-view="reminders" class="nav-item"><svg aria-hidden="true"><use href="#icon-reminders"/></svg><span>Lembretes</span></button>
+        <button data-view="archive" class="nav-item"><svg aria-hidden="true"><use href="#icon-archive"/></svg><span>Lixeira</span></button>
+      </nav>
+    </aside>
+    <section class="notebook" aria-label="Caderninho">
+      <div class="book-stack" aria-hidden="true"></div>
+      <div class="spiral" aria-hidden="true"></div>
+      <div class="paper-tabs" aria-hidden="true"><i></i><i></i><i></i></div>
+      <button id="sidebar-toggle" class="fold-tab" aria-controls="sidebar" aria-expanded="true" aria-label="Recolher menu lateral" title="Recolher menu lateral">
+        <svg viewBox="0 0 34 72" aria-hidden="true"><path class="tab-paper" d="M32 2L10 3Q3 3 3 12L2 60Q2 68 11 68L32 69Z"/><path class="tab-fold" d="M23 3L32 13L23 12Z"/><path class="tab-arrow" d="M21 29L13 36L21 43"/></svg>
+      </button>
+      <div class="sheet" id="sheet">
+        <div class="window-controls" aria-label="Controles da janela"><div class="traffic-lights"><button id="close" aria-label="Fechar" title="Fechar"></button><button id="minimize" aria-label="Minimizar" title="Minimizar"></button><button id="maximize" aria-label="Ocupar toda a altura da tela" title="Ampliar ou restaurar"></button></div></div>
+        <header class="book-header"><span>CADERNINHO</span><button id="quick-open" class="quick-open" title="Abrir rascunho instantâneo">✎ Rascunho</button><span id="save-state" class="save-state" role="status" title="Salvamento local automático">Salvo neste Mac</span></header>
+        <div class="move-grip" title="Clique e arraste para mover o caderninho"><span aria-hidden="true">⠿</span> Arraste para mover</div>
+        <div id="list-progress" class="list-progress" hidden></div>
+        <div class="page-content" id="page-content"></div>
+        <footer class="book-footer"><span id="footer-label">Uma coisa de cada vez.</span><span id="page-number">01</span></footer>
+      </div>
+      <div class="resize-handle resize-mark" data-resize="e" role="separator" aria-label="Arraste para redimensionar a largura" title="Arraste para ajustar a largura"><span></span></div>
+      <div id="flip-layer" aria-hidden="true"></div>
+      <aside class="notes-drawer" id="notes-drawer" hidden aria-label="Todas as notas">
+        <div class="drawer-heading"><h2 id="drawer-title">Suas notas</h2><button id="drawer-close" aria-label="Fechar lista">×</button></div>
+        <input id="search" type="search" placeholder="Procurar uma nota…" aria-label="Procurar uma nota">
+        <div id="notes-list"></div>
+      </aside>
+    </section>
+  </main>
+  <div class="window-edges" aria-hidden="true">
+    <div data-resize="n"></div><div data-resize="s"></div><div data-resize="e"></div><div data-resize="w"></div>
+    <div data-resize="ne"></div><div data-resize="nw"></div><div data-resize="se"></div><div data-resize="sw"></div>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <dialog id="cut-dialog" class="cut-dialog"><form id="cut-link-form"><div class="drawer-heading"><h2>Um recorte novo</h2><button type="button" id="cut-dialog-close" aria-label="Fechar recortes">×</button></div><p>Imagens e links presos à sua página.</p><button type="button" id="cut-image-pick" class="primary">Escolher imagem…</button><input type="file" id="cut-image-file" accept="image/png,image/jpeg,image/webp" multiple hidden><label for="cut-url">Link da página</label><input id="cut-url" type="url" placeholder="https://…" required><button type="submit" class="primary">Colar link</button><small>Também pode colar ou arrastar uma imagem ou um link na nota.</small></form></dialog>
+</body>
+</html>

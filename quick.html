@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'"><title>Rascunho · Caderninho</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="quick.css"><script defer src="quick.js"></script></head>
+<body class="quick-page"><main class="quick-sheet">
+<header class="quick-header"><span>✎ &nbsp; RASCUNHO</span><button id="quick-close" title="Fechar e preservar rascunho" aria-label="Fechar e preservar rascunho">×</button></header>
+<p id="quick-hint" class="quick-hint">Uma ideia antes que ela escape.</p>
+<form id="quick-form"><input id="quick-title" maxlength="160" placeholder="Título, se quiser…" aria-label="Título do rascunho"><textarea id="quick-body" maxlength="200000" placeholder="Escreva aqui…" aria-label="Texto do rascunho" spellcheck="true" lang="pt-BR"></textarea>
+<label class="quick-destination" for="quick-target">Guardar em<select id="quick-target"><option value="">Nova nota</option></select></label>
+<div class="quick-actions"><span id="quick-status" role="status">Rascunho salvo neste Mac</span><button id="quick-save" type="submit" class="primary">Guardar no caderno</button></div></form>
+<button id="quick-reveal" class="quick-reveal" hidden>Abrir a nota no caderno ↗</button>
+<footer class="quick-footer"><span id="quick-shortcut"></span><span>⌘/Ctrl + Enter guarda · Esc fecha</span></footer>
+</main></body></html>
