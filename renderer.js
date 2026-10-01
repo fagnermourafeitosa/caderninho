@@ -6,7 +6,8 @@ const labels = {
   tasks: { singular: 'lista', plural: 'listas', create: 'Nova lista', heading: 'Suas listas' },
   reminders: { singular: 'lembrete', plural: 'lembretes', create: 'Novo lembrete', heading: 'Seus lembretes' }
 };
-let state, view = 'notes', trashType = 'notes', animationGeneration = 0, toastTimer, pending = 0;
+let state, view = 'home', trashType = 'notes', animationGeneration = 0, toastTimer, pending = 0;
+let reminderEditor = false;
 window.smokeErrors = [];
 window.addEventListener('error', event => window.smokeErrors.push(event.message));
 window.addEventListener('unhandledrejection', event => window.smokeErrors.push(String(event.reason)));
@@ -16,11 +17,22 @@ const prettyDate = date => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', mo
 const listDate = date => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(date));
 const localDate = time => { const date = new Date(time); return new Date(time - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16); };
 function toast(message, duration = 4000) { clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').hidden = false; toastTimer = setTimeout(() => $('#toast').hidden = true, duration); }
-function saved() { if (!pending) { $('#save-state').textContent = 'Salvo neste Mac'; $('#save-state').classList.remove('failed'); } }
-async function action(name, input = {}) {
-  pending++; $('#save-state').textContent = 'Salvando…';
+let saveLabelTimer, savingStarted = 0;
+function beginSaving() { clearTimeout(saveLabelTimer); savingStarted=Date.now(); $('#save-state').textContent='Salvando automaticamente…'; $('#save-state').classList.remove('failed'); }
+function saved() {
+  if (pending) return;
+  const at=new Date();
+  clearTimeout(saveLabelTimer); saveLabelTimer=setTimeout(() => { if (!pending && !$('#save-state').classList.contains('failed')) { $('#save-state').textContent=`Salvo às ${at.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`; $('#save-state').title=`Salvamento automático confirmado em ${formatDateTime(at)} · ${state.storagePath}`; } },Math.max(0,300-(Date.now()-savingStarted)));
+}
+async function action(name, input = {}, options = {}) {
+  if (name === 'note:update' && options.history !== false) rememberNoteEdit(input);
+  pending++; beginSaving();
   try {
-    state = await window.notebook.action(name, input); pending--; saved(); return true;
+    state = await window.notebook.action(name, input);
+    if (name === 'view:select' && input.view === 'reminders') { reminderEditor = false; resetReminderCalendar(); }
+    if (['note:create', 'note:select', 'note:restore'].includes(name) && state.activeView === 'reminders') reminderEditor = true;
+    if (name === 'note:trash' && view === 'reminders') reminderEditor = false;
+    pending--; saved(); updateTemporalLabels(); return true;
   } catch (error) {
     pending--; $('#save-state').textContent = 'Falha ao salvar'; $('#save-state').classList.add('failed');
     toast(error.message.replace(/^Error invoking remote method '[^']+': Error: /, ''), 8000); return false;
@@ -43,16 +55,16 @@ function render() {
     button.classList.toggle('active', button.dataset.view === view);
     if (button.dataset.view === view) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
   });
-  $('#footer-label').textContent = { notes: 'Um lugar para suas ideias.', tasks: 'Uma lista, vários pequenos passos.', reminders: 'Dia, hora e um toque para lembrar.', archive: 'Sua lixeira, separada por tipo.' }[view];
+  $('#footer-label').textContent = { home: 'Um dia de cada vez.', notes: 'Um lugar para suas ideias.', tasks: 'Uma lista, vários pequenos passos.', reminders: 'Dia, hora e um toque para lembrar.', archive: 'Sua lixeira, separada por tipo.' }[view];
   $('#page-number').textContent = '';
   renderProgress();
-  if (view === 'archive') renderTrash(); else renderPage();
+  if (view === 'home') renderHome(); else if (view === 'archive') renderTrash(); else if (view === 'reminders' && !reminderEditor) renderReminderCalendar(); else renderPage();
   $('#save-state').title = `Salvamento automático em ${state.storagePath}`;
 }
 function renderPage() {
   const notes = visibleNotes(), note = currentNote(), label = labels[view];
   const index = notes.findIndex(n => n.id === note?.id);
-  const toolbar = `<div class="view-toolbar"><button id="notes-open">☰ &nbsp; ${label.heading} <span class="subtle">(${notes.length})</span></button><span class="toolbar-right">${view === 'notes' && note ? '<button id="add-cut" class="add-note">+ Recorte</button>' : ''}<button id="new-note" class="add-note">+ ${label.create}</button></span></div>`;
+  const toolbar = `<div class="view-toolbar"><span class="toolbar-right">${view === 'reminders' ? '<button id="back-calendar">‹ Calendário</button>' : ''}<button id="notes-open">☰ &nbsp; ${label.heading} <span class="subtle">(${notes.length})</span></button></span><span class="toolbar-right">${view === 'notes' && note ? '<button id="add-cut" class="add-note">+ Adicionar mídia</button>' : ''}<button id="new-note" class="add-note">+ ${label.create}</button></span></div>`;
   if (!note) {
     $('#page-content').innerHTML = toolbar + empty({ notes: 'Uma página nova?', tasks: 'Sua primeira lista?', reminders: 'Uma nota para lembrar?' }[view], { notes: 'Escreva e deixe o caderninho guardar.', tasks: 'Crie uma lista com quantos checkboxes precisar.', reminders: 'Escreva uma nota e agende seu alerta sonoro.' }[view], view, `<button id="empty-create" class="primary">${label.create}</button>`);
     $('#empty-create').onclick = createNote; $('#new-note').onclick = createNote; $('#notes-open').onclick = openDrawer; return;
@@ -60,9 +72,10 @@ function renderPage() {
   const bottom = `<div class="note-bottom"><button id="trash-note" class="trash-page">Mover para a lixeira</button><span id="page-detail"></span><div class="note-pager"><button id="previous-note" aria-label="Página anterior" ${index <= 0 ? 'disabled' : ''}>‹</button><span>${index + 1} / ${notes.length}</span><button id="next-note" aria-label="Próxima página" ${index >= notes.length - 1 ? 'disabled' : ''}>›</button></div></div>`;
   const title = `<input id="note-title" class="note-title" type="text" maxlength="160" aria-label="Título ${view === 'tasks' ? 'da lista' : 'da nota'}" placeholder="Sem título" value="${escape(note.title)}">`;
   const editor = view === 'tasks' ? `<div class="checklist-body"><div id="task-list" class="scroll-list"></div><form id="task-form" class="entry-form task-entry"><input id="task-input" placeholder="Escreva uma tarefa e pressione Enter…" aria-label="Nova tarefa" maxlength="500" required><button type="submit">+ Adicionar</button></form></div>` : `${view === 'reminders' ? '<div id="schedule-panel" class="schedule-panel"></div><p class="reminder-help">O app precisa estar aberto, mesmo minimizado, para tocar o alerta.</p>' : ''}<textarea id="note-body" class="note-body ${view === 'reminders' ? 'reminder-body' : ''}" spellcheck="true" lang="pt-BR" maxlength="200000" aria-label="Texto da nota" placeholder="${view === 'reminders' ? 'Escreva o que você quer lembrar…' : 'Comece uma ideia…'}">${escape(note.body)}</textarea>`;
-  const metadata = view === 'tasks' ? `<p class="list-date">Criada em <time datetime="${escape(note.created)}">${listDate(note.created)}</time> · Salva automaticamente</p>` : '';
-  $('#page-content').innerHTML = toolbar + title + metadata + editor + bottom;
+  const metadata = `<p id="note-dates" class="list-date">${noteDates(note)}</p>`;
+  $('#page-content').innerHTML = toolbar + title + metadata + (view === 'notes' ? '<div id="smart-margin" class="smart-margin" hidden></div>' : '') + editor + bottom;
   $('#notes-open').onclick = openDrawer;
+  if ($('#back-calendar')) $('#back-calendar').onclick = () => { reminderEditor = false; render(); };
   $('#new-note').onclick = createNote;
   if ($('#add-cut')) $('#add-cut').onclick = openCutDialog;
   $('#page-number').textContent = String(index + 1).padStart(2, '0');
@@ -74,13 +87,16 @@ function renderPage() {
       if (await action('item:create', { noteId: note.id, title: $('#task-input').value })) { $('#task-input').value = ''; renderItems(); $('#task-input').focus(); }
     };
   } else {
-    $('#note-body').oninput = () => { updateDetail(); action('note:update', { id: note.id, body: $('#note-body').value }); };
+    $('#note-body').oninput = event => { if (view === 'notes') smartNoteInput(note.id, event); else { updateDetail(); action('note:update', { id: note.id, body: $('#note-body').value }); } };
     if (view === 'reminders') renderSchedule();
-    if (view === 'notes' && note.cuts?.length) mountCollage(note);
+    if (view === 'notes' && (note.cuts?.length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
+    if (view === 'notes') renderSmartMargin();
   }
   $('#trash-note').onclick = async () => { if (await turn('note:trash', { id: note.id })) toast('Página movida para a lixeira. Você pode restaurá-la.'); };
   $('#previous-note').onclick = () => turn('note:select', { id: notes[index - 1].id });
   $('#next-note').onclick = () => turn('note:select', { id: notes[index + 1].id });
+  updateTemporalLabels();
+  ensurePageHistory(note);
   updateDetail();
 }
 function updateDetail() {
@@ -161,10 +177,18 @@ async function turn(name, input = {}) {
   clone.remove(); $('.notebook').classList.remove('turning'); $('.notebook').removeAttribute('aria-busy'); return true;
 }
 async function createNote() {
-  const type = view === 'archive' ? trashType : view;
-  if (await turn('note:create', { type })) { $('#note-title')?.focus(); $('#note-title')?.select(); }
+  const type = view === 'home' ? 'notes' : view === 'archive' ? trashType : view;
+  const day = type === 'reminders' && !reminderEditor ? calendarDay : null;
+  if (await turn('note:create', { type })) {
+    if (day) {
+      const due = new Date(day + 'T09:00:00');
+      if (calendarDateKey(new Date()) === day && due.getTime() <= Date.now()) due.setTime(Date.now() + 60 * 60 * 1000);
+      if (await action('schedule:draft', { id: currentNote().id, due: due.toISOString() })) renderSchedule();
+    }
+    $('#note-title')?.focus(); $('#note-title')?.select();
+  }
 }
-function openDrawer() { renderDrawer(); $('#notes-drawer').hidden = false; $('#search').focus(); }
+function openDrawer() { if (view === 'home') { $('#daily-select')?.focus(); return; } renderDrawer(); $('#notes-drawer').hidden = false; $('#search').focus(); }
 function closeDrawer() { $('#notes-drawer').hidden = true; $('#search').value = ''; }
 function renderDrawer() {
   $('#drawer-title').textContent = labels[view].heading;
@@ -172,13 +196,13 @@ function renderDrawer() {
   const notes = visibleNotes().filter(note => `${note.title} ${note.body} ${note.items.map(item => item.title).join(' ')}`.toLocaleLowerCase('pt-BR').includes(query));
   $('#notes-list').innerHTML = notes.length ? notes.map(note => `<button class="note-list-item ${note.id === state.selected[view] ? 'selected' : ''}" data-note-id="${escape(note.id)}"><strong>${escape(note.title || 'Sem título')}</strong><small>${note.type === 'tasks' ? `${listDate(note.created)} · ${note.items.filter(item => item.done).length} / ${note.items.length} concluídas` : `${prettyDate(note.updated)} · ${escape(note.body.replace(/\s+/g, ' ').slice(0, 90) || 'Página em branco')}`}</small></button>`).join('') : '<div class="empty"><p>Nenhuma página por aqui.</p></div>';
   $('#notes-list').querySelectorAll('[data-note-id]').forEach(button => button.onclick = () => {
-    if (button.dataset.noteId === state.selected[view]) closeDrawer(); else turn('note:select', { id: button.dataset.noteId });
+    if (button.dataset.noteId === state.selected[view] && !(view === 'reminders' && !reminderEditor)) closeDrawer(); else turn('note:select', { id: button.dataset.noteId });
   });
 }
 function renderTrash() {
-  const rows = state.notes.filter(note => note.trashed && note.type === trashType).map(note => ({ ...note, kind: 'note', detail: `${prettyDate(note.updated)} · ${note.type === 'tasks' ? `${note.items.length} tarefas` : note.body.replace(/\s+/g, ' ').slice(0, 50)}` }));
+  const rows = state.notes.filter(note => note.trashed && note.type === trashType).map(note => ({ ...note, kind: 'note', detail: `${note.deletedAt ? 'Removida em '+formatDateTime(note.deletedAt) : 'Data da remoção não registrada'} · ${note.type === 'tasks' ? `${note.items.length} tarefas` : note.body.replace(/\s+/g, ' ').slice(0, 50)}` }));
   if (trashType === 'tasks') rows.push(...state.trashItems.map(item => ({ ...item, kind: 'item', detail: `Item da lista ${item.noteTitle || 'Sem título'}` })));
-  if (trashType === 'notes') rows.push(...(state.trashCuts || []).map(cut => ({ ...cut, kind: 'cut', detail: `Recorte da nota ${state.notes.find(note => note.id === cut.noteId)?.title || 'Sem título'}` })));
+  if (trashType === 'notes') rows.push(...(state.trashCuts || []).map(cut => ({ ...cut, kind: 'cut', detail: `Mídia da nota ${state.notes.find(note => note.id === cut.noteId)?.title || 'Sem título'}` })));
   const count = type => state.notes.filter(note => note.trashed && note.type === type).length + (type === 'tasks' ? state.trashItems.length : type === 'notes' ? (state.trashCuts || []).length : 0);
   $('#page-content').innerHTML = `<div class="view-toolbar"><span>LIXEIRA</span><span>${rows.length} ${rows.length === 1 ? 'item' : 'itens'}</span></div><h1>Guardado por tipo</h1><p class="view-description">Restaure uma página ou exclua definitivamente.</p><div class="trash-tabs">${Object.entries(labels).map(([type]) => `<button data-trash-type="${type}" class="${trashType === type ? 'active' : ''}" aria-pressed="${trashType === type}">${{ notes: 'Notas', tasks: 'Tarefas', reminders: 'Lembretes' }[type]} (${count(type)})</button>`).join('')}</div><div class="scroll-list">${rows.length ? rows.map(row => `<div class="archive-row"><div class="row-copy"><strong>${escape(row.title || 'Sem título')}</strong><small>${escape(row.detail)}</small></div><div class="trash-actions"><button data-restore-id="${escape(row.id)}" data-kind="${row.kind}">Restaurar</button><button class="purge" data-purge-id="${escape(row.id)}" data-kind="${row.kind}">Excluir definitivamente</button></div></div>`).join('') : empty('Lixeira vazia por aqui.', `As ${trashType === 'tasks' ? 'listas e tarefas removidas' : trashType === 'reminders' ? 'notas de lembrete removidas' : 'notas removidas'} ficam nesta seção.`, 'archive')}</div>`;
   document.querySelectorAll('[data-trash-type]').forEach(button => button.onclick = () => { trashType = button.dataset.trashType; renderTrash(); });
@@ -203,6 +227,11 @@ $('#search').oninput = renderDrawer;
 $('#quick-open').onclick = () => window.notebook.quick().catch(error => toast(error.message));
 $('#drawer-close').onclick = closeDrawer;
 for (const name of ['close', 'minimize', 'maximize']) $(`#${name}`).onclick = () => window.notebook.window(name);
+$('#sheet').addEventListener('dblclick', event => {
+  if (event.target.closest('button,input,textarea,select,a,[contenteditable],[data-resize],#page-content,.book-footer')) return;
+  const top = $('#sheet').getBoundingClientRect().top;
+  if (event.clientY < top + 92) { event.preventDefault(); window.notebook.window('maximize'); }
+});
 document.querySelectorAll('[data-resize]').forEach(handle => {
   let active = false;
   handle.onpointerdown = event => {
@@ -218,7 +247,7 @@ document.querySelectorAll('[data-resize]').forEach(handle => {
 });
 window.notebook.onWindowState(info => {
   document.body.classList.toggle('vertical-expanded', info.expanded);
-  $('#maximize').setAttribute('aria-label', info.expanded ? 'Restaurar altura' : 'Ocupar toda a altura da tela');
+  $('#maximize').setAttribute('aria-label', info.expanded ? 'Restaurar tamanho' : 'Maximizar janela');
 });
 // Drag the stationery without turning controls or scrollbars into drag areas.
 let movingPointer = null;
@@ -231,10 +260,10 @@ document.addEventListener('pointerdown', event => {
   event.preventDefault(); movingPointer = event.pointerId;
   target.setPointerCapture(event.pointerId);
   document.body.classList.add('moving-window');
-  window.notebook.move('start', { x: event.screenX, y: event.screenY });
+  window.notebook.move('start');
 });
 document.addEventListener('pointermove', event => {
-  if (movingPointer === event.pointerId) window.notebook.move('move', { x: event.screenX, y: event.screenY });
+  if (movingPointer === event.pointerId) window.notebook.move('move');
 });
 function endMove(event) {
   if (movingPointer !== event.pointerId) return;
@@ -253,7 +282,10 @@ window.notebook.onSaveError(message => { $('#save-state').textContent = 'Falha a
 window.notebook.onNavigate(next => { cancelTurn(); closeDrawer(); state = next; view = state.activeView; render(); });
 window.notebook.onReminder(async reminders => {
   state = await window.notebook.state();
-  if (view === 'reminders') renderSchedule();
+  if (view === 'reminders') { if (reminderEditor) renderSchedule(); else renderReminderCalendar(); }
+  if (view === 'notes') renderSmartMargin();
+  if (view === 'home') refreshHomePanels();
+  updateTemporalLabels();
   toast(`Lembrete: ${reminders.map(reminder => reminder.title || 'Sem título').join(' · ')}`, 12000);
 });
 window.notebook.state().then(next => { state = next; view = state.activeView; render(); });

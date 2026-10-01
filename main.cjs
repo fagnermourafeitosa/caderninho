@@ -6,6 +6,7 @@ const { Store } = require('./store.cjs');
 const { MediaStore, webUrl } = require('./media.cjs');
 const { pathToFileURL } = require('node:url');
 const { randomUUID } = require('node:crypto');
+const { movePosition } = require('./window-move.cjs');
 protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 const smoke = process.argv.includes('--smoke-test');
 app.disableHardwareAcceleration();
@@ -14,7 +15,7 @@ if (smoke) {
   fs.rmSync(app.getPath('userData'), { recursive: true, force: true });
 }
 let win, store, reminderInterval, saveFailed = false, alarmCount = 0;
-let media;
+let media, observedDay;
 let quickWin, openingQuick, quitting = false, quickShortcutAvailable = false;
 const QUICK_SHORTCUT = 'CommandOrControl+Shift+Space';
 function quickState() {
@@ -38,7 +39,7 @@ async function openQuick() {
   try { await openingQuick; } finally { openingQuick = null; }
 }
 let restoreBounds = null, resizeSession = null, moveSession = null;
-const MIN_WIDTH = 620, MIN_HEIGHT = 520;
+const MIN_WIDTH = 620, MIN_HEIGHT = 520, MAX_EXPANDED_WIDTH = 1200;
 function windowState() {
   const info = { expanded: Boolean(restoreBounds), bounds: win.getBounds(), workArea: screen.getDisplayMatching(win.getBounds()).workArea };
   win.webContents.send('notebook:window-state', info);
@@ -49,7 +50,8 @@ function toggleHeight() {
   else {
     restoreBounds = win.getBounds();
     const area = screen.getDisplayMatching(restoreBounds).workArea;
-    win.setBounds({ ...restoreBounds, y: area.y, height: area.height });
+    const width = Math.min(MAX_EXPANDED_WIDTH, area.width);
+    win.setBounds({ x: Math.round(area.x + (area.width - width) / 2), y: area.y, width, height: area.height });
   }
   return windowState();
 }
@@ -78,6 +80,7 @@ else {
     if (process.platform === 'darwin') app.dock.setIcon(nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png')));
     try { store = new Store(app.getPath('userData')); }
     catch (error) { dialog.showErrorBox('Não foi possível abrir o caderno', error.message); app.quit(); return; }
+    store.dispatch('view:select', { view: 'home' }); observedDay = store.dayKey();
     media = new MediaStore(store, nativeImage);
   store.db.prepare("UPDATE cuts SET status='unavailable' WHERE status='loading'").run();
   media.collect();
@@ -93,6 +96,13 @@ else {
   app.on('will-quit', () => { globalShortcut.unregisterAll(); store?.close(); });
   app.on('window-all-closed', () => app.quit());
 }
+function dispatchHistory(direction, targetWindow) {
+  const focused = targetWindow || BrowserWindow.getFocusedWindow();
+  if (!focused) return;
+  if (focused === win) focused.webContents.send('notebook:history', direction);
+  else if (direction === 'undo') focused.webContents.undo();
+  else focused.webContents.redo();
+}
 async function createWindow() {
   const area = screen.getPrimaryDisplay().workArea;
   restoreBounds = null; resizeSession = null;
@@ -100,7 +110,7 @@ async function createWindow() {
   win = new BrowserWindow({ width: Math.min(820, area.width), height: Math.min(820, area.height), minWidth: MIN_WIDTH, minHeight: MIN_HEIGHT, resizable: true, fullscreenable: false, frame: false, transparent: true, hasShadow: false, backgroundColor: '#00000000', title: 'Caderninho', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: false } });
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     ...(process.platform === 'darwin' ? [{ label: 'Caderninho', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'hide' }, { role: 'quit' }] }] : []),
-    { label: 'Editar', submenu: [{ role: 'undo' }, { role: 'redo' }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] }
+    { label: 'Editar', submenu: [{ label: 'Desfazer', accelerator: 'CommandOrControl+Z', click: (_item, targetWindow) => dispatchHistory('undo', targetWindow) }, { label: 'Refazer', accelerator: 'CommandOrControl+Shift+Z', click: (_item, targetWindow) => dispatchHistory('redo', targetWindow) }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] }
     ,{ label: 'Caderno', submenu: [{ label: 'Rascunho instantâneo', click: () => openQuick().catch(reportSaveError) }] }
   ]));
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -115,6 +125,13 @@ async function createWindow() {
   if (smoke) runSmoke();
 }
 function checkReminders() {
+  try {
+    const today = store.dayKey();
+    if (today !== observedDay) {
+      if (store.getSetting('selected_day') === observedDay) store.setSetting('selected_day', today);
+      observedDay = today; win?.webContents.send('notebook:day-updated', store.snapshot());
+    }
+  } catch (error) { reportSaveError(error); }
   let due;
   try { due = store.due(); } catch (error) { reportSaveError(error); return; }
   if (!due.length) return;
@@ -138,7 +155,7 @@ ipcMain.handle('notebook:state', () => ({ ...store.snapshot(), quickShortcutAvai
 ipcMain.handle('quick:open', () => openQuick());
 ipcMain.handle('quick:state', () => quickState());
 ipcMain.handle('quick:write', (_event, input) => {
-  try { store.dispatch('draft:update', input); saveFailed = false; return true; }
+  try { store.dispatch('draft:update', input); saveFailed = false; return store.draft(); }
   catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
 });
 ipcMain.handle('quick:commit', () => {
@@ -208,14 +225,16 @@ ipcMain.on('notebook:resize', (event, phase, input = {}) => {
   win.setBounds(Object.fromEntries(Object.entries(next).map(([key, value]) => [key, Math.round(value)])));
   windowState();
 });
-ipcMain.on('notebook:move', (event, phase, input = {}) => {
-  if (!win || event.sender !== win.webContents) return;
+ipcMain.on('notebook:move', (event, phase) => {
+  if (!win || win.isDestroyed() || event.sender !== win.webContents) return;
   if (phase === 'end') { moveSession = null; return; }
-  if (!Number.isFinite(input.x) || !Number.isFinite(input.y)) return;
-  if (phase === 'start') { moveSession = { ...input, bounds: win.getBounds() }; return; }
+  // Read desktop coordinates directly: renderer screen coordinates can become
+  // unreliable while moving the window that contains the captured pointer.
+  if (phase === 'start') { moveSession = { origin: screen.getCursorScreenPoint(), bounds: win.getBounds() }; return; }
   if (phase !== 'move' || !moveSession) return;
-  const { x, y, bounds } = moveSession;
-  win.setPosition(Math.round(bounds.x + input.x - x), Math.round(bounds.y + input.y - y));
+  const position = movePosition(moveSession.bounds, moveSession.origin, screen.getCursorScreenPoint());
+  if (!position) { moveSession = null; return; }
+  win.setPosition(position.x, position.y);
 });
 async function runSmoke() {
   try {
@@ -259,6 +278,47 @@ async function runSmoke() {
     await win.webContents.executeJavaScript("document.querySelector('#toast').hidden = true");
     await new Promise(resolve => setTimeout(resolve, 100));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'recortes.png'), (await win.webContents.capturePage()).toPNG());
+    const margin = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'margin-smoke.js'), 'utf8'));
+    if (margin.errors.length || alarmCount !== 3) throw new Error('Falha na margem inteligente: ' + margin.errors.join('\n'));
+    const marginStore = new Store(app.getPath('userData'));
+    const inlineNote = marginStore.snapshot().notes.find(note => note.id === margin.noteId);
+    if (!inlineNote.enabled || !inlineNote.body.includes('[x]')) throw new Error('Margem não persistiu no SQLite');
+    marginStore.close();
+    await new Promise(resolve => setTimeout(resolve, 150));
+    fs.writeFileSync(path.join(__dirname, 'artifacts', 'margem-inteligente.png'), (await win.webContents.capturePage()).toPNG());
+    const undo = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'undo-smoke.js'), 'utf8'));
+    if (undo.errors.length) throw new Error(undo.errors.join('\n'));
+    win.focus();
+    await win.webContents.executeJavaScript("putCaret(document.querySelector('.line-text')); document.execCommand('insertText', false, 'Menu undo ')");
+    dispatchHistory('undo', win);
+    await win.webContents.executeJavaScript("(async () => { await new Promise(resolve => setTimeout(resolve, 50)); await undoQueue; })()");
+    if (await win.webContents.executeJavaScript("document.querySelector('#note-body').value.includes('Menu undo ')") ) throw new Error('Menu Desfazer não funcionou');
+    dispatchHistory('redo', win);
+    await win.webContents.executeJavaScript("(async () => { await new Promise(resolve => setTimeout(resolve, 50)); await undoQueue; })()");
+    if (!await win.webContents.executeJavaScript("document.querySelector('#note-body').value.includes('Menu undo ')") ) throw new Error('Menu Refazer não funcionou');
+    const calendar = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'calendar-smoke.js'), 'utf8'));
+    if (calendar.errors.length) throw new Error(calendar.errors.join('\n'));
+    fs.writeFileSync(path.join(__dirname, 'artifacts', 'calendario-lembretes.png'), (await win.webContents.capturePage()).toPNG());
+    const home = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'home-smoke.js'), 'utf8'));
+    if (home.errors.length) throw new Error(home.errors.join('\n'));
+    const homeStore = new Store(app.getPath('userData'));
+    if (homeStore.snapshot().daily.body !== home.body) throw new Error('Anotações do dia não persistiram');
+    homeStore.close();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    fs.writeFileSync(path.join(__dirname, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());
+    const actualNow=store.now;
+    store.now=()=>actualNow()+24*60*60*1000;
+    store.dispatch('view:select',{view:'home'}); observedDay=store.dayKey();
+    await win.webContents.executeJavaScript("(async () => { state = await window.notebook.state(); view = 'home'; render(); })()");
+    await win.webContents.executeJavaScript(`document.querySelector('#daily-select').value=${JSON.stringify(home.day)};document.querySelector('#daily-select').dispatchEvent(new Event('change'));`);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    if (!await win.webContents.executeJavaScript(`document.querySelector('#daily-body').readOnly && document.querySelector('#daily-body').value === ${JSON.stringify(home.body)}`)) throw new Error('Página anterior não foi preservada para consulta');
+    fs.writeFileSync(path.join(__dirname, 'artifacts', 'pagina-anterior.png'), (await win.webContents.capturePage()).toPNG());
+    store.now=actualNow; observedDay=store.dayKey();
+    console.log('HOME_SMOKE_OK', JSON.stringify(home));
+    console.log('CALENDAR_SMOKE_OK', JSON.stringify(calendar));
+    console.log('UNDO_SMOKE_OK', JSON.stringify(undo));
+    console.log('MARGIN_SMOKE_OK', JSON.stringify(margin));
     console.log('CUTS_SMOKE_OK', JSON.stringify(cuts));
     console.log('APP_SMOKE_OK', JSON.stringify({ ...result, alarmCount, quick: quickResult }));
     app.quit();

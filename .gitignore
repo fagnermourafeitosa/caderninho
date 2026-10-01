@@ -1,4 +1,41 @@
+# Dependencies and package/build output
 node_modules/
-dist/
-artifacts/
+/dist/
+/out/
+/release/
+*.app/
+*.dmg
+*.AppImage
+*.exe
+
+# Generated previews, test output and caches
+/artifacts/
+/coverage/
+.nyc_output/
+.cache/
+*.tsbuildinfo
+
+# Local app data: keep notebooks and imported media out of Git
+/userData/
+/media/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+
+# Local configuration and logs
+.env
+.env.*
+!.env.example
+!.env.sample
+*.log
+
+# OS and editor files
 .DS_Store
+._*
+Thumbs.db
+*.swp
+*.swo
+*~

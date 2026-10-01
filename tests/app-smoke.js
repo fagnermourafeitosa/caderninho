@@ -5,9 +5,12 @@
   const fill = (selector, value, event = 'input') => { const element = document.querySelector(selector); element.value = value; element.dispatchEvent(new Event(event, { bubbles: true })); };
   const current = state => state.notes.find(note => note.id === state.selected[state.activeView]);
   await wait(200);
-  assert(document.querySelector('#note-body'), 'Editor inicial');
+  assert(document.querySelector('#daily-body'), 'Página do dia é a home inicial');
+  assert(document.querySelector('.sidebar [data-view]').dataset.view === 'home', 'Caderninho é o primeiro item');
+  await click('[data-view=notes]');
+  assert(document.querySelector('#note-body'), 'Editor de notas');
   assert(!document.querySelector('#themes-open') && !document.querySelector('#pin'), 'Temas e Fixar removidos');
-  assert(document.querySelectorAll('.sidebar [data-view]').length === 4, 'Quatro seções do menu');
+  assert(document.querySelectorAll('.sidebar [data-view]').length === 5, 'Cinco seções do menu');
   assert(!document.querySelector('.face') && !document.querySelector('.arm'), 'Área de escrita livre do mascote');
   assert(!document.querySelector('.ribbon') && document.querySelector('.paper-tabs'), 'Marcador do topo removido');
   const widthBeforeFold = document.querySelector('#note-body').getBoundingClientRect().width;
@@ -25,7 +28,8 @@
   await click('#sidebar-toggle', 350);
   assert(!(await window.notebook.state()).sidebarCollapsed && !document.querySelector('#sidebar').inert, 'Reabrir restaura menu');
   const originalWindow = await window.notebook.window('state');
-  assert(document.querySelector('.move-grip').textContent.includes('Arraste para mover'), 'Área de movimento visível');
+  assert(!document.querySelector('.move-grip'), 'Label de arraste removido');
+  assert(!document.querySelector('.book-header').textContent.includes('CADERNINHO'), 'Título do cabeçalho removido');
   document.querySelector('#note-body').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 7 }));
   assert(!document.body.classList.contains('moving-window'), 'Editor não inicia movimento');
   document.querySelector('#new-note').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 8 }));
@@ -34,17 +38,33 @@
   window.notebook.move('move', { x: 124, y: 120 });
   window.notebook.move('end'); await wait(180);
   const movedWindow = await window.notebook.window('state');
-  assert(movedWindow.bounds.x === originalWindow.bounds.x + 24 && movedWindow.bounds.y === originalWindow.bounds.y + 20, 'Arraste desloca janela');
+  assert(Number.isInteger(movedWindow.bounds.x) && Number.isInteger(movedWindow.bounds.y), 'Arraste usa coordenadas nativas válidas');
   assert(movedWindow.bounds.width === originalWindow.bounds.width, 'Mover mantém tamanho');
   window.notebook.move('start', { x: 124, y: 120 });
   window.notebook.move('move', { x: 100, y: 100 });
   window.notebook.move('end'); await wait(180);
+  // Renderer coordinates are not forwarded to native window positioning.
+  window.notebook.move('start', { x: NaN, y: Infinity });
+  window.notebook.move('move', { x: Number.MAX_VALUE, y: -Number.MAX_VALUE });
+  window.notebook.move('end'); await wait(100);
+  assert((await window.notebook.window('state')).bounds.width === originalWindow.bounds.width, 'Coordenadas inválidas não interrompem o app');
   const expandedWindow = await window.notebook.window('maximize');
   await wait(180);
-  assert(expandedWindow.bounds.width === originalWindow.bounds.width, 'Maximizar mantém largura');
+  assert(expandedWindow.bounds.width === Math.min(1200, expandedWindow.workArea.width), 'Maximizar amplia largura com limite');
   assert(expandedWindow.bounds.height === expandedWindow.workArea.height && expandedWindow.bounds.y === expandedWindow.workArea.y, 'Maximizar usa altura disponível');
   const restoredWindow = await window.notebook.window('maximize');
   assert(restoredWindow.bounds.height === originalWindow.bounds.height, 'Restaurar altura anterior');
+  assert(restoredWindow.bounds.width === originalWindow.bounds.width && restoredWindow.bounds.x === originalWindow.bounds.x, 'Restaurar recupera largura e posição');
+  const header = document.querySelector('.book-header');
+  header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
+  await wait(100);
+  assert((await window.notebook.window('state')).expanded, 'Dois cliques no topo maximizam');
+  document.querySelector('#quick-open').dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
+  await wait(100);
+  assert((await window.notebook.window('state')).expanded, 'Dois cliques em um botão não maximizam');
+  header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
+  await wait(100);
+  assert(!(await window.notebook.window('state')).expanded, 'Dois cliques restauram');
   window.notebook.resize('start', { edge: 'e', x: 100, y: 100 });
   window.notebook.resize('move', { x: 145, y: 100 });
   window.notebook.resize('end'); await wait(180);
@@ -145,4 +165,4 @@
   const sample = await window.notebook.state();
   assert(sample.storagePath.endsWith('notebook.sqlite'), 'SQLite em uso');
   return { pages: sample.notes.length, lists: sample.notes.filter(n => n.type === 'tasks').length, reminderNotes: sample.notes.filter(n => n.type === 'reminders').length, errors: window.smokeErrors };
-})()
+})().catch(error => { throw new Error(error.stack); })

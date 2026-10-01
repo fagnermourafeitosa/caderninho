@@ -1,3 +1,7 @@
+function quickDates(draft) {
+  const date = value => new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));
+  $('#quick-dates').textContent = draft.created || draft.updated ? `Criado: ${draft.created ? date(draft.created) : 'não registrado'} · Atualizado: ${draft.updated ? date(draft.updated) : 'não registrado'}` : '';
+}
 const $ = selector => document.querySelector(selector);
 let writes = Promise.resolve(), saving = false, savedId;
 window.quickErrors = [];
@@ -7,10 +11,10 @@ function message(text, failed = false) { $('#quick-status').textContent = text; 
 function values() { return { title: $('#quick-title').value, body: $('#quick-body').value, targetId: $('#quick-target').value }; }
 function persist() {
   const input = values();
-  message('Salvando rascunho…');
+  message('Salvando automaticamente…');
   writes = writes.catch(() => {}).then(() => window.quick.write(input));
   const currentWrite = writes;
-  return currentWrite.then(() => { if (writes === currentWrite) message('Rascunho salvo neste Mac'); }, error => { message('Não foi salvo. ' + error.message, true); throw error; });
+  return currentWrite.then(draft => { if (writes === currentWrite) { message('Rascunho salvo neste Mac'); quickDates(draft); } }, error => { message('Não foi salvo. ' + error.message, true); throw error; });
 }
 async function refresh() {
   await writes.catch(() => {});
@@ -23,7 +27,7 @@ async function refresh() {
   select.value = state.draft.targetId;
   $('#quick-shortcut').textContent = state.shortcutAvailable ? state.shortcut : 'Atalho indisponível; use o botão Rascunho';
   $('#quick-reveal').hidden = true;
-  message('Rascunho salvo neste Mac');
+  message('Rascunho salvo neste Mac'); quickDates(state.draft);
   $('#quick-body').focus();
 }
 for (const selector of ['#quick-title', '#quick-body', '#quick-target']) $(selector).addEventListener('input', () => {
@@ -51,6 +55,7 @@ async function hide() {
 $('#quick-close').onclick = hide;
 $('#quick-reveal').onclick = () => window.quick.reveal(savedId).catch(error => message(error.message, true));
 document.addEventListener('keydown', event => {
+  if (event.ctrlKey && !event.altKey && ['z', 'y'].includes(event.key.toLowerCase())) { event.preventDefault(); document.execCommand(event.shiftKey || event.key.toLowerCase() === 'y' ? 'redo' : 'undo'); }
   if (event.key === 'Escape') { event.preventDefault(); hide(); }
   if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); $('#quick-form').requestSubmit(); }
 });

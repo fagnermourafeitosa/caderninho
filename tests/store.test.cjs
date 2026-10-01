@@ -26,7 +26,7 @@ test('quick draft survives reopening and transfers atomically into a new note', 
   assert.equal(saved.title, 'Uma ideia');
   assert.equal(saved.body, 'Rascunho\ncom duas linhas');
   assert.equal(saved.type, 'notes');
-  assert.deepEqual(open().draft(), { title: '', body: '', targetId: '' });
+  assert.deepEqual(open().draft(), { title: '', body: '', targetId: '', id:null,created:null,updated:null });
   assert.throws(() => store.dispatch('draft:commit'));
 });
 test('quick draft appends to an existing note and keeps content if destination is invalid', t => {
@@ -201,7 +201,7 @@ test('invalid commands roll back and view selection persists', t => {
 test('cuts retain layout and references across reopen and typed trash restores', t => {
   const { store, open } = fixture(t), id = create(store, 'notes', 'Recortes');
   const blob = 'a'.repeat(64);
-  store.db.prepare('INSERT INTO media_blobs VALUES(?,?,?,?)').run(blob, blob + '.png', 'image/png', 5);
+  store.db.prepare('INSERT INTO media_blobs(id,file,mime,bytes) VALUES(?,?,?,?)').run(blob, blob + '.png', 'image/png', 5);
   store.dispatch('note:update', { id, body: 'Texto ao redor' });
   store.dispatch('cut:create', { id: 'cut-image', noteId: id, kind: 'image', blobId: blob });
   store.dispatch('cut:layout', { id: 'cut-image', side: 'left', anchor: 3, width: .4 });
@@ -218,4 +218,71 @@ test('cuts retain layout and references across reopen and typed trash restores',
   assert.throws(() => store.dispatch('cut:purge', { id: cut.id }));
   store.dispatch('cut:trash', { id: cut.id }); store.dispatch('cut:purge', { id: cut.id });
   assert.equal(note(store, id).cuts.length, 0);
+});
+test('inline note alarm and checkbox states persist, fire once and respect trash', t => {
+  const { store, open, advance, now } = fixture(t), id = create(store, 'notes', 'Margem');
+  const body = '[] comprar pão\n[x] café\namanhã às 14h';
+  store.dispatch('note:update', { id, body });
+  store.dispatch('schedule:activate', { id, due: new Date(now() + 60000).toISOString() });
+  const restored = note(open(), id); assert.equal(restored.body, body); assert.equal(restored.type, 'notes'); assert.equal(restored.enabled, true);
+  advance(60001); assert.equal(store.due()[0].id, id); assert.equal(store.due().length, 0);
+  store.dispatch('schedule:activate', { id, due: new Date(now() + 60000).toISOString() });
+  store.dispatch('schedule:cancel', { id }); advance(60001); assert.equal(store.due().length, 0);
+  store.dispatch('schedule:activate', { id, due: new Date(now() + 60000).toISOString() });
+  store.dispatch('note:trash', { id }); advance(60001); assert.equal(store.due().length, 0);
+  store.dispatch('note:restore', { id }); assert.equal(note(store, id).enabled, false); assert.equal(note(store, id).body, body);
+  const task = create(store, 'tasks', 'Lista'); assert.throws(() => store.dispatch('schedule:activate', { id: task, due: new Date(now() + 60000).toISOString() }));
+});
+test('daily pages freeze past overview and retain independent annotations across midnight', t => {
+  const { store, advance, open } = fixture(t);
+  const list = create(store,'tasks','Trabalho'); store.dispatch('item:create',{noteId:list,title:'Revisar'});
+  const task = note(store,list).items[0];
+  const originalDay=store.dayKey(); store.dispatch('day:update',{day:originalDay,body:'Foi um bom dia.'});
+  store.dispatch('item:toggle',{id:task.id});
+  const frozen=store.snapshot().daily.overview;
+  assert.equal(frozen.tasks[0].done,true);
+  advance(24*60*60*1000);
+  store.dispatch('item:toggle',{id:task.id}); store.dispatch('item:update',{id:task.id,title:'Título novo'});
+  const nextDay=store.dayKey(); store.dispatch('day:update',{day:nextDay,body:'Novos planos.'});
+  store.dispatch('day:select',{day:originalDay});
+  const previous=open().snapshot().daily;
+  assert.equal(previous.body,'Foi um bom dia.'); assert.deepEqual(previous.overview,frozen);
+  assert.throws(()=>store.dispatch('day:update',{day:originalDay,body:'Não mudar o passado'}));
+  store.dispatch('day:select',{day:nextDay}); assert.equal(store.snapshot().daily.body,'Novos planos.');
+});
+test('entity timestamps, toggle history and restored deleted_at survive reopening', t => {
+  const { store, advance, open, now }=fixture(t), list=create(store,'tasks','Datas');
+  store.dispatch('item:create',{noteId:list,title:'Primeiro item'}); const id=note(store,list).items[0].id;
+  const created=note(store,list).items[0].created; assert.equal(created,new Date(now()).toISOString());
+  advance(1000); store.dispatch('item:toggle',{id}); const checked=note(store,list).items[0].checkedAt;
+  advance(1000); store.dispatch('item:toggle',{id}); const unchecked=note(store,list).items[0].uncheckedAt;
+  assert.notEqual(checked,unchecked); assert.equal(note(store,list).items[0].checkedAt,checked);
+  assert.deepEqual(store.db.prepare("SELECT action FROM activity_events WHERE entity_type='task' AND entity_id=? ORDER BY id").all(id).map(row=>row.action),['create','check','uncheck']);
+  store.dispatch('item:trash',{id}); assert.ok(store.snapshot().trashItems.find(item=>item.id===id).deletedAt);
+  advance(1000); store.dispatch('item:restore',{id}); const item=note(open(),list).items[0];
+  assert.equal(item.deletedAt,null); assert.equal(item.created,created); assert.equal(item.uncheckedAt,unchecked);
+  store.dispatch('note:trash',{id:list}); assert.ok(note(store,list).deletedAt);
+  store.dispatch('note:restore',{id:list}); assert.equal(note(open(),list).deletedAt,null);
+});
+test('inline tasks keep identity and dates while edited, moved, removed and restored', t => {
+  const { store,advance,open }=fixture(t), id=create(store,'notes','Inline');
+  store.dispatch('note:update',{id,body:'[] Comprar café\n[] Ler'});
+  const first=note(store,id).inlineTasks[0]; assert.ok(first.created);
+  advance(1000); store.dispatch('inline:toggle',{id:first.id}); assert.ok(note(store,id).body.startsWith('[x]'));
+  const checked=note(store,id).inlineTasks[0].checkedAt;
+  advance(1000); store.dispatch('note:update',{id,body:'[] Ler\n[x] Comprar café'});
+  const moved=note(store,id).inlineTasks.find(item=>item.id===first.id); assert.equal(moved.lineIndex,1); assert.equal(moved.checkedAt,checked);
+  advance(1000); store.dispatch('inline:toggle',{id:first.id}); const unchecked=note(store,id).inlineTasks.find(item=>item.id===first.id).uncheckedAt; assert.ok(unchecked);
+  store.dispatch('note:update',{id,body:'[] Ler'}); assert.ok(store.db.prepare('SELECT deleted_at FROM inline_tasks WHERE id=?').get(first.id).deleted_at);
+  advance(1000); store.dispatch('note:update',{id,body:'[] Ler\n[] Comprar café'});
+  const restored=note(open(),id).inlineTasks.find(item=>item.id===first.id); assert.equal(restored.deletedAt,null); assert.equal(restored.created,first.created);
+  assert.ok(store.snapshot().daily.overview.tasks.some(item=>item.id===first.id && item.source==='inline'));
+});
+test('unassociated quick draft dates persist and original creation transfers into a new note', t => {
+  const { store,open,advance }=fixture(t); store.dispatch('draft:update',{body:'Primeira ideia'});
+  const original=store.draft(); assert.ok(original.id); assert.ok(original.created); assert.equal(original.created,original.updated);
+  advance(1000); store.dispatch('draft:update',{body:'Ideia melhorada'}); const updated=open().draft();
+  assert.equal(updated.id,original.id); assert.equal(updated.created,original.created); assert.notEqual(updated.updated,original.updated);
+  advance(1000); store.dispatch('draft:commit'); const saved=note(store,store.getSetting('quick_saved_note'));
+  assert.equal(saved.created,original.created); assert.notEqual(saved.created,saved.updated); assert.equal(store.draft().id,null);
 });

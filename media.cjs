@@ -1,3 +1,4 @@
+const { event } = require('./temporal.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
@@ -72,7 +73,8 @@ class MediaStore {
     const id = createHash('sha256').update(png).digest('hex'), file = id + '.png';
     const target = path.join(this.directory, file);
     if (!fs.existsSync(target)) fs.writeFileSync(target, png, { mode: 0o600, flag: 'wx' });
-    this.store.db.prepare('INSERT OR IGNORE INTO media_blobs(id,file,mime,bytes) VALUES(?,?,?,?)').run(id, file, 'image/png', png.length);
+    const inserted = this.store.db.prepare('INSERT OR IGNORE INTO media_blobs(id,file,mime,bytes,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id, file, 'image/png', png.length,new Date(this.store.now()).toISOString(),new Date(this.store.now()).toISOString());
+    if (inserted.changes) event(this.store,'media',id,'create',new Date(this.store.now()).toISOString());
     return id;
   }
   file(id) { if (!/^[a-f0-9]{64}$/.test(id)) return null; const row = this.store.db.prepare('SELECT file FROM media_blobs WHERE id=?').get(id); return row ? path.join(this.directory, row.file) : null; }

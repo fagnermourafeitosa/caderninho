@@ -16,7 +16,7 @@
   assert(document.querySelector('.cut-open strong')?.textContent === 'Uma ideia em papel', 'Metatags mostradas no cartão');
   const imageCut = currentNote().cuts.find(cut => cut.kind === 'image');
   await action('cut:layout', { id: imageCut.id, side: 'left', anchor: 1, width: .42 }); renderPage();
-  const line = document.querySelector('.writing-line'); line.textContent = 'Texto editado ao redor dos recortes.'; line.dispatchEvent(new Event('input', { bubbles: true })); await wait(100);
+  const line = document.querySelector('.writing-line .line-text'); line.textContent = 'Texto editado ao redor dos recortes.'; line.dispatchEvent(new Event('input', { bubbles: true })); await wait(100);
   assert((await window.notebook.state()).notes.find(note => note.id === id).body.startsWith('Texto editado'), 'Texto da colagem salvo');
   document.querySelector(`[data-cut-id="${imageCut.id}"] .cut-remove`).click(); await wait(100);
   assert((await window.notebook.state()).trashCuts.some(cut => cut.id === imageCut.id), 'Recorte na lixeira');

@@ -8,9 +8,9 @@ function cutCard(cut) {
   const card = document.createElement('aside');
   card.className = `paper-cut cut-${cut.side}${cut.width > .65 ? ' cut-wide' : ''}`; card.contentEditable = 'false'; card.dataset.cutId = cut.id;
   card.style.width = `${cut.width * 100}%`;
-  card.innerHTML = `<div class="cut-controls"><button class="cut-grip" aria-label="Arrastar recorte" title="Arraste para posicionar na página">⠿ <span>Arraste</span></button><span><button data-size="-1" aria-label="Diminuir recorte">−</button><button data-size="1" aria-label="Aumentar recorte">+</button><button class="cut-remove" aria-label="Mover recorte para a lixeira">×</button></span></div><div class="cut-preview"></div>`;
+  card.innerHTML = `<div class="cut-controls"><button class="cut-grip" aria-label="Arrastar mídia" title="Arraste para posicionar na página">⠿ <span>Arraste</span></button><span><button data-size="-1" aria-label="Diminuir mídia">−</button><button data-size="1" aria-label="Aumentar mídia">+</button><button class="cut-remove" aria-label="Mover mídia para a lixeira">×</button></span></div><div class="cut-preview"></div>`;
   fillCutPreview(card, cut);
-  card.querySelector('.cut-remove').onclick = async () => { if (await action('cut:trash', { id: cut.id })) { renderPage(); toast('Recorte guardado na lixeira de notas.'); } };
+  card.querySelector('.cut-remove').onclick = async () => { if (await action('cut:trash', { id: cut.id })) { renderPage(); toast('Mídia guardada na lixeira de notas.'); } };
   card.querySelectorAll('[data-size]').forEach(button => button.onclick = async () => {
     if (await action('cut:layout', { id: cut.id, side: cut.side, anchor: cut.anchor, width: Math.max(.25, Math.min(.85, cut.width + Number(button.dataset.size) * .1)) })) renderPage();
   });
@@ -29,18 +29,18 @@ function cutCard(cut) {
 }
 function fillCutPreview(card, cut) {
   const preview = card.querySelector('.cut-preview');
-  preview.innerHTML = `${cut.blobId ? `<img src="caderno-media://blob/${cut.blobId}" alt="${escape(cut.title || 'Recorte')}" draggable="false">` : ''}${cut.kind === 'link' ? `<button class="cut-open" title="Abrir no navegador"><small>${escape(new URL(cut.url).hostname)}</small><strong>${escape(cut.title)}</strong>${cut.description ? `<p>${escape(cut.description)}</p>` : ''}<span>${cut.status === 'loading' ? 'Buscando metatags…' : cut.status === 'unavailable' ? 'Sem prévia · Abrir link ↗' : 'Abrir link ↗'}</span></button>` : ''}`;
+  preview.innerHTML = `${cut.blobId ? `<img src="caderno-media://blob/${cut.blobId}" alt="${escape(cut.title || 'Mídia')}" draggable="false">` : ''}${cut.kind === 'link' ? `<button class="cut-open" title="Abrir no navegador"><small>${escape(new URL(cut.url).hostname)}</small><strong>${escape(cut.title)}</strong>${cut.description ? `<p>${escape(cut.description)}</p>` : ''}<span>${cut.status === 'loading' ? 'Buscando metatags…' : cut.status === 'unavailable' ? 'Sem prévia · Abrir link ↗' : 'Abrir link ↗'}</span></button>` : ''}`;
   const open = preview.querySelector('.cut-open'); if (open) open.onclick = () => window.notebook.openCut(cut.id).catch(error => toast(error.message));
 }
 function mountCollage(note) {
   const old = $('#note-body'), editor = document.createElement('div');
-  editor.id = 'note-body'; editor.className = 'note-body collage-editor'; editor.contentEditable = 'false'; editor.setAttribute('aria-label', 'Página com texto e recortes');
-  Object.defineProperty(editor, 'value', { get: () => [...editor.querySelectorAll('.writing-line')].map(line => line.innerText.replace(/\n$/, '')).join('\n') });
-  editor.oninput = old.oninput;
+  editor.id = 'note-body'; editor.className = 'note-body collage-editor'; editor.contentEditable = 'false'; editor.setAttribute('aria-label', 'Página com texto e mídia');
+  Object.defineProperty(editor, 'value', { get: () => [...editor.querySelectorAll('.writing-line')].map(readWritingLine).join('\n') });
+  editor.oninput = old.oninput; editor.onkeydown = handleWritingKey;
   const lines = note.body.split('\n');
   lines.forEach((text, index) => {
     note.cuts.filter(cut => Math.min(cut.anchor, lines.length - 1) === index).forEach(cut => editor.append(cutCard(cut)));
-    const line = document.createElement('div'); line.className = 'writing-line'; line.contentEditable = 'true'; line.spellcheck = true; line.lang = 'pt-BR'; line.dataset.lineIndex = index; line.setAttribute('role', 'textbox'); line.setAttribute('aria-label', `Texto da nota, parágrafo ${index + 1}`); line.textContent = text; if (!text) line.append(document.createElement('br')); editor.append(line);
+    editor.append(makeWritingLine(text, index));
   });
   old.replaceWith(editor);
 }
@@ -55,7 +55,7 @@ async function importCuts(files, url, noteId = currentNote()?.id) {
     }
     if (url) state = await window.notebook.link({ noteId, url });
     if (view === 'notes' && currentNote()?.id === noteId) renderPage();
-    saved(); toast('Recorte colado. Arraste pela alça para posicionar.');
+    saved(); toast('Mídia adicionada. Arraste pela alça para posicionar.');
   } catch (error) { if (view === 'notes' && currentNote()?.id === noteId) renderPage(); toast(error.message.replace(/^Error invoking remote method '[^']+': Error: /, '')); }
 }
 $('#cut-dialog-close').onclick = () => $('#cut-dialog').close();
@@ -66,7 +66,7 @@ document.addEventListener('paste', event => {
   if (view !== 'notes' || !currentNote() || !event.target.closest('#note-body')) return;
   const files = [...event.clipboardData.files], url = cutUrl(event.clipboardData.getData('text/plain'));
   if (files.length || url) { event.preventDefault(); importCuts(files, files.length ? null : url); }
-  else if (event.target.closest('.writing-line')) { event.preventDefault(); document.execCommand('insertText', false, event.clipboardData.getData('text/plain')); }
+  else if (event.target.closest('.writing-line')) { event.preventDefault(); pasteWritingText(event.clipboardData.getData('text/plain')); }
 });
 document.addEventListener('dragover', event => { if (view === 'notes' && currentNote() && event.target.closest('#page-content')) { event.preventDefault(); $('#note-body')?.classList.add('drop-active'); } });
 document.addEventListener('dragleave', event => { if (!event.relatedTarget?.closest('#page-content')) $('#note-body')?.classList.remove('drop-active'); });

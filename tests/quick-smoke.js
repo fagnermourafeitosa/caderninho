@@ -5,6 +5,7 @@
  await wait(200);
  fill('#quick-title', 'Uma ideia'); fill('#quick-body', 'Uma ideia capturada.'); await wait(180);
  assert((await window.quick.state()).draft.body === 'Uma ideia capturada.', 'Rascunho automático');
+ assert(document.querySelector('#quick-dates').textContent.includes('Atualizado:'), 'Datas do rascunho independente visíveis');
  await window.quick.hide();
  // Refresh is also used when the global shortcut reopens a hidden sheet.
  await refresh();
