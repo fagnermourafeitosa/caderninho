@@ -58,6 +58,12 @@ Para atualizar as capturas:
 npx electron scripts/capture-readme.cjs
 ```
 
+Para gerar somente as capturas de ações vinculadas e colagem:
+
+```sh
+npx electron scripts/capture-readme.cjs --features-only
+```
+
 O script usa o renderer real com dados fictícios em um banco temporário. As capturas são gravadas em `docs/images/`; a pasta temporária é removida ao terminar. Nenhuma nota pessoal é acessada.
 
 As funcionalidades ainda não implementadas ficam registradas em [ROADMAP.md](../ROADMAP.md).

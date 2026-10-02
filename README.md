@@ -39,9 +39,17 @@ Uma nota pode começar com uma frase e ganhar títulos, listas, checkboxes, cita
 - **Categorias no texto:** escreva `#ideias` ou `#trabalho` para organizar a página enquanto escreve.
 - **Salvamento automático:** acompanhe a confirmação de salvamento sem interromper a escrita.
 
+## Suas referências, coladas na página
+
+Cole ou arraste imagens e links para a nota. Posicione as mídias como pedacinhos de papel, ajuste o tamanho e escreva ao redor. Os cartões de links guardam título, descrição e imagem quando o site disponibiliza uma prévia.
+
+![Página com imagem e cartão de link posicionados como colagem, com anotações ao redor](docs/images/colagem.png)
+
 ## Da ideia à ação, sem perder o contexto
 
 Selecione um trecho da nota e use o **ícone de tarefa**, ou use a mesma opção em uma imagem ou cartão de link. Defina uma tarefa ou um lembrete na margem, sem sair da página.
+
+![Nota com trechos marcados e ações associadas: tarefa pendente, tarefa concluída e lembrete](docs/images/acoes-na-nota.png)
 
 Cada ação mantém uma cópia do trecho original e um caminho de volta à origem. As tarefas aparecem na Página do dia; os lembretes também entram no calendário. Você pode concluir, editar, reagendar ou recolher a margem para continuar escrevendo.
 
