@@ -39,3 +39,6 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Native OCR binary rebuilt for the target Mac
+/native/caderninho-ocr

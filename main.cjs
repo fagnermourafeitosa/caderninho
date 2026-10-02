@@ -3,6 +3,7 @@ const { execFile } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Store } = require('./store.cjs');
+const { RelatedService } = require('./related-service.cjs');
 const { MediaStore, webUrl } = require('./media.cjs');
 const { pathToFileURL } = require('node:url');
 const { randomUUID } = require('node:crypto');
@@ -15,7 +16,7 @@ if (smoke) {
   fs.rmSync(app.getPath('userData'), { recursive: true, force: true });
 }
 let win, store, reminderInterval, saveFailed = false, alarmCount = 0;
-let media, observedDay;
+let media, observedDay, related;
 let quickWin, openingQuick, quitting = false, quickShortcutAvailable = false;
 const QUICK_SHORTCUT = 'CommandOrControl+Shift+Space';
 function quickState() {
@@ -82,6 +83,8 @@ else {
     catch (error) { dialog.showErrorBox('Não foi possível abrir o caderno', error.message); app.quit(); return; }
     store.dispatch('view:select', { view: 'home' }); observedDay = store.dayKey();
     media = new MediaStore(store, nativeImage);
+    related = new RelatedService(store, media, { ocrPath: app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(__dirname,'native','caderninho-ocr'), onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');} });
+    if(!smoke)related.schedule();
   store.db.prepare("UPDATE cuts SET status='unavailable' WHERE status='loading'").run();
   media.collect();
     protocol.handle('caderno-media', request => {
@@ -93,7 +96,7 @@ else {
   });
   app.on('activate', () => { if (store && !BrowserWindow.getAllWindows().length) createWindow(); });
   app.on('before-quit', event => { if (!flush()) event.preventDefault(); else quitting = true; });
-  app.on('will-quit', () => { globalShortcut.unregisterAll(); store?.close(); });
+  app.on('will-quit', () => { globalShortcut.unregisterAll(); related?.close(); store?.close(); });
   app.on('window-all-closed', () => app.quit());
 }
 function dispatchHistory(direction, targetWindow) {
@@ -151,6 +154,8 @@ function checkReminders() {
     });
   }
 }
+ipcMain.handle('related:query', (_event,id) => related.query(id));
+ipcMain.handle('related:retry', () => { if(!smoke)related.schedule(); });
 ipcMain.handle('notebook:state', () => ({ ...store.snapshot(), quickShortcutAvailable, ...(smoke ? { alarmCount } : {}) }));
 ipcMain.handle('quick:open', () => openQuick());
 ipcMain.handle('quick:state', () => quickState());
@@ -160,7 +165,7 @@ ipcMain.handle('quick:write', (_event, input) => {
 });
 ipcMain.handle('quick:commit', () => {
   try {
-    const state = store.dispatch('draft:commit'); saveFailed = false;
+    const state = store.dispatch('draft:commit'); saveFailed = false; if(!smoke)related.schedule();
     win?.webContents.send('notebook:navigate', state);
     return { id: store.getSetting('quick_saved_note') };
   } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
@@ -172,7 +177,7 @@ ipcMain.handle('quick:reveal', (_event, id) => {
 });
 ipcMain.handle('notebook:action', (_event, action, input) => {
   if (['source:purge','note:purge','item:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
-  try { const state = store.dispatch(action, input); saveFailed = false; return state; }
+  try { const state = store.dispatch(action, input); saveFailed = false; if(!smoke)related.schedule(); return state; }
   catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
 });
 ipcMain.handle('notebook:purge', async (_event, kind, id) => {
@@ -181,12 +186,12 @@ ipcMain.handle('notebook:purge', async (_event, kind, id) => {
   if (!item || !item.trashed) throw new Error('Este item não está na lixeira.');
   const result = await dialog.showMessageBox(win, { type: 'warning', title: 'Excluir definitivamente?', message: `Excluir “${item.title || 'Sem título'}”?`, detail: 'Esta ação não pode ser desfeita.', buttons: ['Cancelar', 'Excluir definitivamente'], defaultId: 0, cancelId: 0, noLink: true });
   if (result.response !== 1) return null;
-  const state = store.dispatch(kind + ':purge', { id }); media.collect(); saveFailed = false; return state;
+  const state = store.dispatch(kind + ':purge', { id }); media.collect(); saveFailed = false; if(!smoke)related.schedule(); return state;
 });
 ipcMain.handle('cuts:image', (_event, input) => {
   const note = store.note(input.noteId, 'notes'); if (note.trashed) throw new Error('Restaure a nota primeiro.');
   const blobId = media.image(input.bytes);
-  return store.dispatch('cut:create', { noteId: note.id, kind: 'image', blobId, title: input.name || 'Imagem' });
+  const state=store.dispatch('cut:create', { noteId: note.id, kind: 'image', blobId, title: input.name || 'Imagem' }); if(!smoke)related.schedule(); return state;
 });
 ipcMain.handle('cuts:link', (_event, input) => {
   const url = webUrl(input.url).href;
@@ -194,8 +199,8 @@ ipcMain.handle('cuts:link', (_event, input) => {
   const state = store.dispatch('cut:create', { id, noteId: input.noteId, kind: 'link', url, title: new URL(url).hostname, status: 'loading' });
   media.preview(url).then(data => store.dispatch('cut:preview', { id, ...data, status: 'ready' })).catch(() => {
     try { store.dispatch('cut:preview', { id, status: 'unavailable' }); } catch {}
-  }).finally(() => { if (store && win && !win.isDestroyed()) { try { win.webContents.send('notebook:cuts-updated', store.snapshot()); } catch {} } });
-  return state;
+  }).finally(() => { if (store && win && !win.isDestroyed()) { try { win.webContents.send('notebook:cuts-updated', store.snapshot()); if(!smoke)related.schedule(); } catch {} } });
+  if(!smoke)related.schedule(); return state;
 });
 ipcMain.handle('notebook:open-link', (_event,value)=>{const url=require('./editor-document.js').link(value);if(!url)throw new Error('Link inválido.');return shell.openExternal(url);});
 ipcMain.handle('cuts:open', (_event, id) => { const cut = store.cut(id); if (cut.kind !== 'link') throw new Error('Este recorte não é um link.'); return shell.openExternal(webUrl(cut.url).href); });
@@ -276,6 +281,19 @@ async function runNativeEditorSmoke(){
 async function runSmoke() {
   try {
     if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(__dirname,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript('openSourceComposer(actionsForNote()[0].origin)');await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(__dirname,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());app.quit();return;}
+    if(process.argv.includes('--related-runtime-only')) {
+      related.cacheDir=path.join(process.cwd(),'artifacts','embedding-cache');
+      store.dispatch('note:update',{id:'welcome',title:'Custos de nuvem',body:'Reduzir os gastos com infraestrutura e serviços de nuvem.'});
+      const next=store.dispatch('note:create',{type:'notes',title:'Cloud cost optimization'});const target=next.selected.notes;
+      store.dispatch('note:update',{id:target,body:'Optimize cloud infrastructure costs and reduce spending.'});
+      await related.run();if(related.status!=='ready')throw Error(related.error);
+      if(!related.query('welcome').results.some(d=>d.noteId===target))throw Error('Modelo local não encontrou conexão entre idiomas.');
+      if(process.platform==='darwin'){
+        const file=path.join(store.directory,'ocr-probe.png');fs.writeFileSync(file,fs.readFileSync(path.join(__dirname,'docs','images','acoes-na-nota.png')));
+        const text=await related.job({kind:'ocr',file});if(!text.includes('Próximos passos'))throw Error('OCR do pacote não leu o texto esperado.');
+      }
+      console.log('RELATED_RUNTIME_OK');app.quit();return;
+    }
     if(process.argv.includes('--native-only')){await runNativeEditorSmoke();app.quit();return;}
     if(process.argv.includes('--editor-only')) {
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
@@ -294,6 +312,16 @@ async function runSmoke() {
       const selectionResult=await win.webContents.executeJavaScript(smokeScript('selection-smoke.js'));
       console.log('SELECTION_SMOKE_OK',JSON.stringify(selectionResult));
       console.log('EDITOR_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
+    if(process.argv.includes('--related-only')) {
+      await win.webContents.executeJavaScript(smokeScript('related-smoke.js'));
+      const docs=require('./related-engine.cjs').documents(store.snapshot());
+      for(const d of docs)store.db.prepare('INSERT OR REPLACE INTO related_vectors VALUES(?,?,?,?)').run(d.id,d.hash,require('./related-config.cjs').version,JSON.stringify([1,0]));
+      related.status='ready';
+      const result=await win.webContents.executeJavaScript('verifyRelatedSmoke()');
+      if(result.errors.length)throw Error(result.errors.join('\n'));
+      fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});fs.writeFileSync(path.join(__dirname,'artifacts','relacionados.png'),(await win.webContents.capturePage()).toPNG());
+      console.log('RELATED_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
     if(process.argv.includes('--notebooks-only')) {
       const result=await win.webContents.executeJavaScript(smokeScript('notebook-smoke.js'));

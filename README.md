@@ -53,6 +53,12 @@ Selecione um trecho da nota e use o **ícone de tarefa**, ou use a mesma opção
 
 Cada ação mantém uma cópia do trecho original e um caminho de volta à origem. As tarefas aparecem na Página do dia; os lembretes também entram no calendário. Você pode concluir, editar, reagendar ou recolher a margem para continuar escrevendo.
 
+## Reencontre ideias que se conectam
+
+Enquanto você escreve, o Caderninho procura relações com outras notas, tarefas e lembretes do mesmo caderno. As conexões aparecem discretamente no rodapé. Abra **Relacionados** para explorá-las em um grafo: conteúdos com mais afinidade ficam mais próximos, e um clique leva à página de origem.
+
+O texto de imagens também participa, com reconhecimento local no Mac. O primeiro uso baixa o modelo de análise; depois, as conexões são calculadas no seu computador, inclusive sem internet.
+
 ## Transforme planos em próximos passos
 
 Crie listas independentes para a rotina, um projeto ou uma viagem. Cada lista tem título, categorias e seus próprios itens, com progresso e registro de conclusão.

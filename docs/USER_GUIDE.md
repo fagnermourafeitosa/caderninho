@@ -67,7 +67,7 @@ Alterar a data ou hora desativa o agendamento anterior até você clicar em **Ag
 
 ## Editor de notas
 
-Digite **`/`** no texto ou clique em **+ Bloco** para inserir texto, **Título**, **Subtítulo**, **Título pequeno**, tarefas com checkbox, listas com marcadores ou números, citação, divisor, código, mídia ou tabela. A paleta reúne os blocos em **Texto**, **Listas**, **Estrutura** e **Mídia**, com busca. Continue digitando depois da barra para filtrar: **`/tit`** mostra os três níveis de título. A busca aceita palavras sem acento. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
+Digite **`/`** no texto para inserir texto, **Título**, **Subtítulo**, **Título pequeno**, tarefas com checkbox, listas com marcadores ou números, citação, divisor, código, mídia ou tabela. A paleta reúne os blocos em **Texto**, **Listas**, **Estrutura** e **Mídia**, com busca. Continue digitando depois da barra para filtrar: **`/tit`** mostra os três níveis de título. A busca aceita palavras sem acento. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
 
 Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código inline, link e marca-texto**. A seleção com **Shift + setas** atravessa os parágrafos. A formatação vale para todo o texto selecionado, inclusive em várias linhas ou células. **Backspace/Delete** apagam a seleção inteira; junto de um divisor, removem o bloco. No início de um título, citação ou lista, Backspace volta ao texto normal sem perder o conteúdo. O marca-texto usa uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
 
@@ -98,7 +98,7 @@ Esses itens pertencem à nota e não criam uma lista separada em **Tarefas**.
 
 ## Imagens e links
 
-Em **Notas**, use **+ Adicionar mídia**, cole uma imagem ou um link no texto, ou arraste arquivos de imagem e links para a página. São aceitas imagens **PNG, JPEG e WebP**, de até **20 MB** cada.
+Em **Notas**, use **Adicionar mídia**, cole uma imagem ou um link no texto, ou arraste arquivos de imagem e links para a página. São aceitas imagens **PNG, JPEG e WebP**, de até **20 MB** cada.
 
 Use a alça **Arraste** para posicionar a mídia junto a um parágrafo, à esquerda ou à direita. Os botões **− / +** ajustam a largura; o texto acompanha a posição da mídia.
 
@@ -136,7 +136,7 @@ A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fic
 
 Páginas mostram quando foram criadas e atualizadas. Tarefas registram marcações e desmarcações; itens removidos mantêm a data de exclusão até serem restaurados. Rascunhos guardam suas próprias datas, e uma nova nota criada a partir deles preserva a data original. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
 
-**Mover para a lixeira** mantém uma página recuperável. Itens de tarefas e mídias também podem ser restaurados em **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado novamente.
+O **ícone de lixeira em vermelho pastel**, no topo da página após o separador, move a página para a lixeira e a mantém recuperável. Itens de tarefas e mídias também podem ser restaurados em **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado novamente.
 
 **Excluir definitivamente** pede confirmação e apaga o item permanentemente. Imagens continuam no disco enquanto outra página ou mídia recuperável ainda as utiliza.
 
@@ -178,3 +178,11 @@ Escolha **Tarefa** ou **Lembrete**, escreva seu próximo passo e, para um lembre
 - O botão **×** move a ação para a lixeira de tarefas ou lembretes, onde ela pode ser restaurada. Remover a ação preserva a nota original.
 
 No formulário, **Esc** cancela e devolve a seleção de texto. Nada é criado até confirmar em **Criar tarefa** ou **Agendar lembrete**.
+
+## Conexões entre páginas
+
+Depois do salvamento automático, o Caderninho procura relações entre notas, tarefas e lembretes do mesmo caderno. Até duas conexões aparecem suavemente no rodapé, depois de **Relacionados:**. Clique em um título para abrir a página de origem. Quando não houver uma relação relevante, ele fica vazio.
+
+Use **Relacionados**, no topo da página, para abrir o grafo. A página atual fica no centro; conteúdos com maior afinidade ficam mais próximos. Clique em uma conexão para abrir sua página de origem. Em janelas estreitas, o botão mostra apenas o ícone, com o nome ao passar o mouse.
+
+O cálculo combina categorias, palavras em comum e significado do texto. No Mac, o texto encontrado nas imagens também participa. Não há envio das páginas ou imagens para análise na nuvem. O primeiro uso precisa de internet para baixar o modelo; depois, a análise funciona localmente.

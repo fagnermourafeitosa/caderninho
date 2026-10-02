@@ -17,6 +17,13 @@
 2. **[2026-10-01] Contextual editor without block actions**
    Do instead: provide grouped searchable slash/+ command insertion (300px, 40px rows, ink icons, active yellow, no permanent scrollbar), arrows/Enter/Escape and accent-insensitive aliases, text-selection formatting and an Office-style hover/drag table size grid. Do not add transform/duplicate/move/delete block menus. Save sanitized structured blocks in SQLite alongside searchable plain text, include tables/formatting in undo and preserve them during quick capture. Mermaid remains planned in ROADMAP.md until requested.
 
+3. **[2026-10-01] Undo must include the custom paper editor**
+   Do instead: use bounded per-page text/title snapshots for textarea and rich checkbox edits, intercept Ctrl/Cmd+Z and redo, route native menus to the same history, retain media/scheduling state, and reset the baseline after external quick-capture changes. Keep history session-local and autosave undo results to SQLite.
+
+
+4. **[2026-10-01] Actions preserve their page context**
+   Do instead: persist linked tasks and independent reminder alarms in source_actions, retaining the selected text and stable block/cut origin. Offer selection/menu drag and media creation with an inline collapsible margin, completion dates, edit/reschedule, daily/calendar navigation and typed trash. Resolve edited origins only when unambiguous; keep the original excerpt when removed. Keep margin controls outside contenteditable and verify native editor regressions plus source-action smoke tests. Run Electron smoke processes sequentially: they share a test data directory and desktop focus. Keep permanent origin highlights derived from source_actions, outside saved rich-text marks; reapply after formatting and undo.
+
 ## Documentation
 1. **[2026-10-01] User-facing Portuguese README**
    Do instead: lead with actual features and local storage, emphasize no cloud upload or accounts; explain link-preview website requests accurately and avoid design commentary in the opening.
@@ -49,9 +56,5 @@
 9. **[2026-10-01] Smart margin stays in the note**
    Do instead: offer an explicit date/time stamp without auto-scheduling; keep one absolute alarm on the original note with cancel/re-schedule controls. Render line-start [] as inline checkboxes, preserve [ ]/[x] in SQLite body, and support Enter continuation/exit without affecting task lists or cuts.
 
-10. **[2026-10-01] Undo must include the custom paper editor**
-   Do instead: use bounded per-page text/title snapshots for textarea and rich checkbox edits, intercept Ctrl/Cmd+Z and redo, route native menus to the same history, retain media/scheduling state, and reset the baseline after external quick-capture changes. Keep history session-local and autosave undo results to SQLite.
-
-
-11. **[2026-10-01] Actions preserve their page context**
-   Do instead: persist linked tasks and independent reminder alarms in source_actions, retaining the selected text and stable block/cut origin. Offer selection/menu drag and media creation with an inline collapsible margin, completion dates, edit/reschedule, daily/calendar navigation and typed trash. Resolve edited origins only when unambiguous; keep the original excerpt when removed. Keep margin controls outside contenteditable and verify native editor regressions plus source-action smoke tests. Run Electron smoke processes sequentially: they share a test data directory and desktop focus. Keep permanent origin highlights derived from source_actions, outside saved rich-text marks; reapply after formatting and undo.
+10. **[2026-10-02] Local related content stays modular**
+   Do instead: keep ranking weights/thresholds in related-config.cjs, inference/OCR in a worker and the graph in related-ui.js. Cache by content hash and pinned model version, restrict results to the same notebook, omit scores in the UI, and keep the compact toolbar usable. Validate real embeddings separately from deterministic graph smoke fixtures.

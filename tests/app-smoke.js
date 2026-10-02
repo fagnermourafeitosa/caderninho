@@ -9,6 +9,10 @@
   assert(document.querySelector('.sidebar [data-view]').dataset.view === 'home', 'Caderninho é o primeiro item');
   await click('[data-view=notes]');
   assert(document.querySelector('#note-body'), 'Editor de notas');
+  assert(document.querySelector('#add-cut svg') && document.querySelector('#new-note svg'), 'Ações da toolbar usam ícones');
+  assert(!document.querySelector('#add-cut').textContent.includes('+') && !document.querySelector('#new-note').textContent.includes('+'), 'Ações sem prefixo +');
+  assert(document.querySelector('.view-toolbar #trash-note svg') && !document.querySelector('.note-bottom #trash-note'), 'Lixeira com ícone fica na toolbar');
+  assert(document.querySelector('#trash-note').previousElementSibling.classList.contains('toolbar-separator'), 'Separador antes da lixeira');
   assert(!document.querySelector('#themes-open') && !document.querySelector('#pin'), 'Temas e Fixar removidos');
   assert(document.querySelectorAll('.sidebar [data-view]').length === 6, 'Seis seções do menu');
   assert(!document.querySelector('.face') && !document.querySelector('.arm'), 'Área de escrita livre do mascote');

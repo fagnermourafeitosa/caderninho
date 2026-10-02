@@ -2,8 +2,8 @@
  const wait=async()=>{await new Promise(resolve=>setTimeout(resolve,130));const deadline=Date.now()+3000;while(pending&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));if(pending)throw new Error('Editor não terminou de salvar');};
  const assert=(value,label)=>{if(!value)throw new Error(label);};
  state=await window.notebook.action('note:create',{type:'notes',title:'Plano da semana'});view='notes';render();const id=currentNote().id;
- $('#add-block').click();
- const search=$('#block-menu input');assert(document.activeElement===search,'Botão + Bloco foca a busca');
+ openInsertMenu();
+ const search=$('#block-menu input');assert(document.activeElement===search,'Inserção contextual foca a busca');
  assert(document.querySelectorAll('.command-group').length===4,'Paleta separa texto, listas, estrutura e mídia');
  assert(document.querySelector('.keyboard-choice').dataset.insertBlock==='paragraph','Primeiro comando já selecionado');
  search.value='codigo';search.dispatchEvent(new Event('input',{bubbles:true}));assert(document.querySelectorAll('[data-insert-block]').length===1&&document.querySelector('[data-insert-block=code]'),'Busca ignora acentos');
@@ -11,7 +11,7 @@
  search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));
  search.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',bubbles:true,cancelable:true}));assert(document.querySelector('.keyboard-choice').dataset.insertBlock==='media','Seta para cima circula até o último comando');
  search.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert($('#block-menu').hidden&&document.activeElement.closest('#note-body'),'Esc retorna à escrita');
- $('#add-block').click();document.querySelector('[data-insert-block=table]').click();
+ openInsertMenu();document.querySelector('[data-insert-block=table]').click();
  const first=document.querySelector('.table-picker [data-row="1"][data-column="1"]'),chosen=document.querySelector('.table-picker [data-row="3"][data-column="4"]');
  first.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true}));chosen.dispatchEvent(new PointerEvent('pointerenter'));assert($('#table-size').textContent==='4 colunas × 3 linhas','Grade mostra a prévia');assert(document.querySelectorAll('.table-picker .chosen').length===12,'Grade destaca o retângulo');$('#block-menu').dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));await wait();
  assert(document.querySelectorAll('.paper-table tr').length===3&&document.querySelectorAll('.table-cell-text').length===12,'Arrastar cria a tabela escolhida');

@@ -21,6 +21,7 @@
   <script defer src="notebook-ui.js"></script>
   <script defer src="block-editor.js"></script>
   <script defer src="source-actions.js"></script>
+  <script defer src="related-ui.js"></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -33,6 +34,8 @@
 
 
       <symbol id="icon-archive" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 27L58 25L57 62L15 64Z" fill="#e9ad39"/><path d="M9 17L59 13L64 24L12 29Z" fill="#f8cc65"/><path d="M12 29L64 24L63 32L12 36Z" fill="#e6a83e"/><path d="M28 44L45 43L45 49L28 50Z" fill="#fff4d8"/></g></symbol>
+      <symbol id="icon-media" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4L19 3Q21 3 21 5L22 18Q22 20 20 20L5 21Q3 21 3 19L2 6Q2 4 4 4Z" fill="#fbf0d5"/><path d="M4 17L9 11L13 15L16 12L21 18" fill="#c5d3ae"/><circle cx="16" cy="8" r="2" fill="#f8d985"/></g></symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7L7 20Q7 21 9 21H16Q18 21 18 19L19 7" fill="#f2d3cb"/><path d="M4 6L21 6M9 5L10 2H15L16 5M10 10L10.5 17M15 10L14.5 17" fill="none"/></g></symbol>
     </defs>
   </svg>
   <main class="app">
@@ -79,5 +82,6 @@
 <dialog id="notebook-dialog" class="cut-dialog notebook-dialog"><form id="notebook-form"><div class="drawer-heading"><h2 id="notebook-dialog-title">Novo caderno</h2><button id="notebook-close" type="button" aria-label="Fechar caderno">×</button></div><label for="notebook-name">Nome</label><input id="notebook-name" maxlength="80" required autocomplete="off"><label for="notebook-description">Descrição <span class="subtle">(opcional)</span></label><textarea id="notebook-description" maxlength="500" rows="2"></textarea><fieldset class="notebook-palette"><legend>Cor do caderno</legend><div id="notebook-colors"></div></fieldset><p id="notebook-error" class="category-error" role="alert" hidden></p><button class="primary" type="submit">Guardar caderno</button></form></dialog>
   <dialog id="notebook-remove-dialog" class="cut-dialog notebook-dialog"><form id="notebook-remove-form"><div class="drawer-heading"><h2>Remover caderno</h2><button id="notebook-remove-close" type="button" aria-label="Cancelar remoção">×</button></div><p id="notebook-remove-copy"></p><label for="notebook-transfer">Mover todas as páginas para</label><select id="notebook-transfer" required></select><small>Notas, listas, lembretes e páginas na lixeira serão preservados no caderno escolhido.</small><button class="primary" type="submit">Mover páginas e remover caderno</button></form></dialog>
 <div id="block-menu" class="editor-popup" role="menu" hidden></div><div id="format-menu" class="editor-popup format-menu" role="toolbar" aria-label="Formatar texto" hidden></div><dialog id="editor-link-dialog" class="cut-dialog"><form id="editor-link-form"><div class="drawer-heading"><h2>Link no texto</h2><button id="editor-link-close" type="button" aria-label="Fechar link">×</button></div><label for="editor-link-url">Endereço</label><input id="editor-link-url" type="url" required placeholder="https://…"><button class="primary" type="submit">Adicionar link</button></form></dialog>
+<dialog id="related-dialog" class="cut-dialog related-dialog" aria-labelledby="related-title"><div class="drawer-heading"><h2 id="related-title">Relacionados</h2><button id="related-close" aria-label="Fechar relacionados">×</button></div><div id="related-content"></div></dialog>
 </body>
 </html>

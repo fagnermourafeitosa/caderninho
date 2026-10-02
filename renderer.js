@@ -32,7 +32,7 @@ async function action(name, input = {}, options = {}) {
     if (name === 'view:select' && input.view === 'reminders') { reminderEditor = false; resetReminderCalendar(); }
     if (['note:create', 'note:select', 'note:restore'].includes(name) && state.activeView === 'reminders') reminderEditor = true;
     if (name === 'note:trash' && view === 'reminders') reminderEditor = false;
-    pending--; saved(); updateTemporalLabels(); renderCategoryBadges(); return true;
+    pending--; saved(); updateTemporalLabels(); renderCategoryBadges(); refreshRelatedSoon(); return true;
   } catch (error) {
     pending--; $('#save-state').textContent = 'Falha ao salvar'; $('#save-state').classList.add('failed');
     toast(error.message.replace(/^Error invoking remote method '[^']+': Error: /, ''), 8000); return false;
@@ -57,22 +57,23 @@ function render() {
     button.classList.toggle('active', button.dataset.view === view);
     if (button.dataset.view === view) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
   });
-  $('#footer-label').textContent = { home: 'Um dia de cada vez.', notes: 'Um lugar para suas ideias.', tasks: 'Uma lista, vários pequenos passos.', reminders: 'Dia, hora e um toque para lembrar.', notebooks:'Seus cadernos, suas páginas.', archive: 'Sua lixeira, separada por tipo.' }[view];
+  $('#footer-label').textContent = ''; delete $('#footer-label').dataset.connections;
   $('#page-number').textContent = '';
   renderProgress();
   if (view === 'notebooks') renderNotebooks(); else if (view === 'home') renderHome(); else if (view === 'archive') renderTrash(); else if (view === 'reminders' && !reminderEditor) renderReminderCalendar(); else renderPage();
   $('#save-state').title = `Salvamento automático em ${state.storagePath}`;
+  refreshRelatedSoon();
 }
 function renderPage() {
   const notes = visibleNotes(), note = currentNote(), label = labels[view];
   const index = notes.findIndex(n => n.id === note?.id);
-  const toolbar = `<div class="view-toolbar"><span class="toolbar-right">${view === 'reminders' ? '<button id="back-calendar">‹ Calendário</button>' : ''}<button id="notes-open">☰ &nbsp; ${label.heading} <span class="subtle">(${notes.length})</span></button></span><span class="toolbar-right">${view === 'notes' && note ? '<button id="add-block" class="add-note">+ Bloco</button><button id="add-cut" class="add-note">+ Adicionar mídia</button>' : ''}<button id="new-note" class="add-note">+ ${label.create}</button></span></div>`;
+  const toolbar = `<div class="view-toolbar"><span class="toolbar-right">${view === 'reminders' ? '<button id="back-calendar">‹ Calendário</button>' : ''}<button id="notes-open">☰ &nbsp; ${label.heading} <span class="subtle">(${notes.length})</span></button></span><span class="toolbar-right">${note ? '<button id="related-open" class="related-open" aria-label="Relacionados" title="Relacionados">'+relatedGraphIcon+'<span class="related-label">Relacionados</span></button>' : ''}${view === 'notes' && note ? '<button id="add-cut" class="add-note toolbar-action" aria-label="Adicionar mídia" title="Adicionar mídia">'+icon('media')+'<span class="toolbar-action-label">Adicionar mídia</span></button>' : ''}<button id="new-note" class="add-note toolbar-action" aria-label="${label.create}" title="${label.create}">${icon(view)}<span class="toolbar-action-label">${label.create}</span></button>${note ? '<span class="toolbar-separator" aria-hidden="true"></span><button id="trash-note" class="trash-toolbar" aria-label="Mover para a lixeira" title="Mover para a lixeira">'+icon('trash')+'</button>' : ''}</span></div>`;
   if (!note) {
     $('#page-content').innerHTML = toolbar + empty({ notes: 'Uma página nova?', tasks: 'Sua primeira lista?', reminders: 'Uma nota para lembrar?' }[view], { notes: 'Escreva e deixe o caderninho guardar.', tasks: 'Crie uma lista com quantos checkboxes precisar.', reminders: 'Escreva uma nota e agende seu alerta sonoro.' }[view], view, `<button id="empty-create" class="primary">${label.create}</button>`);
     if(view==='tasks'&&(state.sourceActions||[]).some(item=>item.kind==='task'&&item.notebookId===state.activeNotebook)){ $('#page-content').innerHTML=toolbar+'<div id="source-task-only" class="scroll-list"></div>';renderSourceTasks();$('#new-note').onclick=createNote;$('#notes-open').onclick=openDrawer;return;}
     $('#empty-create').onclick = createNote; $('#new-note').onclick = createNote; $('#notes-open').onclick = openDrawer; return;
   }
-  const bottom = `<div class="note-bottom"><button id="trash-note" class="trash-page">Mover para a lixeira</button><span id="page-detail"></span><div class="note-pager"><button id="previous-note" aria-label="Página anterior" ${index <= 0 ? 'disabled' : ''}>‹</button><span>${index + 1} / ${notes.length}</span><button id="next-note" aria-label="Próxima página" ${index >= notes.length - 1 ? 'disabled' : ''}>›</button></div></div>`;
+  const bottom = `<div class="note-bottom"><span id="page-detail"></span><div class="note-pager"><button id="previous-note" aria-label="Página anterior" ${index <= 0 ? 'disabled' : ''}>‹</button><span>${index + 1} / ${notes.length}</span><button id="next-note" aria-label="Próxima página" ${index >= notes.length - 1 ? 'disabled' : ''}>›</button></div></div>`;
   const title = `<input id="note-title" class="note-title" type="text" maxlength="160" aria-label="Título ${view === 'tasks' ? 'da lista' : 'da nota'}" placeholder="Sem título" value="${escape(note.title)}">`;
   const editor = view === 'tasks' ? `<div class="checklist-body"><div id="task-list" class="scroll-list"></div><form id="task-form" class="entry-form task-entry"><input id="task-input" placeholder="Escreva uma tarefa e pressione Enter…" aria-label="Nova tarefa" maxlength="500" required><button type="submit">+ Adicionar</button></form></div>` : `${view === 'reminders' ? '<div id="schedule-panel" class="schedule-panel"></div><p class="reminder-help">O app precisa estar aberto, mesmo minimizado, para tocar o alerta.</p>' : ''}<textarea id="note-body" class="note-body ${view === 'reminders' ? 'reminder-body' : ''}" spellcheck="true" lang="pt-BR" maxlength="200000" aria-label="Texto da nota" placeholder="${view === 'reminders' ? 'Escreva o que você quer lembrar…' : 'Comece uma ideia…'}">${escape(note.body)}</textarea>`;
   const metadata = `${notebookAssociation(note)}<div id="category-badges" class="category-badges" aria-label="Categorias da página"></div><p id="note-dates" class="list-date">${noteDates(note)}</p>`;
@@ -81,7 +82,7 @@ function renderPage() {
   if ($('#back-calendar')) $('#back-calendar').onclick = () => { reminderEditor = false; render(); };
   $('#new-note').onclick = createNote;
   if ($('#add-cut')) $('#add-cut').onclick = openCutDialog;
-  if($('#add-block')) $('#add-block').onclick=()=>openInsertMenu();
+  if($('#related-open')) $('#related-open').onclick=openRelated;
   $('#page-number').textContent = String(index + 1).padStart(2, '0');
   $('#note-title').oninput = () => action('note:update', { id: note.id, title: $('#note-title').value });
   if (view === 'tasks') {
