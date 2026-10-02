@@ -28,7 +28,8 @@ function detach(store,noteId,categoryId,source,stamp) {
 }
 function syncCategories(store,noteId,stamp,pendingOffset=null) {
   const note=store.note(noteId);
-  const text=note.body+(note.type==='tasks'?'\n'+store.db.prepare('SELECT title FROM task_items WHERE note_id=? AND trashed=0 ORDER BY position').all(noteId).map(item=>item.title).join('\n'):'');
+  const source=note.editor_document?require('./editor-document.js').text(JSON.parse(note.editor_document).map(block=>({...block,runs:block.runs?.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run),rows:block.rows?.map(row=>row.map(cell=>cell.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run)))}))):note.body;
+  const text=source+(note.type==='tasks'?'\n'+store.db.prepare('SELECT title FROM task_items WHERE note_id=? AND trashed=0 ORDER BY position').all(noteId).map(item=>item.title).join('\n'):'');
   const keys=new Set(), ids=new Set();
   for(const token of tokens(text,pendingOffset)) if(!keys.has(token.key)) { keys.add(token.key); const row=category(store,token.name,stamp); ids.add(row.id); associate(store,noteId,row.id,'inline',stamp); }
   for(const link of store.db.prepare("SELECT category_id FROM note_categories WHERE note_id=? AND source='inline' AND deleted_at IS NULL").all(noteId)) if(!ids.has(link.category_id)) detach(store,noteId,link.category_id,'inline',stamp);

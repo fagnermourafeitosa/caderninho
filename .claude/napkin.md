@@ -10,6 +10,10 @@
 4. **[2026-10-01] Use native desktop coordinates for window dragging**
    Do instead: sample screen.getCursorScreenPoint in the main process and validate computed signed 32-bit positions before setPosition; captured renderer screenX/screenY can become unreliable while the window moves. Validate actual dragging after packaging.
 
+## Editor
+1. **[2026-10-01] Contextual editor without block actions**
+   Do instead: provide slash/+ insertion, text-selection formatting and an Office-style hover/drag table size grid. Do not add transform/duplicate/move/delete block menus. Save sanitized structured blocks in SQLite alongside searchable plain text, include tables/formatting in undo and preserve them during quick capture. Mermaid remains planned in ROADMAP.md until requested.
+
 ## Documentation
 1. **[2026-10-01] User-facing Portuguese README**
    Do instead: lead with actual features and local storage, emphasize no cloud upload or accounts; explain link-preview website requests accurately and avoid design commentary in the opening.

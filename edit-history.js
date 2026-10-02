@@ -4,7 +4,7 @@
       this.current = { ...value }; this.past = []; this.future = []; this.limit = limit; this.maxCharacters = maxCharacters; this.now = now; this.group = null; this.last = 0;
     }
     record(value, group = null) {
-      if (value.title === this.current.title && value.body === this.current.body) { this.current.selection = value.selection; return false; }
+      if (value.title === this.current.title && value.body === this.current.body && JSON.stringify(value.editorDoc??null)===JSON.stringify(this.current.editorDoc??null)) { this.current.selection = value.selection; return false; }
       const time = this.now();
       if (!group || this.group !== group || time - this.last > 700 || !this.past.length) this.past.push(this.current);
       this.current = { ...value }; this.future = []; this.group = group; this.last = time;

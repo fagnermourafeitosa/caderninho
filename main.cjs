@@ -197,6 +197,7 @@ ipcMain.handle('cuts:link', (_event, input) => {
   }).finally(() => { if (store && win && !win.isDestroyed()) { try { win.webContents.send('notebook:cuts-updated', store.snapshot()); } catch {} } });
   return state;
 });
+ipcMain.handle('notebook:open-link', (_event,value)=>{const url=require('./editor-document.js').link(value);if(!url)throw new Error('Link inválido.');return shell.openExternal(url);});
 ipcMain.handle('cuts:open', (_event, id) => { const cut = store.cut(id); if (cut.kind !== 'link') throw new Error('Este recorte não é um link.'); return shell.openExternal(webUrl(cut.url).href); });
 ipcMain.handle('notebook:sound', () => { playSound(); return true; });
 ipcMain.handle('notebook:window', (_event, action) => {
@@ -238,6 +239,15 @@ ipcMain.on('notebook:move', (event, phase) => {
 });
 async function runSmoke() {
   try {
+    if(process.argv.includes('--editor-only')) {
+      await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
+      const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','editor-smoke.js'),'utf8'));
+      if(result.errors.length)throw new Error(result.errors.join('\n'));
+      fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});fs.writeFileSync(path.join(__dirname,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+      await win.webContents.executeJavaScript("openInsertMenu([...document.querySelectorAll('.writing-line')].at(-1));document.querySelector('[data-insert-block=table]').click();document.querySelectorAll('.table-picker button')[19].dispatchEvent(new PointerEvent('pointerenter'));");
+      fs.writeFileSync(path.join(__dirname,'artifacts','seletor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+      console.log('EDITOR_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     if(process.argv.includes('--notebooks-only')) {
       const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','notebook-smoke.js'),'utf8'));
       if(result.errors.length) throw new Error(result.errors.join('\n'));
@@ -335,6 +345,10 @@ async function runSmoke() {
     const notebooks=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','notebook-smoke.js'),'utf8'));
     if(notebooks.errors.length) throw new Error(notebooks.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
+    const editorResult=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','editor-smoke.js'),'utf8'));
+    if(editorResult.errors.length)throw new Error(editorResult.errors.join('\n'));
+    fs.writeFileSync(path.join(__dirname,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+    console.log('EDITOR_SMOKE_OK',JSON.stringify(editorResult));
     console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(notebooks));
     console.log('HOME_SMOKE_OK', JSON.stringify(home));
     console.log('CALENDAR_SMOKE_OK', JSON.stringify(calendar));

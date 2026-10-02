@@ -17,7 +17,8 @@ function installTemporal(store) {
 function event(store, type, id, action, stamp, details = {}) { store.db.prepare('INSERT INTO activity_events(entity_type,entity_id,action,at,details) VALUES(?,?,?,?,?)').run(type, id, action, stamp, JSON.stringify(details)); }
 function syncInline(store, note, stamp, legacy = false) {
   const existing = store.db.prepare('SELECT * FROM inline_tasks WHERE note_id=? ORDER BY deleted_at IS NOT NULL,line_index').all(note.id);
-  const entries = note.body.split('\n').flatMap((line,index) => { const match = checkbox(line); return match ? [{ index, title: line.slice(match[0].length), done: match[1].toLowerCase() === 'x' }] : []; });
+  let code=false;
+  const entries = note.body.split('\n').flatMap((line,index) => { if(/^```/.test(line)){code=!code;return [];} if(code)return []; const match = checkbox(line); return match ? [{ index, title: line.slice(match[0].length), done: match[1].toLowerCase() === 'x' }] : []; });
   const used = new Set();
   for (const entry of entries) {
     let item = existing.find(item => !used.has(item.id) && item.title === entry.title && item.line_index === entry.index && !item.deleted_at)

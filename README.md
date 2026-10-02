@@ -67,6 +67,20 @@ Alterar a data ou hora desativa o agendamento anterior até você clicar em **Ag
 
 **O aplicativo precisa estar aberto para tocar; pode ficar minimizado.** Fechar a janela encerra o app. Se o horário passar com o aplicativo fechado ou o computador dormindo, o alerta dispara quando o app abrir ou o computador acordar. Cada alerta toca uma vez, usa o volume do sistema e mostra uma mensagem no app e uma notificação do sistema, quando disponível. Páginas na lixeira não disparam alertas.
 
+## Editor de notas
+
+Digite **`/`** no texto ou clique em **+ Bloco** para inserir texto, títulos de três tamanhos, checkboxes, listas com marcadores ou números, citação, divisor, código, mídia ou tabela. Continue digitando depois da barra para filtrar as opções. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
+
+Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código inline, link e marca-texto**. O marca-texto usa uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
+
+### Tabelas
+
+Escolha **Tabela** no menu de inserção. A grade mostra uma prévia de **colunas × linhas** conforme você passa o mouse. Clique no tamanho desejado ou pressione, arraste e solte para criar a tabela. O seletor inicial permite até 8 × 8; depois você pode acrescentar linhas e colunas, até 20 × 20.
+
+Escreva diretamente nas células. **Tab** avança; **Shift Tab** volta. Tab na última célula acrescenta uma linha. **Enter** quebra a linha dentro da célula. Os controles da tabela permitem acrescentar linha ou coluna, ativar ou desativar o cabeçalho e remover a tabela.
+
+Tabelas, formatação e blocos são salvos automaticamente no banco local. **Desfazer/refazer** também recupera essas alterações. As notas existentes continuam disponíveis, e adicionar uma mídia ou capturar um rascunho mantém a formatação já guardada.
+
 ## Atalhos dentro da nota
 
 Escreva uma data como `amanhã às 14h`, `hoje às 18h30`, `depois de amanhã às 9h` ou `05/10/2027 às 14:30`. Um carimbo **Agendar** oferece o horário interpretado. Confira a data antes de clicar: escrever a frase sozinho não ativa o alerta.

@@ -1,5 +1,6 @@
 function editableText(line) { return line.querySelector('.line-text') || line; }
 function readWritingLine(line) {
+  if(line.dataset.blockType) return pageDocument.blockText(readEditorBlock(line));
   const text = editableText(line).innerText.replace(/\n$/, '');
   return line.dataset.checkbox ? `[${line.dataset.checked === 'true' ? 'x' : ' '}] ${text}` : text;
 }
@@ -27,7 +28,7 @@ function convertInlineCheckbox(line) {
   span.textContent = text; if (!text) span.append(document.createElement('br'));
   line.dataset.checkbox = 'true'; line.dataset.checked = String(match[1].toLowerCase() === 'x'); line.classList.add('inline-task');
   const input = document.createElement('input'); input.type = 'checkbox'; input.className = 'inline-check'; input.checked = line.dataset.checked === 'true'; input.setAttribute('aria-label', 'Concluir item da nota');
-  input.onchange = () => { line.dataset.checked = String(input.checked); line.classList.toggle('is-checked', input.checked); const note = currentNote(); if (note) { action('note:update', { id: note.id, body: $('#note-body').value }); renderSmartMargin(); } };
+  input.onchange = () => { line.dataset.checked = String(input.checked); line.classList.toggle('is-checked', input.checked); const note = currentNote(); if (note) { action('note:update', { id: note.id, body: $('#note-body').value,...($('#note-body').dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) }); renderSmartMargin(); } };
   line.classList.toggle('is-checked', input.checked); line.prepend(input);
   if (focused) putCaret(span, Math.max(0, offset - match[0].length));
 }
@@ -46,11 +47,13 @@ function smartNoteInput(noteId, event) {
   } else if (editor.classList.contains('collage-editor')) {
     const line = event?.target.closest('.writing-line');
     const lines=line?[line]:[...editor.querySelectorAll('.writing-line')];
-    for(const item of lines) { convertInlineCheckbox(item); if(!event?.isComposing) highlightCategoryTokens(editableText(item)); }
+    for(const item of lines) { if(item.classList.contains('table-block')) {if(!event?.isComposing) item.querySelectorAll('.table-cell-text').forEach(highlightCategoryTokens);} else if(item.dataset.blockType!=='code'&&item.dataset.blockType!=='divider'){convertInlineCheckbox(item);if(!event?.isComposing)highlightCategoryTokens(editableText(item));} }
   }
-  updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor });
+  updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor,...(editor.dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) });
 }
 function handleWritingKey(event) {
+  if(tableKey(event)) return;
+  if(event.target.closest('[data-block-type=code]') && event.key==='Enter'&&!event.isComposing){event.preventDefault();document.execCommand('insertLineBreak');return;}
   const line = event.target.closest('.writing-line'); if (!line || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
   const span = editableText(line); if (!span.contains(getSelection().anchorNode)) return;
   capturePageSelection();
@@ -61,8 +64,9 @@ function handleWritingKey(event) {
       line.replaceWith(makeWritingLine('', Number(line.dataset.lineIndex))); const replacement = $('#note-body').querySelector(`[data-line-index="${line.dataset.lineIndex}"]`); putCaret(editableText(replacement));
     } else {
       const prefix = line.dataset.checkbox ? '[ ] ' : '';
-      span.textContent = text.slice(0, start); if (!span.textContent) span.append(document.createElement('br'));
-      const next = makeWritingLine(prefix + text.slice(end), Number(line.dataset.lineIndex) + 1); line.after(next); putCaret(editableText(next));
+      const splitRuns=readInlineRuns(span);renderInlineRuns(span,sliceInlineRuns(splitRuns,0,start));
+      const next = makeWritingLine(prefix + text.slice(end), Number(line.dataset.lineIndex) + 1); if(['bullet','number','quote'].includes(line.dataset.blockType)) {next.dataset.blockType=line.dataset.blockType;next.classList.add('block-'+line.dataset.blockType);}
+      renderInlineRuns(editableText(next),sliceInlineRuns(splitRuns,end,text.length));line.after(next); putCaret(editableText(next));
     }
   } else if (event.key === 'Backspace' && start === 0 && end === 0 && line.dataset.checkbox) {
     event.preventDefault(); line.querySelector('.inline-check').remove(); delete line.dataset.checkbox; delete line.dataset.checked; line.classList.remove('inline-task', 'is-checked'); putCaret(span);
@@ -70,6 +74,7 @@ function handleWritingKey(event) {
     const lines = [...$('#note-body').querySelectorAll('.writing-line')], index = lines.indexOf(line);
     const previous = event.key === 'Backspace', neighbor = lines[index + (previous ? -1 : 1)];
     if (!neighbor) return; event.preventDefault();
+    if(['table','code','divider'].includes(neighbor.dataset.blockType)) {putCaret(editableText(neighbor));return;}
     const keep = previous ? neighbor : line, remove = previous ? line : neighbor;
     const keepSpan = editableText(keep), offset = keepSpan.innerText.replace(/\n$/, '').length;
     keepSpan.textContent = keepSpan.innerText.replace(/\n$/, '') + editableText(remove).innerText.replace(/\n$/, ''); remove.remove(); putCaret(keepSpan, offset);

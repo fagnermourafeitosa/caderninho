@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('notebook', {
   quick: () => ipcRenderer.invoke('quick:open'),
   image: input => ipcRenderer.invoke('cuts:image', input),
   link: input => ipcRenderer.invoke('cuts:link', input),
+  openLink: url => ipcRenderer.invoke('notebook:open-link',url),
   openCut: id => ipcRenderer.invoke('cuts:open', id),
   onCutsUpdated: callback => ipcRenderer.on('notebook:cuts-updated', (_event, state) => callback(state)),
   resize: (phase, input) => ipcRenderer.send('notebook:resize', phase, input),

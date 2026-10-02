@@ -37,6 +37,7 @@ function mountCollage(note) {
   editor.id = 'note-body'; editor.className = 'note-body collage-editor'; editor.contentEditable = 'false'; editor.setAttribute('aria-label', 'Página com texto e mídia');
   Object.defineProperty(editor, 'value', { get: () => [...editor.querySelectorAll('.writing-line')].map(readWritingLine).join('\n') });
   editor.oninput = old.oninput; editor.onkeydown = handleWritingKey;
+  if(note.editorDoc) {renderDocumentBlocks(editor,note);old.replaceWith(editor);return;}
   const lines = note.body.split('\n');
   lines.forEach((text, index) => {
     note.cuts.filter(cut => Math.min(cut.anchor, lines.length - 1) === index).forEach(cut => editor.append(cutCard(cut)));
@@ -66,6 +67,7 @@ document.addEventListener('paste', event => {
   if (view !== 'notes' || !currentNote() || !event.target.closest('#note-body')) return;
   const files = [...event.clipboardData.files], url = cutUrl(event.clipboardData.getData('text/plain'));
   if (files.length || url) { event.preventDefault(); importCuts(files, files.length ? null : url); }
+  else if(event.target.closest('.table-cell-text')) { event.preventDefault();document.execCommand('insertText',false,event.clipboardData.getData('text/plain')); }
   else if (event.target.closest('.writing-line')) { event.preventDefault(); pasteWritingText(event.clipboardData.getData('text/plain')); }
 });
 document.addEventListener('dragover', event => { if (view === 'notes' && currentNote() && event.target.closest('#page-content')) { event.preventDefault(); $('#note-body')?.classList.add('drop-active'); } });

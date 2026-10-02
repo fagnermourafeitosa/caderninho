@@ -5,6 +5,7 @@ const { DatabaseSync } = require('node:sqlite');
 const { installTemporal, event, syncInline, taskDTO } = require('./temporal.cjs');
 const {installCategories,category,associate,detach,syncCategories,categoryState}=require('./categories.cjs');
 const {COLORS,installNotebooks,getNotebook,activeNotebook,notebookCommand,notebookState}=require('./notebooks.cjs');
+const pageDocument=require('./editor-document.js');
 const TYPES = ['notes', 'tasks', 'reminders'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
 const iso = value => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
@@ -57,6 +58,7 @@ class Store {
       CREATE INDEX IF NOT EXISTS items_note ON task_items(note_id, position);
     `);
     if (!this.db.prepare('PRAGMA table_info(task_items)').all().some(column => column.name === 'completed_at')) this.db.exec('ALTER TABLE task_items ADD COLUMN completed_at TEXT');
+    if(!this.db.prepare('PRAGMA table_info(notes)').all().some(column=>column.name==='editor_document')) this.db.exec('ALTER TABLE notes ADD COLUMN editor_document TEXT');
     installTemporal(this);
     installCategories(this);
     installNotebooks(this);
@@ -121,7 +123,7 @@ class Store {
     });
   }
   dto(row, items = []) {
-    return { id: row.id, notebookId:row.notebook_id, type: row.type, title: row.title, body: row.body, created: row.created, updated: row.updated, trashed: Boolean(row.trashed), deletedAt:row.deleted_at, scheduledAt: row.scheduled_at, enabled: Boolean(row.reminder_enabled), fired: Boolean(row.fired), firedAt:row.fired_at,items: items.filter(item => item.note_id === row.id && !item.trashed).map(taskDTO) };
+    return { id: row.id, notebookId:row.notebook_id, editorDoc:row.editor_document?JSON.parse(row.editor_document):null, type: row.type, title: row.title, body: row.body, created: row.created, updated: row.updated, trashed: Boolean(row.trashed), deletedAt:row.deleted_at, scheduledAt: row.scheduled_at, enabled: Boolean(row.reminder_enabled), fired: Boolean(row.fired), firedAt:row.fired_at,items: items.filter(item => item.note_id === row.id && !item.trashed).map(taskDTO) };
   }
   dayKey(time = this.now()) {
     const date = new Date(time);
@@ -207,6 +209,7 @@ class Store {
           if (!match) throw new Error('Item não encontrado na nota.');
           lines[item.line_index] = `[${item.done ? ' ' : 'x'}] ` + lines[item.line_index].slice(match[0].length);
           this.db.prepare('UPDATE notes SET body=?,updated=? WHERE id=?').run(lines.join('\n'),stamp,note.id);
+          if(note.editor_document) this.db.prepare('UPDATE notes SET editor_document=? WHERE id=?').run(JSON.stringify(pageDocument.reconcile(JSON.parse(note.editor_document),lines.join('\n'))),note.id);
           syncInline(this,this.note(note.id),stamp); break;
         }
         case 'day:update': {
@@ -262,7 +265,7 @@ class Store {
             if (note.trashed) throw new Error('Esta nota está na lixeira. Escolha outra página.');
             const body = note.body ? note.body + '\n\n' + draft.body : draft.body;
             if (body.length > 200_000) throw new Error('A nota ficou muito longa. Guarde como nova nota.');
-            this.db.prepare('UPDATE notes SET body=?,updated=? WHERE id=?').run(body, stamp, note.id);
+            this.db.prepare('UPDATE notes SET body=?,updated=?,editor_document=? WHERE id=?').run(body, stamp,note.editor_document?JSON.stringify(pageDocument.reconcile(JSON.parse(note.editor_document),body)):null, note.id);
             id = note.id;
           } else {
             if (this.db.prepare('SELECT count(*) AS total FROM notes').get().total >= 3000) throw new Error('Limite de 3.000 páginas atingido.');
@@ -294,13 +297,18 @@ class Store {
         }
         case 'note:update': {
           const note = this.note(input.id);
+          let doc=Object.hasOwn(input,'editorDoc')?(input.editorDoc===null?null:pageDocument.normalize(input.editorDoc)):note.editor_document?JSON.parse(note.editor_document):null;
+          if(Object.hasOwn(input,'editorDoc')&&doc&&note.type!=='notes') throw new Error('Blocos estão disponíveis nas notas.');
+          const body=Object.hasOwn(input,'editorDoc')&&doc?pageDocument.text(doc):Object.hasOwn(input,'body')?text(input.body,200000):note.body;
+          if(doc&&!Object.hasOwn(input,'editorDoc')) doc=pageDocument.reconcile(doc,body);
           if (note.trashed) throw new Error('Restaure a nota antes de editar.');
           this.db.prepare('UPDATE notes SET title=?,body=?,updated=? WHERE id=?').run(
             Object.hasOwn(input, 'title') ? text(input.title, 160) : note.title,
-            Object.hasOwn(input, 'body') ? text(input.body, 200_000) : note.body, stamp, note.id
+            body, stamp, note.id
           );
+          this.db.prepare('UPDATE notes SET editor_document=? WHERE id=?').run(doc?JSON.stringify(doc):null,note.id);
           if (note.type === 'notes') syncInline(this,this.note(note.id),stamp);
-          if(Object.hasOwn(input,'body')) syncCategories(this,note.id,stamp,Number.isInteger(input.categoryCursor)?input.categoryCursor:null);
+          if(Object.hasOwn(input,'body')||Object.hasOwn(input,'editorDoc')) syncCategories(this,note.id,stamp,Number.isInteger(input.categoryCursor)?input.categoryCursor:null);
           break;
         }
         case 'note:select': {

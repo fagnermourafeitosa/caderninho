@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script defer src="smart-text.js"></script>
   <script defer src="category-text.js"></script>
+  <script defer src="editor-document.js"></script>
   <script defer src="edit-history.js"></script>
   <script defer src="renderer.js"></script>
   <script defer src="cuts.js"></script>
@@ -18,6 +19,7 @@
   <script defer src="dates.js"></script>
   <script defer src="category-ui.js"></script>
   <script defer src="notebook-ui.js"></script>
+  <script defer src="block-editor.js"></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -75,5 +77,6 @@
   <dialog id="category-dialog" class="cut-dialog category-dialog"><form id="category-form"><div class="drawer-heading"><h2>Categoria</h2><button id="category-close" type="button" aria-label="Fechar categorias">×</button></div><label for="category-name">Escolha uma existente ou crie uma nova</label><input id="category-name" type="text" maxlength="49" required placeholder="#trabalho" autocomplete="off"><p id="category-error" class="category-error" role="alert" hidden></p><div id="category-choices" class="category-choices"></div><button class="primary" type="submit">Adicionar categoria</button><small>Você também pode escrever #categoria no texto da página.</small></form></dialog>
 <dialog id="notebook-dialog" class="cut-dialog notebook-dialog"><form id="notebook-form"><div class="drawer-heading"><h2 id="notebook-dialog-title">Novo caderno</h2><button id="notebook-close" type="button" aria-label="Fechar caderno">×</button></div><label for="notebook-name">Nome</label><input id="notebook-name" maxlength="80" required autocomplete="off"><label for="notebook-description">Descrição <span class="subtle">(opcional)</span></label><textarea id="notebook-description" maxlength="500" rows="2"></textarea><fieldset class="notebook-palette"><legend>Cor do caderno</legend><div id="notebook-colors"></div></fieldset><p id="notebook-error" class="category-error" role="alert" hidden></p><button class="primary" type="submit">Guardar caderno</button></form></dialog>
   <dialog id="notebook-remove-dialog" class="cut-dialog notebook-dialog"><form id="notebook-remove-form"><div class="drawer-heading"><h2>Remover caderno</h2><button id="notebook-remove-close" type="button" aria-label="Cancelar remoção">×</button></div><p id="notebook-remove-copy"></p><label for="notebook-transfer">Mover todas as páginas para</label><select id="notebook-transfer" required></select><small>Notas, listas, lembretes e páginas na lixeira serão preservados no caderno escolhido.</small><button class="primary" type="submit">Mover páginas e remover caderno</button></form></dialog>
+<div id="block-menu" class="editor-popup" role="menu" hidden></div><div id="format-menu" class="editor-popup format-menu" role="toolbar" aria-label="Formatar texto" hidden></div><dialog id="editor-link-dialog" class="cut-dialog"><form id="editor-link-form"><div class="drawer-heading"><h2>Link no texto</h2><button id="editor-link-close" type="button" aria-label="Fechar link">×</button></div><label for="editor-link-url">Endereço</label><input id="editor-link-url" type="url" required placeholder="https://…"><button class="primary" type="submit">Adicionar link</button></form></dialog>
 </body>
 </html>

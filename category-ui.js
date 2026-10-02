@@ -31,13 +31,7 @@ function highlightCategoryTokens(span) {
   const text=span.innerText.replace(/\n$/,''), tokens=categoryText.tokens(text);
   if(!tokens.length && !span.querySelector('.inline-category')) return;
   const focused=span.contains(getSelection().anchorNode), offset=focused?caretOffset(span):0;
-  const fragment=document.createDocumentFragment(); let previous=0;
-  for(const token of tokens) {
-    fragment.append(document.createTextNode(text.slice(previous,token.start)));
-    const pill=document.createElement('span'); pill.className='inline-category'; pill.textContent=text.slice(token.start,token.end); fragment.append(pill); previous=token.end;
-  }
-  fragment.append(document.createTextNode(text.slice(previous))); span.replaceChildren(fragment);
-  if(!text) span.append(document.createElement('br'));
+  renderInlineRuns(span,readInlineRuns(span));
   if(focused) putCaret(span,offset);
 }
 let unfinishedCategoryNote=null;
@@ -48,12 +42,14 @@ function categoryCursorFor(event,editor) {
   if(['TEXTAREA','INPUT'].includes(editor.tagName)) return editor.selectionStart;
   const lines=[...editor.querySelectorAll('.writing-line')], line=getSelection().anchorNode?.parentElement?.closest('.writing-line');
   if(!line) return null;
+  if(line.dataset.blockType==='code') return null;
+  if(line.dataset.blockType==='table') {const cell=getSelection().anchorNode?.parentElement?.closest('.table-cell-text');if(!cell)return null;const blocks=[...editor.querySelectorAll('.writing-line')],prefix=blocks.slice(0,blocks.indexOf(line)).reduce((size,item)=>size+readWritingLine(item).length+1,0);const block=readEditorBlock(line),row=Number(cell.dataset.row),column=Number(cell.dataset.column);return prefix+block.rows.slice(0,row).reduce((size,cells)=>size+pageDocument.blockText({...block,rows:[cells]}).length+1,0)+2+block.rows[row].slice(0,column).reduce((size,runs)=>size+pageDocument.runText(runs).length+3,0)+caretOffset(cell);}
   return lines.slice(0,lines.indexOf(line)).reduce((size,item)=>size+readWritingLine(item).length+1,0)+caretOffset(editableText(line))+(line.dataset.checkbox?4:0);
 }
 document.addEventListener('focusout',event=>{
   if(transformingCategoryEditor || !unfinishedCategoryNote || !event.target.closest('#note-body') || event.relatedTarget?.closest('#note-body')) return;
   const id=unfinishedCategoryNote; unfinishedCategoryNote=null;
-  if(currentNote()?.id===id && $('#note-body')) action('note:update',{id,body:$('#note-body').value},{history:false});
+  if(currentNote()?.id===id && $('#note-body')) action('note:update',{id,body:$('#note-body').value,...($('#note-body').dataset.structured==='true'?{editorDoc:readEditorDocument()}:{})},{history:false});
 });
 document.addEventListener('compositionend',event=>{ if(view==='notes'&&event.target.closest('#note-body')) smartNoteInput(currentNote().id,event); });
 
@@ -71,7 +67,7 @@ function eraseCategoryPill(event) {
   }
   if(!token) return;
   event.preventDefault();event.stopImmediatePropagation();capturePageSelection();unfinishedCategoryNote=null;
-  span.textContent=text.slice(0,token.start)+text.slice(token.end); if(!span.textContent) span.append(document.createElement('br'));
+  const runs=readInlineRuns(span);renderInlineRuns(span,[...sliceInlineRuns(runs,0,token.start),...sliceInlineRuns(runs,token.end,text.length)]);
   highlightCategoryTokens(span);putCaret(span,token.start);
   smartNoteInput(currentNote().id,{target:span,isTrusted:false});
 }
