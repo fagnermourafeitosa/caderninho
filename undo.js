@@ -14,10 +14,11 @@ function editorSelection() {
   if (active?.id === 'note-title') return { field: 'title', start: active.selectionStart, end: active.selectionEnd };
   const editor = $('#note-body'); if (!editor) return null;
   if (editor.tagName === 'TEXTAREA') return { field: 'body', start: editor.selectionStart, end: editor.selectionEnd };
-  const selected = getSelection(),cell=selected.anchorNode?.parentElement?.closest('.table-cell-text'), line = selected.anchorNode?.parentElement?.closest('.writing-line');
-  if (!line) return { field: 'body', line: 0, start: 0, end: 0 };
-  if(cell)return {field:'body',line:[...editor.querySelectorAll('.writing-line')].indexOf(line),cell:[...line.querySelectorAll('.table-cell-text')].indexOf(cell),start:caretOffset(cell),end:caretOffset(cell,true)};
-  return { field: 'body', line: [...editor.querySelectorAll('.writing-line')].indexOf(line), start: caretOffset(editableText(line)), end: caretOffset(editableText(line), true) };
+  const selected=getSelection(),range=selected.rangeCount?selected.getRangeAt(0):null,parts=range&&!selected.isCollapsed?editorRangeParts(range):[];
+  const lines=[...editor.querySelectorAll('.writing-line')];
+  if(parts.length){const first=parts[0],last=parts.at(-1);return {field:'body',line:lines.indexOf(first.line),cell:first.span.classList.contains('table-cell-text')?[...first.line.querySelectorAll('.table-cell-text')].indexOf(first.span):undefined,start:first.start,endLine:lines.indexOf(last.line),endCell:last.span.classList.contains('table-cell-text')?[...last.line.querySelectorAll('.table-cell-text')].indexOf(last.span):undefined,end:last.end};}
+  const span=selected.anchorNode?.parentElement?.closest('.line-text'),line=span?.closest('.writing-line');if(!line)return {field:'body',line:0,start:0,end:0};
+  return {field:'body',line:lines.indexOf(line),cell:span.classList.contains('table-cell-text')?[...line.querySelectorAll('.table-cell-text')].indexOf(span):undefined,start:caretOffset(span),end:caretOffset(span,true)};
 }
 function rememberNoteEdit(input,options={}) {
   const note = state?.notes.find(item => item.id === input.id); if (!note) return;
@@ -38,7 +39,10 @@ function restoreEditorSelection(selection) {
     field.focus(); field.setSelectionRange(selection.start || 0, selection.end ?? selection.start ?? 0); return;
   }
   const lines = field.querySelectorAll('.writing-line'), line = lines[Math.max(0, Math.min(selection.line || 0, lines.length - 1))];
-  if (line) putCaret(selection.cell!==undefined?line.querySelectorAll('.table-cell-text')[selection.cell]||editableText(line):editableText(line), selection.start || 0);
+  if(line){const span=selection.cell!==undefined?line.querySelectorAll('.table-cell-text')[selection.cell]||editableText(line):editableText(line);putCaret(span,selection.start||0);
+    const lastLine=lines[selection.endLine??selection.line]||line,last=selection.endCell!==undefined?lastLine.querySelectorAll('.table-cell-text')[selection.endCell]||editableText(lastLine):editableText(lastLine);
+    if(last!==span||selection.end>selection.start){const point=editorTextPoint(last,selection.end??selection.start??0);getSelection().getRangeAt(0).setEnd(point.node,point.offset);}
+  }
 }
 function isPageHistoryTarget(target = document.activeElement) {
   if (!currentNote() || view === 'archive' || !$('#note-title')) return false;

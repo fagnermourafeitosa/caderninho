@@ -2,6 +2,15 @@
  const wait=async()=>{await new Promise(resolve=>setTimeout(resolve,130));const deadline=Date.now()+3000;while(pending&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));if(pending)throw new Error('Editor não terminou de salvar');};
  const assert=(value,label)=>{if(!value)throw new Error(label);};
  state=await window.notebook.action('note:create',{type:'notes',title:'Plano da semana'});view='notes';render();const id=currentNote().id;
+ $('#add-block').click();
+ const search=$('#block-menu input');assert(document.activeElement===search,'Botão + Bloco foca a busca');
+ assert(document.querySelectorAll('.command-group').length===4,'Paleta separa texto, listas, estrutura e mídia');
+ assert(document.querySelector('.keyboard-choice').dataset.insertBlock==='paragraph','Primeiro comando já selecionado');
+ search.value='codigo';search.dispatchEvent(new Event('input',{bubbles:true}));assert(document.querySelectorAll('[data-insert-block]').length===1&&document.querySelector('[data-insert-block=code]'),'Busca ignora acentos');
+ search.value='inexistente';search.dispatchEvent(new Event('input',{bubbles:true}));assert(document.querySelector('.command-empty')&&!search.hasAttribute('aria-activedescendant'),'Busca vazia mostra feedback sem opção ativa');
+ search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));
+ search.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',bubbles:true,cancelable:true}));assert(document.querySelector('.keyboard-choice').dataset.insertBlock==='media','Seta para cima circula até o último comando');
+ search.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert($('#block-menu').hidden&&document.activeElement.closest('#note-body'),'Esc retorna à escrita');
  $('#add-block').click();document.querySelector('[data-insert-block=table]').click();
  const first=document.querySelector('.table-picker [data-row="1"][data-column="1"]'),chosen=document.querySelector('.table-picker [data-row="3"][data-column="4"]');
  first.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true}));chosen.dispatchEvent(new PointerEvent('pointerenter'));assert($('#table-size').textContent==='4 colunas × 3 linhas','Grade mostra a prévia');assert(document.querySelectorAll('.table-picker .chosen').length===12,'Grade destaca o retângulo');$('#block-menu').dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));await wait();
@@ -12,7 +21,11 @@
  assert(currentNote().editorDoc.find(block=>block.type==='table').rows[1][0][0].marks.bold,'Formatação salva no SQLite');
  document.querySelector('[data-table-action=row]').click();await wait();assert(document.querySelectorAll('.paper-table tr').length===4,'Acrescenta linha');document.querySelector('[data-table-action=column]').click();await wait();assert(document.querySelectorAll('.table-cell-text').length===20,'Acrescenta coluna');
  cell=document.querySelectorAll('.table-cell-text')[5];putCaret(cell,7);cell.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));assert(document.activeElement===document.querySelectorAll('.table-cell-text')[6],'Tab avança para a próxima célula');
- const text=[...document.querySelectorAll('.writing-line')].at(-1).querySelector('.line-text');putCaret(text);document.execCommand('insertText',false,'/');await wait();assert(!$('#block-menu').hidden,'Barra abre menu ao digitar /');document.querySelector('[data-insert-block=h2]').click();await wait();assert(document.querySelector('.block-h2'),'Insere título pelo slash');
+ const text=[...document.querySelectorAll('.writing-line')].at(-1).querySelector('.line-text');putCaret(text);document.execCommand('insertText',false,'/tit');await wait();assert(!$('#block-menu').hidden,'Barra abre busca ao digitar /tit');
+ assert(document.querySelectorAll('[data-insert-block]').length===3&&!document.querySelector('.command-group'),'Busca /tit mostra apenas os três títulos sem grupos');
+ assert($('#note-body').contains(document.activeElement)&&text.contains(getSelection().anchorNode)&&$('#block-menu input').value==='tit','Busca slash mantém foco e espelha o comando');
+ text.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));assert(document.querySelector('.keyboard-choice').dataset.insertBlock==='h2','Seta seleciona subtítulo');
+ text.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));await wait();assert(document.querySelector('.block-h2')&&!currentNote().body.includes('/tit'),'Enter insere o comando e remove /tit');
  const heading=document.querySelector('.block-h2 .line-text');putCaret(heading);document.execCommand('insertText',false,'Objetivos');await wait();
  state=await window.notebook.state();renderPage();assert(document.querySelectorAll('.table-cell-text').length===20&&document.querySelector('.block-h2 .line-text').textContent==='Objetivos','Blocos e tabela sobrevivem à reabertura da página');
  state=await window.notebook.image({noteId:id,name:'Imagem junto da tabela',bytes:new Uint8Array(window.cutTestBytes)});renderPage();assert(document.querySelector('.paper-cut')&&document.querySelectorAll('.table-cell-text').length===20,'Mídia e tabela coexistem sem perder dados');

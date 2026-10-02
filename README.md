@@ -69,9 +69,9 @@ Alterar a data ou hora desativa o agendamento anterior até você clicar em **Ag
 
 ## Editor de notas
 
-Digite **`/`** no texto ou clique em **+ Bloco** para inserir texto, títulos de três tamanhos, checkboxes, listas com marcadores ou números, citação, divisor, código, mídia ou tabela. Continue digitando depois da barra para filtrar as opções. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
+Digite **`/`** no texto ou clique em **+ Bloco** para inserir texto, **Título**, **Subtítulo**, **Título pequeno**, tarefas com checkbox, listas com marcadores ou números, citação, divisor, código, mídia ou tabela. A paleta reúne os blocos em **Texto**, **Listas**, **Estrutura** e **Mídia**, com busca. Continue digitando depois da barra para filtrar: **`/tit`** mostra os três níveis de título. A busca aceita palavras sem acento. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
 
-Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código inline, link e marca-texto**. O marca-texto usa uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
+Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código inline, link e marca-texto**. A seleção com **Shift + setas** atravessa os parágrafos. A formatação vale para todo o texto selecionado, inclusive em várias linhas ou células. **Backspace/Delete** apagam a seleção inteira; junto de um divisor, removem o bloco. No início de um título, citação ou lista, Backspace volta ao texto normal sem perder o conteúdo. O marca-texto usa uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
 
 ### Tabelas
 

@@ -56,7 +56,7 @@ document.addEventListener('compositionend',event=>{ if(view==='notes'&&event.tar
 // A category is removed as one unit, while surrounding prose keeps normal editing.
 function eraseCategoryPill(event) {
   if(view!=='notes' || event.isComposing) return;
-  const span=event.target.closest('.line-text'); if(!span) return;
+  const span=getSelection().anchorNode?.parentElement?.closest('.line-text'); if(!span) return;
   const selection=getSelection();if(!selection.isCollapsed || !span.contains(selection.anchorNode)) return;
   const offset=caretOffset(span),text=span.innerText.replace(/\n$/,'');
   let position=0,token;

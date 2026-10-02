@@ -11,8 +11,11 @@
    Do instead: sample screen.getCursorScreenPoint in the main process and validate computed signed 32-bit positions before setPosition; captured renderer screenX/screenY can become unreliable while the window moves. Validate actual dragging after packaging.
 
 ## Editor
-1. **[2026-10-01] Contextual editor without block actions**
-   Do instead: provide slash/+ insertion, text-selection formatting and an Office-style hover/drag table size grid. Do not add transform/duplicate/move/delete block menus. Save sanitized structured blocks in SQLite alongside searchable plain text, include tables/formatting in undo and preserve them during quick capture. Mermaid remains planned in ROADMAP.md until requested.
+1. **[2026-10-01] One continuous editing host**
+   Do instead: keep ordinary writing blocks in the shared contenteditable page; native input targets the host, so resolve the caret block from Selection. Slice rich runs across the complete DOM range for deletion/formatting, including reverse ranges and line-boundary endpoints. Preserve prefix/suffix, SQLite structure and one-step replacement undo; guard caret offsets for detached nodes while constructing checkboxes. Normalize native nodes and route page-boundary carets into writing spans before editing, so plain text never escapes persistence. Validate native sendInputEvent keyboard/mouse selection plus Backspace/Delete, not only synthetic events.
+
+2. **[2026-10-01] Contextual editor without block actions**
+   Do instead: provide grouped searchable slash/+ command insertion (300px, 40px rows, ink icons, active yellow, no permanent scrollbar), arrows/Enter/Escape and accent-insensitive aliases, text-selection formatting and an Office-style hover/drag table size grid. Do not add transform/duplicate/move/delete block menus. Save sanitized structured blocks in SQLite alongside searchable plain text, include tables/formatting in undo and preserve them during quick capture. Mermaid remains planned in ROADMAP.md until requested.
 
 ## Documentation
 1. **[2026-10-01] User-facing Portuguese README**

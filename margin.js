@@ -5,15 +5,19 @@ function readWritingLine(line) {
   return line.dataset.checkbox ? `[${line.dataset.checked === 'true' ? 'x' : ' '}] ${text}` : text;
 }
 function makeWritingLine(text, index) {
-  const line = document.createElement('div'); line.className = 'writing-line'; line.contentEditable = 'false'; line.dataset.lineIndex = index;
-  const span = document.createElement('span'); span.className = 'line-text'; span.contentEditable = 'true'; span.spellcheck = true; span.lang = 'pt-BR'; span.setAttribute('role', 'textbox'); span.setAttribute('aria-label', `Texto da nota, parágrafo ${index + 1}`); span.textContent = text; if (!text) span.append(document.createElement('br')); line.append(span);
+  const line = document.createElement('div'); line.className = 'writing-line'; line.contentEditable = 'true'; line.dataset.lineIndex = index;
+  const span = document.createElement('span'); span.className = 'line-text'; span.contentEditable = 'true'; span.tabIndex=0; span.spellcheck = true; span.lang = 'pt-BR'; span.setAttribute('role', 'textbox'); span.setAttribute('aria-label', `Texto da nota, parágrafo ${index + 1}`); span.textContent = text; if (!text) span.append(document.createElement('br')); line.append(span);
   convertInlineCheckbox(line);
   highlightCategoryTokens(span);
   return line;
 }
 function caretOffset(element, end = false) {
-  const selection = getSelection(); if (!selection.rangeCount || !element.contains(selection.anchorNode)) return 0;
-  const selected = selection.getRangeAt(0), range = document.createRange(); range.selectNodeContents(element); range.setEnd(end ? selected.endContainer : selected.startContainer, end ? selected.endOffset : selected.startOffset); return range.toString().length;
+  const selection=getSelection();if(!selection.rangeCount)return 0;
+  const selected=selection.getRangeAt(0),node=end?selected.endContainer:selected.startContainer,offset=end?selected.endOffset:selected.startOffset;
+  if(element.getRootNode()!==node.getRootNode())return 0;
+  const range=document.createRange();range.selectNodeContents(element);
+  if(!element.contains(node))return range.comparePoint(node,offset)>0?range.toString().length:0;
+  range.setEnd(node,offset);return range.toString().length;
 }
 function putCaret(element, offset = 0) {
   element.focus(); const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT); let node;
@@ -52,9 +56,10 @@ function smartNoteInput(noteId, event) {
   updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor,...(editor.dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) });
 }
 function handleWritingKey(event) {
+  if(handleDocumentKey(event)) return;
   if(tableKey(event)) return;
-  if(event.target.closest('[data-block-type=code]') && event.key==='Enter'&&!event.isComposing){event.preventDefault();document.execCommand('insertLineBreak');return;}
-  const line = event.target.closest('.writing-line'); if (!line || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
+  if(getSelection().focusNode?.parentElement?.closest('[data-block-type=code]') && event.key==='Enter'&&!event.isComposing){event.preventDefault();document.execCommand('insertLineBreak');return;}
+  const line = getSelection().focusNode?.parentElement?.closest('.writing-line')||event.target.closest('.writing-line'); if (!line || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
   const span = editableText(line); if (!span.contains(getSelection().anchorNode)) return;
   capturePageSelection();
   const start = caretOffset(span), end = caretOffset(span, true), text = span.innerText.replace(/\n$/, '');
@@ -69,15 +74,15 @@ function handleWritingKey(event) {
       renderInlineRuns(editableText(next),sliceInlineRuns(splitRuns,end,text.length));line.after(next); putCaret(editableText(next));
     }
   } else if (event.key === 'Backspace' && start === 0 && end === 0 && line.dataset.checkbox) {
-    event.preventDefault(); line.querySelector('.inline-check').remove(); delete line.dataset.checkbox; delete line.dataset.checked; line.classList.remove('inline-task', 'is-checked'); putCaret(span);
+    event.preventDefault(); line.querySelector('.inline-check').remove(); delete line.dataset.checkbox; delete line.dataset.checked; line.dataset.blockType='paragraph'; line.classList.remove('block-check'); line.classList.remove('inline-task', 'is-checked'); putCaret(span);
   } else if ((event.key === 'Backspace' && start === 0 && end === 0) || (event.key === 'Delete' && start === text.length && end === start)) {
     const lines = [...$('#note-body').querySelectorAll('.writing-line')], index = lines.indexOf(line);
     const previous = event.key === 'Backspace', neighbor = lines[index + (previous ? -1 : 1)];
     if (!neighbor) return; event.preventDefault();
-    if(['table','code','divider'].includes(neighbor.dataset.blockType)) {putCaret(editableText(neighbor));return;}
+    if(['table','divider'].includes(neighbor.dataset.blockType)) {neighbor.remove();putCaret(span,start);saveDocument();return;}
     const keep = previous ? neighbor : line, remove = previous ? line : neighbor;
     const keepSpan = editableText(keep), offset = keepSpan.innerText.replace(/\n$/, '').length;
-    keepSpan.textContent = keepSpan.innerText.replace(/\n$/, '') + editableText(remove).innerText.replace(/\n$/, ''); remove.remove(); putCaret(keepSpan, offset);
+    renderInlineRuns(keepSpan,[...readInlineRuns(keepSpan),...readInlineRuns(editableText(remove))]); remove.remove(); putCaret(keepSpan, offset);
   } else return;
   $('#note-body').querySelectorAll('.writing-line').forEach((item, index) => item.dataset.lineIndex = index);
   $('#note-body').dispatchEvent(new Event('input', { bubbles: true }));
@@ -99,14 +104,15 @@ function renderSmartMargin() {
 setInterval(() => { if (state && view === 'notes') renderSmartMargin(); }, 30000);
 
 function pasteWritingText(text) {
-  const selection = getSelection(), line = selection.anchorNode?.parentElement?.closest('.writing-line');
+  const selection = getSelection();if(!selection.isCollapsed&&editorRangeParts(selection.getRangeAt(0)).length>1)deleteEditorSelection(false);
+  const line = selection.anchorNode?.parentElement?.closest('.writing-line');
   if (!line) return;
   capturePageSelection();
   if (!text.includes('\n')) { document.execCommand('insertText', false, text); return; }
-  const span = editableText(line), original = span.innerText.replace(/\n$/, ''), start = caretOffset(span), end = caretOffset(span, true), parts = text.replace(/\r\n?/g, '\n').split('\n');
-  span.textContent = original.slice(0, start) + parts[0]; convertInlineCheckbox(line);
+  const span = editableText(line), original = span.innerText.replace(/\n$/, ''), start = caretOffset(span), end = caretOffset(span, true), parts = text.replace(/\r\n?/g, '\n').split('\n'),runs=readInlineRuns(span);
+  renderInlineRuns(span,[...sliceInlineRuns(runs,0,start),...pageDocument.plainRuns(parts[0])]); convertInlineCheckbox(line);
   let last = line;
-  parts.slice(1).forEach((part, index) => { const next = makeWritingLine(part + (index === parts.length - 2 ? original.slice(end) : ''), index + 1); last.after(next); last = next; });
+  parts.slice(1).forEach((part, index) => { const suffix=index===parts.length-2?sliceInlineRuns(runs,end,original.length):[],marker=smartText.checkbox(part),next = makeWritingLine(part+pageDocument.runText(suffix), index + 1);renderInlineRuns(editableText(next),[...pageDocument.plainRuns(marker?part.slice(marker[0].length):part),...suffix]); last.after(next); last = next; });
   $('#note-body').querySelectorAll('.writing-line').forEach((item, index) => item.dataset.lineIndex = index);
   const marker = smartText.checkbox(parts.at(-1)); putCaret(editableText(last), Math.max(0, parts.at(-1).length - (marker?.[0].length || 0)));
   $('#note-body').dispatchEvent(new Event('input', { bubbles: true }));

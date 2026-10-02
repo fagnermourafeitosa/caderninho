@@ -237,32 +237,78 @@ ipcMain.on('notebook:move', (event, phase) => {
   if (!position) { moveSession = null; return; }
   win.setPosition(position.x, position.y);
 });
+function smokeScript(file){const source=fs.readFileSync(path.join(__dirname,'tests',file),'utf8').trim().replace(/;$/, '');return `Promise.resolve(${source}).catch(error=>{throw new Error(${JSON.stringify(file)}+': '+(error.stack||error.message||String(error)));})`;}
+async function runNativeEditorSmoke(){
+  const js=async code=>{try{return await win.webContents.executeJavaScript(code.includes('await ')?'(async()=>{'+code+'})()':code);}catch(error){throw new Error('Native script '+code.slice(0,180)+': '+error.message);}},pause=()=>new Promise(resolve=>setTimeout(resolve,180));
+  const key=(keyCode,modifiers=[])=>{keyCode=({ArrowDown:'Down',ArrowUp:'Up',ArrowRight:'Right',ArrowLeft:'Left'})[keyCode]||keyCode;win.webContents.sendInputEvent({type:'keyDown',keyCode,modifiers});win.webContents.sendInputEvent({type:'keyUp',keyCode,modifiers});};
+  await js("state=await window.notebook.action('note:create',{type:'notes',title:'Barra em nota nova'});view='notes';render();$('#note-body').focus();");
+  win.webContents.sendInputEvent({type:'char',keyCode:'/'});await pause();
+  if(!await js("!$('#block-menu').hidden&&document.querySelectorAll('[data-insert-block]').length===12"))throw new Error('Native slash in new textarea did not open commands');
+  key('Escape');
+  await js("state=await window.notebook.action('note:create',{type:'notes',title:'Teclado real'});view='notes';render();ensureRichEditor();const editor=$('#note-body');editor.focus();const r=document.createRange();r.selectNodeContents(editor);r.collapse(false);getSelection().removeAllRanges();getSelection().addRange(r);");
+  win.webContents.sendInputEvent({type:'char',keyCode:'/'});await pause();
+  if(!await js("!$('#block-menu').hidden&&document.querySelectorAll('[data-insert-block]').length===12"))throw new Error('Native slash at page boundary did not open commands');
+  for(const letter of 'tit'){win.webContents.sendInputEvent({type:'char',keyCode:letter});await pause();}
+  if(!await js("document.querySelectorAll('[data-insert-block]').length===3"))throw new Error('Native slash search did not filter');
+  key('Escape');await pause();
+  const setup=async()=>{await js("state=await window.notebook.action('note:update',{id:currentNote().id,editorDoc:pageDocument.fromPlain('Primeira linha\\nSegunda linha\\nTerceira linha')});renderPage();hideEditorMenus();");await pause();};
+  for(const method of ['keyboard','mouse'])for(const deletion of ['Backspace','Delete']){
+    await setup();
+    if(method==='keyboard'){
+      await js("putCaret($('#note-body .line-text'),0)");key('ArrowDown',['shift']);key('ArrowDown',['shift']);key('ArrowRight',['shift','meta']);
+    }else{
+      const coords=await js("(()=>{const spans=[...$('#note-body').querySelectorAll('.line-text')],a=spans[0].getBoundingClientRect(),b=spans.at(-1).getBoundingClientRect();return {x1:Math.round(a.left),y1:Math.round(a.top+a.height/2),x2:Math.round(b.right),y2:Math.round(b.top+b.height/2)}})()");
+      win.webContents.sendInputEvent({type:'mouseDown',button:'left',clickCount:1,x:coords.x1,y:coords.y1});
+      win.webContents.sendInputEvent({type:'mouseMove',modifiers:['leftbuttondown'],x:coords.x2,y:coords.y2});
+      win.webContents.sendInputEvent({type:'mouseUp',button:'left',clickCount:1,x:coords.x2,y:coords.y2});
+    }
+    await pause();
+    if(!await js("getSelection().toString().includes('Segunda linha')"))throw new Error('Native '+method+' did not select multiple lines: '+await js("JSON.stringify({selection:getSelection().toString(),html:$('#note-body').innerHTML,active:document.activeElement.outerHTML.slice(0,200),errors:window.smokeErrors})"));
+    key(deletion);await pause();
+    if(!await js("$('#note-body').value===''&&currentNote().body===''") )throw new Error('Native '+method+' '+deletion+' failed: '+await js("JSON.stringify({text:$('#note-body').innerText,body:currentNote().body,html:$('#note-body').innerHTML,errors:window.smokeErrors})"));
+    key('z',['meta']);await pause();if(!await js("currentNote().body.includes('Segunda linha')"))throw new Error('Native undo failed');
+  }
+  // Recover browser-created paragraphs rather than silently saving an empty document.
+  await js("$('#note-body').innerHTML='<div>Texto visível</div><div>Outra linha</div>';const editor=$('#note-body');editor.focus();const r=document.createRange();r.selectNodeContents(editor);r.collapse(false);getSelection().removeAllRanges();getSelection().addRange(r);editor.dispatchEvent(new InputEvent('input',{bubbles:true}));");await pause();
+  if(!await js("currentNote().body==='Texto visível\\nOutra linha'"))throw new Error('Native unwrapped paragraphs were not recovered');
+  console.log('NATIVE_EDITOR_SMOKE_OK');
+}
 async function runSmoke() {
   try {
+    if(process.argv.includes('--native-only')){await runNativeEditorSmoke();app.quit();return;}
     if(process.argv.includes('--editor-only')) {
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
-      const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','editor-smoke.js'),'utf8'));
+      const result=await win.webContents.executeJavaScript(smokeScript('editor-smoke.js'));
       if(result.errors.length)throw new Error(result.errors.join('\n'));
       fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});fs.writeFileSync(path.join(__dirname,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+      await win.webContents.executeJavaScript("openInsertMenu([...document.querySelectorAll('.writing-line')].at(-1));");
+      await win.webContents.executeJavaScript('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+      fs.writeFileSync(path.join(__dirname,'artifacts','paleta-blocos.png'),(await win.webContents.capturePage()).toPNG());
+      await win.webContents.executeJavaScript("const search=document.querySelector('#block-menu input');search.value='tit';search.dispatchEvent(new Event('input',{bubbles:true}));");
+      await win.webContents.executeJavaScript('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+      fs.writeFileSync(path.join(__dirname,'artifacts','paleta-busca.png'),(await win.webContents.capturePage()).toPNG());
       await win.webContents.executeJavaScript("openInsertMenu([...document.querySelectorAll('.writing-line')].at(-1));document.querySelector('[data-insert-block=table]').click();document.querySelectorAll('.table-picker button')[19].dispatchEvent(new PointerEvent('pointerenter'));");
       fs.writeFileSync(path.join(__dirname,'artifacts','seletor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+      await runNativeEditorSmoke();
+      const selectionResult=await win.webContents.executeJavaScript(smokeScript('selection-smoke.js'));
+      console.log('SELECTION_SMOKE_OK',JSON.stringify(selectionResult));
       console.log('EDITOR_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
     if(process.argv.includes('--notebooks-only')) {
-      const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','notebook-smoke.js'),'utf8'));
+      const result=await win.webContents.executeJavaScript(smokeScript('notebook-smoke.js'));
       if(result.errors.length) throw new Error(result.errors.join('\n'));
       fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true}); fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
       console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
     if(process.argv.includes('--categories-only')) {
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
-      const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','category-smoke.js'),'utf8'));
+      const result=await win.webContents.executeJavaScript(smokeScript('category-smoke.js'));
       if(result.errors.length) throw new Error(result.errors.join('\n'));
       fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});
       fs.writeFileSync(path.join(__dirname,'artifacts','categorias.png'),(await win.webContents.capturePage()).toPNG());
       console.log('CATEGORY_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
-    const result = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'app-smoke.js'), 'utf8'));
+    const result = await win.webContents.executeJavaScript(smokeScript('app-smoke.js'));
     if (result.errors.length) throw new Error(result.errors.join('\n'));
     const reopened = new Store(app.getPath('userData'));
     if (!reopened.snapshot().notes.some(n => n.body.includes('Salvamento verificado'))) throw new Error('Nota não persistiu no SQLite');
@@ -282,7 +328,7 @@ async function runSmoke() {
     await new Promise(resolve => setTimeout(resolve, 350));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'menu-recolhido.png'), (await win.webContents.capturePage()).toPNG());
     await openQuick();
-    const quickResult = await quickWin.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'quick-smoke.js'), 'utf8'));
+    const quickResult = await quickWin.webContents.executeJavaScript(smokeScript('quick-smoke.js'));
     if (quickResult.errors.length) throw new Error(quickResult.errors.join('\n'));
     const quickNote = store.note(store.getSetting('quick_saved_note'));
     if (quickNote.body !== 'Uma ideia capturada.\n\nMais um detalhe.') throw new Error('Rascunho não foi acrescentado corretamente.');
@@ -293,7 +339,7 @@ async function runSmoke() {
     const bytes = fs.readFileSync(path.join(__dirname, 'assets', 'icon.png'));
     media.fetch = async url => { await new Promise(resolve => setTimeout(resolve, 50)); return url.endsWith('.png') ? { bytes, type: 'image/png', url } : { bytes: Buffer.from('<meta property="og:title" content="Uma ideia em papel"><meta property="og:description" content="Uma prévia guardada pelas metatags, mesmo sem internet."><meta property="og:image" content="/cover.png">'), type: 'text/html', url }; };
     await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname, 'assets', 'icon.png'))])}`);
-    const cuts = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'cuts-smoke.js'), 'utf8'));
+    const cuts = await win.webContents.executeJavaScript(smokeScript('cuts-smoke.js'));
     if (cuts.errors.length) throw new Error(cuts.errors.join('\n'));
     const cutStore = new Store(app.getPath('userData'));
     if (cutStore.snapshot().notes.find(note => note.id === cuts.noteId).cuts.length !== 2) throw new Error('Recortes não persistiram');
@@ -302,7 +348,7 @@ async function runSmoke() {
     await win.webContents.executeJavaScript("document.querySelector('#toast').hidden = true");
     await new Promise(resolve => setTimeout(resolve, 100));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'recortes.png'), (await win.webContents.capturePage()).toPNG());
-    const margin = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'margin-smoke.js'), 'utf8'));
+    const margin = await win.webContents.executeJavaScript(smokeScript('margin-smoke.js'));
     if (margin.errors.length || alarmCount !== 3) throw new Error('Falha na margem inteligente: ' + margin.errors.join('\n'));
     const marginStore = new Store(app.getPath('userData'));
     const inlineNote = marginStore.snapshot().notes.find(note => note.id === margin.noteId);
@@ -310,7 +356,7 @@ async function runSmoke() {
     marginStore.close();
     await new Promise(resolve => setTimeout(resolve, 150));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'margem-inteligente.png'), (await win.webContents.capturePage()).toPNG());
-    const undo = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'undo-smoke.js'), 'utf8'));
+    const undo = await win.webContents.executeJavaScript(smokeScript('undo-smoke.js'));
     if (undo.errors.length) throw new Error(undo.errors.join('\n'));
     win.focus();
     await win.webContents.executeJavaScript("(async () => { window.menuHistoryReceipt=0; window.notebook.onHistory(() => window.menuHistoryReceipt++); putCaret(document.querySelector('.line-text')); document.execCommand('insertText', false, 'Menu undo '); while(pending) await new Promise(resolve=>setTimeout(resolve,20)); if(!document.querySelector('#note-body').value.includes('Menu undo ')) throw new Error('Texto do teste de menu não foi inserido'); })()");
@@ -320,13 +366,13 @@ async function runSmoke() {
     dispatchHistory('redo', win);
     await win.webContents.executeJavaScript("(async () => { const deadline=Date.now()+3000; while(window.menuHistoryReceipt<2 && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,20)); if(window.menuHistoryReceipt<2) throw new Error('Menu Refazer não foi recebido'); await undoQueue; })()");
     if (!await win.webContents.executeJavaScript("document.querySelector('#note-body').value.includes('Menu undo ')") ) throw new Error('Menu Refazer não funcionou: '+await win.webContents.executeJavaScript("JSON.stringify({body:$('#note-body').value,active:document.activeElement.outerHTML.slice(0,400),history:pageHistories.get(currentNote().id),errors:window.smokeErrors})"));
-    const calendar = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'calendar-smoke.js'), 'utf8'));
+    const calendar = await win.webContents.executeJavaScript(smokeScript('calendar-smoke.js'));
     if (calendar.errors.length) throw new Error(calendar.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'calendario-lembretes.png'), (await win.webContents.capturePage()).toPNG());
-    const categories = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'category-smoke.js'), 'utf8'));
+    const categories = await win.webContents.executeJavaScript(smokeScript('category-smoke.js'));
     if (categories.errors.length) throw new Error(categories.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'categorias.png'), (await win.webContents.capturePage()).toPNG());
-    const home = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'home-smoke.js'), 'utf8'));
+    const home = await win.webContents.executeJavaScript(smokeScript('home-smoke.js'));
     if (home.errors.length) throw new Error(home.errors.join('\n'));
     const homeStore = new Store(app.getPath('userData'));
     if (homeStore.snapshot().daily.body !== home.body) throw new Error('Anotações do dia não persistiram');
@@ -342,13 +388,15 @@ async function runSmoke() {
     if (!await win.webContents.executeJavaScript(`document.querySelector('#daily-body').readOnly && document.querySelector('#daily-body').value === ${JSON.stringify(home.body)}`)) throw new Error('Página anterior não foi preservada para consulta');
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'pagina-anterior.png'), (await win.webContents.capturePage()).toPNG());
     store.now=actualNow; observedDay=store.dayKey();
-    const notebooks=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','notebook-smoke.js'),'utf8'));
+    const notebooks=await win.webContents.executeJavaScript(smokeScript('notebook-smoke.js'));
     if(notebooks.errors.length) throw new Error(notebooks.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
-    const editorResult=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','editor-smoke.js'),'utf8'));
+    const editorResult=await win.webContents.executeJavaScript(smokeScript('editor-smoke.js'));
     if(editorResult.errors.length)throw new Error(editorResult.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
     console.log('EDITOR_SMOKE_OK',JSON.stringify(editorResult));
+    await runNativeEditorSmoke();
+    console.log('SELECTION_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('selection-smoke.js'))));
     console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(notebooks));
     console.log('HOME_SMOKE_OK', JSON.stringify(home));
     console.log('CALENDAR_SMOKE_OK', JSON.stringify(calendar));
