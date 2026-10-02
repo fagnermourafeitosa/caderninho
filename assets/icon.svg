@@ -1,16 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect x="56" y="62" width="388" height="414" rx="49" fill="#bca577" stroke="#303025" stroke-width="13"/>
-  <rect x="70" y="58" width="382" height="408" rx="40" fill="#fbf0d5" stroke="#303025" stroke-width="12"/>
-  <g fill="none" stroke="#303025" stroke-width="15" stroke-linecap="round">
-    <path d="M121 89C157 84 151 20 131 22C111 23 116 45 120 49M190 89C226 84 220 20 200 22C180 23 185 45 189 49M260 89C296 84 290 20 270 22C250 23 255 45 259 49M330 89C366 84 360 20 340 22C320 23 325 45 329 49M400 89C436 84 430 20 410 22C390 23 395 45 399 49"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <title>Caderninho — caderno com espiral e lápis</title>
+  <g stroke="#35352a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M87 69H383Q423 69 423 109V440Q423 477 386 477H87Q52 477 52 442V106Q52 69 87 69Z" fill="#b6bd91" stroke-width="12"/>
+    <path d="M78 74H386Q419 74 419 108V428Q419 459 387 459H78Q65 459 65 442V93Q65 74 78 74Z" fill="#ddcba7" stroke-width="7"/>
+    <path d="M96 63H382Q414 63 414 97V420Q414 450 384 450H96Q77 450 77 431V83Q77 63 96 63Z" fill="#fbf0d5" stroke-width="10"/>
+    <path d="M91 102V420Q91 436 104 436H379" stroke="#d5bf95" stroke-width="5"/>
+    <g stroke-width="12">
+      <path d="M124 87C147 87 146 27 129 27C116 27 116 44 119 49"/>
+      <path d="M183 87C206 87 205 27 188 27C175 27 175 44 178 49"/>
+      <path d="M242 87C265 87 264 27 247 27C234 27 234 44 237 49"/>
+      <path d="M301 87C324 87 323 27 306 27C293 27 293 44 296 49"/>
+      <path d="M360 87C383 87 382 27 365 27C352 27 352 44 355 49"/>
+    </g>
+    <path d="M126 156Q208 150 298 155L294 196Q213 191 127 198Z" fill="#f3d478" stroke="none"/>
+    <path d="M137 176Q200 172 263 175" stroke-width="9"/>
+    <path d="M129 239Q237 234 346 238M129 278Q230 274 329 277M129 317Q196 313 262 316" stroke="#8f8166" stroke-width="7"/>
+    <g transform="rotate(31 384 317)">
+      <path d="M365 211V187Q365 176 377 176H391Q403 176 403 187V211Z" fill="#d77c64" stroke-width="7"/>
+      <path d="M365 211H403V236H365Z" fill="#b6bd91" stroke-width="7"/>
+      <path d="M365 236H403V390L384 433L365 390Z" fill="#f1c45e" stroke-width="8"/>
+      <path d="M365 390L384 433L403 390Z" fill="#e3c397" stroke-width="6"/>
+      <path d="M377 418L384 433L391 418Z" fill="#35352a" stroke-width="4"/>
+      <path d="M378 246V380" stroke="#ffe49a" stroke-width="6"/>
+    </g>
   </g>
-  <g stroke="#303025" stroke-width="6"><ellipse cx="208" cy="213" rx="28" ry="41" fill="#fff6dc"/><ellipse cx="308" cy="213" rx="28" ry="41" fill="#fff6dc"/></g>
-  <ellipse cx="216" cy="223" rx="17" ry="31" fill="#303025"/><ellipse cx="316" cy="223" rx="17" ry="31" fill="#303025"/>
-  <ellipse cx="221" cy="209" rx="4" ry="9" fill="#fff6dc"/><ellipse cx="321" cy="209" rx="4" ry="9" fill="#fff6dc"/>
-  <path d="M180 151Q205 125 228 149M280 149Q306 123 331 151" fill="none" stroke="#303025" stroke-width="6" stroke-linecap="round"/>
-  <path d="M222 270Q259 286 300 268Q292 329 256 321Q231 316 222 270Z" fill="#303025"/>
-  <path d="M239 302Q262 285 278 314Q255 325 239 302Z" fill="#d55c3f"/>
-  <path d="M111 356H408M112 390H408M113 424H408" stroke="#b8a278" stroke-width="3" opacity=".55"/>
-  <path d="M352 406L365 356L425 278Q433 267 445 276L454 285L392 366Z" fill="#eeb952" stroke="#303025" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M365 356L392 366M423 283L449 300M352 406L361 383" fill="none" stroke="#303025" stroke-width="6"/>
 </svg>

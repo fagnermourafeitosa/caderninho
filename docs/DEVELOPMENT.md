@@ -38,6 +38,16 @@ Veja [Instalação no macOS](INSTALLATION.md) para copiar e abrir o aplicativo g
 
 ## Atualizar as imagens do README
 
+Para regenerar o logo PNG e o ícone do aplicativo a partir de `assets/icon.svg`:
+
+```sh
+npm run icon
+```
+
+No macOS, esse comando também gera `assets/icon.icns` para o pacote instalado.
+
+Para atualizar as capturas:
+
 ```sh
 npx electron scripts/capture-readme.cjs
 ```
