@@ -84,5 +84,6 @@ window.notebook.onCutsUpdated(next => {
   // Metadata completion must not replace text being edited or move its caret.
   for (const note of state.notes) { const fresh = next.notes.find(item => item.id === note.id); if (fresh) note.cuts = fresh.cuts; }
   state.trashCuts = next.trashCuts;
+  if(view==='home')renderHomeNotePreview();
   if (view === 'notes') currentNote()?.cuts.forEach(cut => { const card = document.querySelector(`[data-cut-id="${cut.id}"]`); if (card) fillCutPreview(card, cut); });
 });

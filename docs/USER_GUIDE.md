@@ -4,7 +4,7 @@
 
 ## Comece por aqui
 
-Abra **Caderninho.app**. A primeira tela, **Caderninho**, reúne suas tarefas pendentes, lembretes de hoje, últimas notas e um espaço para anotar o que aconteceu no dia.
+Abra **Caderninho.app**. A primeira tela, **Caderninho**, reúne suas tarefas pendentes, lembretes de hoje, últimas notas e uma prévia da nota mais recentemente atualizada do caderno, com seu grafo de conexões.
 
 Para escrever, abra **Notas** e clique em **+ Nova nota**. Dê um título e comece. Não há botão Salvar: **Salvando automaticamente…** mostra o salvamento em andamento; **Salvo às…** confirma que seus dados foram guardados localmente.
 
@@ -35,7 +35,7 @@ Na própria página, o campo **Caderno** permite mover uma nota, lista ou lembre
 
 Veja tarefas pendentes, itens concluídos hoje, alertas do dia e últimas notas. Marcar uma tarefa aqui atualiza sua página original. Clique em um título para abrir a página correspondente.
 
-Cada dia tem seu próprio espaço de anotações. No dia seguinte, a página anterior continua disponível no seletor de datas, com as anotações e o resumo guardados. Dias anteriores são somente para consulta; escolha **Hoje** para voltar ao dia atual.
+No topo de hoje, a última nota do caderno aparece com sua formatação e mídias, ao lado do grafo de conexões. Use **Continuar nesta nota** para editar ou clique em uma conexão para abrir outra página. No dia seguinte, o resumo da página anterior continua disponível no seletor de datas. Dias anteriores são somente para consulta; escolha **Hoje** para voltar ao dia atual.
 
 ### Categorias
 

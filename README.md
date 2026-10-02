@@ -53,7 +53,7 @@ No topo, retome a última nota do caderno e explore as ideias ligadas a ela em u
 
 ![Página do dia com a última nota e seu grafo de conexões no topo, seguido das tarefas e lembretes](docs/images/pagina-do-dia.png)
 
-Há espaço para escrever sobre o dia. Amanhã, a página de hoje continua disponível para consulta — suas anotações e o retrato daquele momento ficam guardados.
+Amanhã, a página de hoje continua disponível para consulta. O retrato das tarefas, lembretes e notas daquele momento fica guardado.
 
 ## Um caderno para cada assunto
 

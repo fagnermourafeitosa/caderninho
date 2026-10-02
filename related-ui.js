@@ -38,19 +38,19 @@ function renderRelatedGraph(note,data,host=$('#related-content'),{openCenter=fal
  }
  // Stable angular slots; equal scaling on both axes preserves affinity distances.
  const nodes=[...data.results].sort((a,b)=>a.id.localeCompare(b.id));
- const points=nodes.map((node,i)=>{const angle=-Math.PI/2+i*2*Math.PI/nodes.length;const radius=125+(1-Math.max(0,Math.min(1,node.score)))*200;return {...node,x:320+Math.cos(angle)*radius,y:320+Math.sin(angle)*radius};});
- host.innerHTML=`<p class="related-caption">Quanto mais perto desta página, mais afinidade. Clique para abrir.</p><div class="related-graph" aria-label="Conexões desta página"><svg viewBox="0 0 640 640" class="related-edges" aria-hidden="true">${points.map(p=>`<path d="M320 320L${p.x} ${p.y}"/>`).join('')}</svg><${openCenter?'button type="button"':'div'} class="related-node related-center" style="left:50%;top:50%" ${openCenter?'aria-label="Abrir última nota"':''}>${icon(note.type)}<strong>${escape(note.title||'Sem título')}</strong><small>${openCenter?'Última nota':'Esta página'}</small></${openCenter?'button':'div'}>${points.map(p=>`<button class="related-node" data-related-id="${escape(p.id)}" style="left:${p.x/640*100}%;top:${p.y/640*100}%" aria-label="Abrir ${escape(p.title)}">${icon(p.type)}<span>${escape(p.title)}</span></button>`).join('')}</div>`;
+ const points=nodes.map((node,i)=>{const angle=-Math.PI/2+i*2*Math.PI/nodes.length;const distance=1-Math.max(0,Math.min(1,node.score));const radius=openCenter?200+distance*50:125+distance*200;return {...node,x:320+Math.cos(angle)*radius,y:320+Math.sin(angle)*radius};});
+ host.innerHTML=`${openCenter?'':'<p class="related-caption">Quanto mais perto desta página, mais afinidade. Clique para abrir.</p>'}<div class="related-graph" aria-label="Conexões desta página"><svg viewBox="0 0 640 640" class="related-edges" aria-hidden="true">${points.map(p=>`<path d="M320 320L${p.x} ${p.y}"/>`).join('')}</svg><${openCenter?'button type="button"':'div'} class="related-node related-center" style="left:50%;top:50%" ${openCenter?'aria-label="Abrir última nota"':''}>${icon(note.type)}<strong>${escape(note.title||'Sem título')}</strong><small>${openCenter?'Última nota':'Esta página'}</small></${openCenter?'button':'div'}>${points.map(p=>`<button class="related-node" data-related-id="${escape(p.id)}" style="left:${p.x/640*100}%;top:${p.y/640*100}%" aria-label="Abrir ${escape(p.title)}">${icon(p.type)}<span>${escape(p.title)}</span></button>`).join('')}</div>`;
  if(openCenter)host.querySelector('.related-center').onclick=()=>openRelatedPage({noteId:note.id});
  host.querySelectorAll('[data-related-id]').forEach(button=>button.onclick=async()=>{const target=points.find(p=>p.id===button.dataset.relatedId);if(host===$('#related-content'))$('#related-dialog').close();await openRelatedPage(target);});
 }
 async function refreshHomeRelated(){
  let host=$('#home-related-content');const note=latestHomeNote(),request=++homeRelatedRequest;
  if(view!=='home'||!host||!note)return;
- if(host.dataset.noteId!==note.id){host.closest('.home-connections').outerHTML=homeRelatedSection();bindHomePanels();host=$('#home-related-content');}
+ if(host.dataset.noteId!==note.id){host.closest('.home-connections').outerHTML=homeRelatedSection();bindHomePanels();renderHomeNotePreview();host=$('#home-related-content');}
  try{
   const data=await window.notebook.related(note.id);
   if(request!==homeRelatedRequest||view!=='home'||!host.isConnected||host.dataset.noteId!==note.id||latestHomeNote()?.id!==note.id)return;
-  const results=orderRelated(data.results).slice(0,6),signature=JSON.stringify([note.title,data.status,results.map(item=>[item.id,item.title,item.score])]);
+  const results=orderRelated(data.results).slice(0,4),signature=JSON.stringify([note.title,data.status,results.map(item=>[item.id,item.title,item.score])]);
   if(host.dataset.connections===signature)return;
   renderRelatedGraph(note,{...data,results},host,{openCenter:true});host.dataset.connections=signature;
  }catch{

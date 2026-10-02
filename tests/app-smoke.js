@@ -5,7 +5,7 @@
   const fill = (selector, value, event = 'input') => { const element = document.querySelector(selector); element.value = value; element.dispatchEvent(new Event(event, { bubbles: true })); };
   const current = state => state.notes.find(note => note.id === state.selected[state.activeView]);
   await wait(200);
-  assert(document.querySelector('#daily-body'), 'Página do dia é a home inicial');
+  assert(document.querySelector('#daily-overview')&&!document.querySelector('#daily-body'), 'Página do dia é a home inicial sem campo de anotações');
   assert(document.querySelector('.sidebar [data-view]').dataset.view === 'home', 'Caderninho é o primeiro item');
   await click('[data-view=notes]');
   assert(document.querySelector('#note-body'), 'Editor de notas');

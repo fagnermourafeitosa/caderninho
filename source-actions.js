@@ -49,23 +49,23 @@ window.notebook.onSourceOrigin?.(id=>openSourceOrigin(id));
 
 let sourceRefreshTimer;document.addEventListener('input',event=>{if(view==='notes'&&event.target.closest('#note-body')){clearTimeout(sourceRefreshTimer);sourceRefreshTimer=setTimeout(()=>{if(!sourceDraft)renderSourceMargin();},450);}});
 
-function sourcePartTarget(part){
- const editor=$('#note-body'),line=editor?.querySelector(`[data-block-id="${CSS.escape(part.blockId)}"]`);
+function sourcePartTarget(part,editor=$('#note-body')){
+ const line=editor?.querySelector(`[data-block-id="${CSS.escape(part.blockId)}"]`);
  const span=line&&(part.row===null?editableText(line):line.querySelector(`[data-row="${part.row}"][data-column="${part.column}"]`));
  if(span){const text=span.textContent,index=text.indexOf(part.text);if(text.slice(part.start,part.end)===part.text)return {span,start:part.start,end:part.end};if(index>=0&&index===text.lastIndexOf(part.text))return {span,start:index,end:index+part.text.length};}
  const matches=[...(editor?.querySelectorAll('.line-text')||[])].filter(span=>span.textContent.includes(part.text)&&span.textContent.indexOf(part.text)===span.textContent.lastIndexOf(part.text));
  if(matches.length===1){const span=matches[0],start=span.textContent.indexOf(part.text);return {span,start,end:start+part.text.length};}return null;
 }
-function renderSourceAnchors(){
- const editor=$('#note-body');if(!editor||editor.tagName==='TEXTAREA')return;
- if(!actionsForNote().length&&!editor.querySelector('[data-source-anchor],.source-media-linked'))return;
- const bookmark=editorSelection(),selection=getSelection(),wasInside=selection.rangeCount&&editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode);
+function renderSourceAnchors(editor=$('#note-body'),items=actionsForNote()) {
+ if(!editor||editor.tagName==='TEXTAREA')return;
+ if(!items.length&&!editor.querySelector('[data-source-anchor],.source-media-linked'))return;
+ const bookmark=editor.id==='note-body'?editorSelection():null,selection=getSelection(),wasInside=selection.rangeCount&&editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode);
  editor.querySelectorAll('[data-source-anchor]').forEach(mark=>mark.replaceWith(...mark.childNodes));editor.querySelectorAll('.line-text').forEach(span=>span.normalize());
- const segments=[];for(const item of actionsForNote()){
+ const segments=[];for(const item of items){
   if(item.origin.kind==='cut'){const card=editor.querySelector(`[data-cut-id="${CSS.escape(item.origin.cutId)}"]`);if(card){card.classList.add('source-media-linked');card.dataset.sourceLabel='Ação ligada a esta mídia';}continue;}
-  for(const part of item.origin.parts){const target=sourcePartTarget(part);if(target)segments.push({...target,item});}
+  for(const part of item.origin.parts){const target=sourcePartTarget(part,editor);if(target)segments.push({...target,item});}
  }
- editor.querySelectorAll('.source-media-linked').forEach(card=>{if(!actionsForNote().some(item=>item.origin.cutId===card.dataset.cutId)){card.classList.remove('source-media-linked');delete card.dataset.sourceLabel;}});
+ editor.querySelectorAll('.source-media-linked').forEach(card=>{if(!items.some(item=>item.origin.cutId===card.dataset.cutId)){card.classList.remove('source-media-linked');delete card.dataset.sourceLabel;}});
  // Work from the end so overlapping actions can share a passage without changing text offsets.
  segments.sort((a,b)=>b.start-a.start||b.end-a.end);
  for(const segment of segments){const a=editorTextPoint(segment.span,segment.start),b=editorTextPoint(segment.span,segment.end),range=document.createRange();range.setStart(a.node,a.offset);range.setEnd(b.node,b.offset);const mark=document.createElement('span');mark.dataset.sourceAnchor=segment.item.id;mark.className='source-anchor'+(segment.item.done||segment.item.fired?' source-anchor-done':'');mark.title=(segment.item.kind==='task'?'Tarefa: ':'Lembrete: ')+segment.item.title;mark.append(range.extractContents());range.insertNode(mark);}

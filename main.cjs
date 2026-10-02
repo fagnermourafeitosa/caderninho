@@ -289,6 +289,13 @@ async function runSmoke() {
       console.log('SELECTION_SMOKE_OK',JSON.stringify(selectionResult));
       console.log('EDITOR_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
+    if(process.argv.includes('--home-preview-only')) {
+      media.fetch=async url=>({bytes:Buffer.from('<meta property="og:title" content="Referência">'),type:'text/html',url});
+      await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
+      const result=await win.webContents.executeJavaScript(smokeScript('home-preview-smoke.js'));
+      if(result.errors.length)throw Error(result.errors.join('\n'));
+      console.log('HOME_PREVIEW_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     if(process.argv.includes('--related-only')) {
       await win.webContents.executeJavaScript(smokeScript('related-smoke.js'));
       const docs=require('./related-engine.cjs').documents(store.snapshot());
@@ -297,6 +304,15 @@ async function runSmoke() {
       const result=await win.webContents.executeJavaScript('verifyRelatedSmoke()');
       if(result.errors.length)throw Error(result.errors.join('\n'));
       fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});fs.writeFileSync(path.join(__dirname,'artifacts','relacionados.png'),(await win.webContents.capturePage()).toPNG());
+      await win.webContents.executeJavaScript("$('#related-dialog').close();state.activeView='home';view='home';render();");
+      for(const [width,height] of [[1080,900],[1080,560],[800,560],[640,560]]){
+        win.setSize(width,height);await new Promise(resolve=>setTimeout(resolve,160));
+        const geometry=await win.webContents.executeJavaScript(`(async()=>{await refreshHomeRelated();const host=$('#home-related-content');const fixture=[.95,.8,.65,.5].map((score,i)=>({id:'size-'+i,score,title:'Nota relacionada '+i,type:'notes'}));renderRelatedGraph(latestHomeNote(),{results:fixture,status:'ready'},host,{openCenter:true});const r=host.querySelector('.related-graph').getBoundingClientRect(),svg=host.querySelector('.related-edges').getBoundingClientRect(),nodes=[...host.querySelectorAll('.related-node .small-icon,.related-node span,.related-node strong')].map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});const note=$('.home-latest').getBoundingClientRect();return {width:innerWidth,height:innerHeight,graph:[r.width,r.height],svg:[svg.width,svg.height],nodes,sideBySide:r.left>=note.right&&r.top<=note.top+20}})()`);
+        console.log('HOME_GRAPH_SIZE',JSON.stringify({window:[geometry.width,geometry.height],graph:geometry.graph}));
+        if(Math.abs(geometry.graph[0]-geometry.graph[1])>1||geometry.graph[0]<100)throw Error('Grafo da home foi comprimido');
+        if(!geometry.sideBySide)throw Error('Grafo deixou de ficar ao lado da nota');
+        for(let i=0;i<geometry.nodes.length;i++)for(let j=i+1;j<geometry.nodes.length;j++){const a=geometry.nodes[i],b=geometry.nodes[j];if(a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y)throw Error('Nós do grafo da home se sobrepõem');}
+      }
       console.log('RELATED_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
     if(process.argv.includes('--notebooks-only')) {
@@ -388,7 +404,7 @@ async function runSmoke() {
     const home = await win.webContents.executeJavaScript(smokeScript('home-smoke.js'));
     if (home.errors.length) throw new Error(home.errors.join('\n'));
     const homeStore = new Store(app.getPath('userData'));
-    if (homeStore.snapshot().daily.body !== home.body) throw new Error('Anotações do dia não persistiram');
+    if (!homeStore.snapshot().daily.overview.tasks.find(task=>task.id===home.taskId)?.done) throw new Error('Conclusão na home não persistiu');
     homeStore.close();
     await new Promise(resolve => setTimeout(resolve, 100));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());
@@ -398,7 +414,7 @@ async function runSmoke() {
     await win.webContents.executeJavaScript("(async () => { state = await window.notebook.state(); view = 'home'; render(); })()");
     await win.webContents.executeJavaScript(`document.querySelector('#daily-select').value=${JSON.stringify(home.day)};document.querySelector('#daily-select').dispatchEvent(new Event('change'));`);
     await new Promise(resolve => setTimeout(resolve, 100));
-    if (!await win.webContents.executeJavaScript(`document.querySelector('#daily-body').readOnly && document.querySelector('#daily-body').value === ${JSON.stringify(home.body)}`)) throw new Error('Página anterior não foi preservada para consulta');
+    if (!await win.webContents.executeJavaScript(`state.daily.day===${JSON.stringify(home.day)}&&!document.querySelector('#daily-body')&&!document.querySelector('.home-connections')&&[...document.querySelectorAll('[data-home-task]')].every(input=>input.disabled)`)) throw new Error('Página anterior não foi preservada para consulta');
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'pagina-anterior.png'), (await win.webContents.capturePage()).toPNG());
     store.now=actualNow; observedDay=store.dayKey();
     const notebooks=await win.webContents.executeJavaScript(smokeScript('notebook-smoke.js'));

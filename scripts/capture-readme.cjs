@@ -46,7 +46,6 @@ app.whenReady().then(async()=>{
   for(const [day,hour,title] of [[1,14,'Revisar o planejamento'],[1,18,'Pausa para caminhar'],[3,10,'Café com a Ana'],[7,15,'Consulta de rotina'],[15,9,'Revisar as metas do mês'],[22,16,'Separar os documentos']]){
     const id=create('reminders',title,'Um lembrete para cuidar do que importa.');command('schedule:activate',{id,due:`2026-10-${String(day).padStart(2,'0')}T${String(hour).padStart(2,'0')}:00:00-03:00`});
   }
-  command('day:update',{day:'2026-10-01',body:'Hoje, quero terminar o essencial e deixar espaço para uma boa ideia.\n\nUma coisa de cada vez também é progresso.'});
   command('view:select',{view:'home'});
   related=new RelatedService(store,media,{onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');}});
   related.cacheDir=path.join(root,'artifacts','embedding-cache');
@@ -112,7 +111,8 @@ app.whenReady().then(async()=>{
   win.setSize(1080,900);
   await capture('relacionados.png',"(async()=>{document.querySelector('#related-open').click();await refreshRelated();})()");
   win.setSize(1080,1100);
-  command('day:update',{day:'2026-10-01',body:'Hoje escolhi a luminária do meu canto de trabalho.\n\nQuero comparar os orçamentos sem pressa e guardar as referências da viagem. Um projeto de cada vez.'});
+  store.now=()=>new Date('2026-10-01T13:05:00-03:00').getTime();
+  command('note:update',{id:collage,body:store.snapshot().notes.find(note=>note.id===collage).body});
   await capture('pagina-do-dia.png',"(async()=>{document.querySelector('#related-dialog').close();state=await window.notebook.action('view:select',{view:'home'});view='home';render();})()");
   if(process.argv.includes('--review-sections')){
     const output=path.join(root,'artifacts');fs.mkdirSync(output,{recursive:true});
