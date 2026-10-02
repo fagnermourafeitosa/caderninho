@@ -36,7 +36,7 @@
 
 ## User Directives
 1. **[2026-10-01] Daily overview and temporal records**
-   Do instead: open on Caderninho with pending tasks, today's completions/reminders, recent notes and daily writing; preserve previous snapshots read-only. Store creation/update/check/uncheck/deletion events, clear deleted_at on restore, keep unknown legacy dates null and show autosaving as inline text.
+   Do instead: open on Caderninho with the latest updated note from the active notebook and its clickable related graph above the daily panels; show this live section only for today. Keep pending tasks, today's completions/reminders, recent notes and daily writing; preserve previous snapshots read-only. Store creation/update/check/uncheck/deletion events, clear deleted_at on restore, keep unknown legacy dates null and show autosaving as inline text.
 
 2. **[2026-10-01] Reference style and motion**
    Do instead: use illustrated vintage stationery with unruled writing pages, a narrow vertical icon menu, paper tabs instead of a face/arms (no top ribbon), and an upward page flip when changing notes. Maximize to the available screen height, centered at up to 1200px wide; restore size/position and support top double-click. Provide edge/corner resize plus a visible right grip.

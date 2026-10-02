@@ -49,9 +49,9 @@ A referência fica junto da ideia que ela despertou. E, quando surgir algo para 
 
 ## O dia tem uma página própria
 
-Tarefas das suas listas e das margens das notas se encontram com os lembretes e as páginas recentes. Você acompanha o dia sem precisar abrir cada projeto para descobrir o que ficou pendente.
+No topo, retome a última nota do caderno e explore as ideias ligadas a ela em um grafo. Logo abaixo, tarefas das suas listas e das margens das notas se encontram com os lembretes e as páginas recentes. Você acompanha o dia sem precisar abrir cada projeto para descobrir o que ficou pendente.
 
-![Página do dia reunindo tarefas das listas e da margem de uma nota, lembretes e um registro diário](docs/images/pagina-do-dia.png)
+![Página do dia com a última nota e seu grafo de conexões no topo, seguido das tarefas e lembretes](docs/images/pagina-do-dia.png)
 
 Há espaço para escrever sobre o dia. Amanhã, a página de hoje continua disponível para consulta — suas anotações e o retrato daquele momento ficam guardados.
 

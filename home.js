@@ -1,3 +1,13 @@
+function latestHomeNote() {
+  return state.notes.map((note,index)=>({note,index})).filter(({note})=>note.type==='notes'&&!note.trashed&&note.notebookId===state.activeNotebook).sort((a,b)=>new Date(b.note.updated||b.note.created||0)-new Date(a.note.updated||a.note.created||0)||b.index-a.index)[0]?.note;
+}
+function homeRelatedSection() {
+  if(state.daily.day!==state.daily.today)return '';
+  const note=latestHomeNote();
+  if(!note)return '';
+  const excerpt=(note.body||'').replace(/\s+/g,' ').trim();
+  return `<section class="daily-section home-connections" aria-label="Última nota e suas conexões"><div class="daily-section-heading"><h2>${relatedGraphIcon}<span>Ideias por perto</span></h2><span>Seu caderno em conexão</span></div><div class="home-connections-layout"><div class="home-latest"><small>Última nota</small><button type="button" data-home-note="${escape(note.id)}"><h3>${escape(note.title||'Sem título')}</h3><p>${escape(excerpt.slice(0,240)||'Uma página esperando suas ideias.')}${excerpt.length>240?'…':''}</p><span class="daily-link">${actionLabel('open','Continuar nesta nota')}</span></button></div><div id="home-related-content" data-note-id="${escape(note.id)}"><p class="daily-empty" role="status">À procura de conexões…</p></div></div></section>`;
+}
 function dayLabel(day, long = false) {
   return new Intl.DateTimeFormat('pt-BR', long ? { weekday: 'long', day: 'numeric', month: 'long' } : { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(day + 'T12:00:00'));
 }
@@ -24,7 +34,7 @@ function refreshHomePanels() {
 }
 function renderHome() {
   const daily = state.daily, history = daily.day !== daily.today, index = daily.days.indexOf(daily.day);
-  $('#page-content').innerHTML = `<div class="view-toolbar daily-toolbar"><label class="daily-picker">${icon('home')}<span>Página</span> <select id="daily-select" aria-label="Consultar páginas anteriores">${daily.days.map(day => `<option value="${day}" ${day === daily.day ? 'selected' : ''}>${day === daily.today ? 'Hoje · ' : ''}${dayLabel(day)}</option>`).join('')}</select></label><span class="toolbar-right">${history ? `<button id="daily-today">${icon('home')}<span>Voltar a hoje</span></button>` : ''}<button id="new-note" class="add-note toolbar-action" title="Nova nota" aria-label="Nova nota">${icon('notes')}<span>Nova nota</span></button></span></div><div class="daily-heading"><h1>${history ? 'Página anterior' : 'Página do dia'}</h1><span class="daily-date">${escape(dayLabel(daily.day, true))}</span></div><p id="daily-summary" class="daily-summary"></p><div id="daily-overview" class="daily-overview"><div id="daily-panels"></div><section class="daily-section daily-writing"><div class="daily-section-heading"><h2>${icon('notes')}<span>Anotações ${history ? 'daquele dia' : 'de hoje'}</span></h2>${history ? '<span>Guardadas para consulta</span>' : '<span>Salvas automaticamente</span>'}</div><textarea id="daily-body" class="note-body daily-body" aria-label="Anotações da página do dia" placeholder="Um espaço livre para o seu dia…" maxlength="200000" ${history ? 'readonly' : ''}>${escape(daily.body)}</textarea></section></div><div class="daily-bottom"><span>${history ? 'Um retrato do que ficou neste dia.' : 'Pendentes de todas as listas + concluídas hoje.'}</span><div class="note-pager"><button id="daily-prev" aria-label="Dia anterior" ${index >= daily.days.length - 1 ? 'disabled' : ''}>${icon('chevron')}</button><button id="daily-next" aria-label="Dia seguinte" ${index === 0 ? 'disabled' : ''}>${icon('chevron')}</button></div></div>`;
+  $('#page-content').innerHTML = `<div class="view-toolbar daily-toolbar"><label class="daily-picker">${icon('home')}<span>Página</span> <select id="daily-select" aria-label="Consultar páginas anteriores">${daily.days.map(day => `<option value="${day}" ${day === daily.day ? 'selected' : ''}>${day === daily.today ? 'Hoje · ' : ''}${dayLabel(day)}</option>`).join('')}</select></label><span class="toolbar-right">${history ? `<button id="daily-today">${icon('home')}<span>Voltar a hoje</span></button>` : ''}<button id="new-note" class="add-note toolbar-action" title="Nova nota" aria-label="Nova nota">${icon('notes')}<span>Nova nota</span></button></span></div><div class="daily-heading"><h1>${history ? 'Página anterior' : 'Página do dia'}</h1><span class="daily-date">${escape(dayLabel(daily.day, true))}</span></div><p id="daily-summary" class="daily-summary"></p><div id="daily-overview" class="daily-overview">${homeRelatedSection()}<div id="daily-panels"></div><section class="daily-section daily-writing"><div class="daily-section-heading"><h2>${icon('notes')}<span>Anotações ${history ? 'daquele dia' : 'de hoje'}</span></h2>${history ? '<span>Guardadas para consulta</span>' : '<span>Salvas automaticamente</span>'}</div><textarea id="daily-body" class="note-body daily-body" aria-label="Anotações da página do dia" placeholder="Um espaço livre para o seu dia…" maxlength="200000" ${history ? 'readonly' : ''}>${escape(daily.body)}</textarea></section></div><div class="daily-bottom"><span>${history ? 'Um retrato do que ficou neste dia.' : 'Pendentes de todas as listas + concluídas hoje.'}</span><div class="note-pager"><button id="daily-prev" aria-label="Dia anterior" ${index >= daily.days.length - 1 ? 'disabled' : ''}>${icon('chevron')}</button><button id="daily-next" aria-label="Dia seguinte" ${index === 0 ? 'disabled' : ''}>${icon('chevron')}</button></div></div>`;
   $('#page-number').textContent = daily.day.slice(8);
   $('#new-note').onclick = createNote;
   const select = async day => { if (await action('day:select', { day })) renderHome(); };
@@ -32,7 +42,7 @@ function renderHome() {
   $('#daily-prev').onclick = () => select(daily.days[index + 1]); $('#daily-next').onclick = () => select(daily.days[index - 1]);
   if ($('#daily-today')) $('#daily-today').onclick = () => select(daily.today);
   $('#daily-body').oninput = event => action('day:update', { day: daily.day, body: event.target.value });
-  refreshHomePanels(); updateTemporalLabels();
+  refreshHomePanels(); updateTemporalLabels(); refreshHomeRelated();
 }
 window.notebook.onDayUpdated(next => {
   state = next;
