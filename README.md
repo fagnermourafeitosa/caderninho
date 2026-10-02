@@ -1,146 +1,168 @@
 # Caderninho
 
-A little desktop notebook for ideas, checklists, reminders, and scraps worth keeping. Caderninho pairs cream paper, a spiral binding, and illustrated paper tabs with automatic local saving.
+Caderninho é um aplicativo de desktop para organizar **notas, listas de tarefas, lembretes, imagens e links em cadernos**. Tudo é salvo automaticamente no seu computador. **Seus dados não são enviados para a nuvem: não há conta, sincronização nem servidor para guardar suas páginas.**
 
-The app currently uses **Portuguese labels**. This guide includes those labels so you can find each control.
+Você pode escrever, consultar suas páginas e ver as mídias já guardadas sem internet. A única função que consulta a internet é a prévia de um link: ela acessa o site indicado para ler seu título, descrição e imagem. O conteúdo das suas notas não é enviado nessa consulta.
 
-## Open your notebook
+## Comece por aqui
 
-Open **Caderninho.app** in Finder. If you are using the copy built in this project, it is in `dist/Caderninho-darwin-arm64/`.
+Abra **Caderninho.app**. A primeira tela, **Caderninho**, reúne suas tarefas pendentes, lembretes de hoje, últimas notas e um espaço para anotar o que aconteceu no dia.
 
-The notebook opens on **Caderninho**, your daily overview. Choose **Notas** (Notes), then **+ Nova nota** (New note), to start a page. Give it a title and start writing. There is no Save button: **Salvando automaticamente…** means your changes are being saved; **Salvo às…** confirms when saving finished.
+Para escrever, abra **Notas** e clique em **+ Nova nota**. Dê um título e comece. Não há botão Salvar: **Salvando automaticamente…** mostra o salvamento em andamento; **Salvo às…** confirma que seus dados foram guardados localmente.
 
-Use **Suas notas** (Your notes) to browse or search your pages. The arrows at the bottom turn to the previous or next page. Each section has its own list and search.
+## Cadernos
 
-## Five places for your pages
+**Cadernos**, o segundo item do menu, é onde você cria, abre, edita e remove cadernos. Cada um tem nome, descrição opcional e uma cor escolhida na paleta.
 
-| Menu | What it holds |
+Sempre existe pelo menos um caderno. Na primeira abertura, **Meu caderno** recebe suas páginas existentes. Toda nota, lista de tarefas ou lembrete pertence a um caderno, e novas páginas são criadas no caderno selecionado.
+
+As abas à direita permitem trocar de caderno. Ao passar o mouse, a aba abre e revela o nome na vertical. A aba selecionada fica aberta, indicando em qual caderno você está. A última aba, **+**, abre o formulário de criação.
+
+Na própria página, o campo **Caderno** permite mover uma nota, lista ou lembrete para outro caderno. Ao remover um caderno, você escolhe outro para receber todas as páginas, inclusive as da lixeira. Nenhuma página é apagada por essa operação, e o último caderno não pode ser removido.
+
+## O que você pode guardar
+
+| Seção | Função |
 | --- | --- |
-| **Caderninho** — Daily page | Today's tasks and reminders, recent notes, and room for daily writing. |
-| **Notas** — Notes | Freeform notes, inline checkboxes, images, and link cards. |
-| **Tarefas** — Tasks | Separate task lists, each with its own title, dates, and checked or unchecked items. |
-| **Lembretes** — Reminders | Notes with a date and time for a sound alert. |
-| **Lixeira** — Trash | Removed pages, individual tasks, and scraps, grouped by type. |
+| **Caderninho** | Visão do dia, reunindo tarefas, lembretes e últimas notas de todos os cadernos. |
+| **Cadernos** | Criar, editar, abrir e remover cadernos. |
+| **Notas** | Texto livre, categorias, checkboxes, imagens e cartões de links. |
+| **Tarefas** | Várias listas independentes, com título, datas e itens marcados ou pendentes. |
+| **Lembretes** | Notas com agendamento de dia e hora para um alerta sonoro. |
+| **Lixeira** | Páginas, tarefas e mídias removidas, separadas por tipo e recuperáveis. |
 
-### Your daily page
+**Notas**, **Tarefas** e o calendário de **Lembretes** mostram o caderno selecionado. A visão do dia e a lixeira reúnem todos os cadernos. Os alertas continuam funcionando mesmo quando você está em outro caderno.
 
-**Caderninho** brings together unfinished tasks from your lists and notes, tasks completed today, today's scheduled reminders, and your latest notes. Check off an item here to update its original page, or click a page title to open it.
+### Página do dia
 
-Use the writing area for thoughts about the day. Each day has its own automatically saved space. When the date changes, the previous page stays available in the date selector, with its saved overview and writing. Previous days are read-only; **Hoje** (Today) returns to the current page.
+Veja tarefas pendentes, itens concluídos hoje, alertas do dia e últimas notas. Marcar uma tarefa aqui atualiza sua página original. Clique em um título para abrir a página correspondente.
 
-### Dates and saving
+Cada dia tem seu próprio espaço de anotações. No dia seguinte, a página anterior continua disponível no seletor de datas, com as anotações e o resumo guardados. Dias anteriores são somente para consulta; escolha **Hoje** para voltar ao dia atual.
 
-Pages display their creation and last update times. Tasks keep timestamps for checking and unchecking, and removed items keep their deletion time until restored. Quick drafts keep their own creation and update dates even before they belong to a note. Saving a draft as a new note preserves its creation time.
+### Categorias
 
-Dates use your computer's local time zone. Older records may show **não registrado** (not recorded) for dates that were never stored by earlier versions.
+Abaixo do título, clique em **+ Categoria** para usar uma categoria cadastrada ou criar outra. A mesma categoria pode ser usada em vários cadernos e tipos de página.
 
-### Task lists
+Digite `#trabalho` ou `#ideias` no texto de uma nota para criar uma pill e associar a categoria à página. Termine a palavra com espaço ou pontuação, ou saia do editor, para registrá-la. Hashtags em itens de tarefas também associam categorias à lista.
 
-In **Tarefas**, click **+ Nova lista** (New list). Add a title, then type a task in the field at the bottom and press **Enter** or **+ Adicionar** (Add). You can edit a task directly and check it off when finished.
+**Backspace na pill remove a categoria inteira do texto**, mantendo as palavras ao redor. Desfazer recupera a pill e sua associação. O texto guardado mantém a hashtag original, permitindo copiar para outros aplicativos.
 
-Use **Suas listas** (Your lists) to switch between lists. Each list keeps its items, completion states, and creation and update dates. The small squares at the top show your progress.
+O **×** no badge remove uma associação feita pelo seletor. Se a categoria também aparece no texto, ela continua associada até você remover a hashtag. As categorias ficam cadastradas para reutilização.
 
-### Reminders
+Nomes aceitam letras, acentos, números, hífens e sublinhados; espaços viram hífens. Hashtags escapadas, dentro de código ou em endereços de links não criam categorias.
 
-**Lembretes** opens a monthly calendar. Use the arrows to browse months and **Hoje** (Today) to return to the current month. Bullets mark days with scheduled alerts, including alerts attached to regular notes. Select a day to see its reminders, then click one to open the original page. Unscheduled reminders remain available below the calendar.
+### Listas de tarefas
 
-Click **+ Novo lembrete** (New reminder) to create a page for the selected day. Write your note and choose **Dia e horário** (Date and time). Click **Agendar** (Schedule) to activate the alert. **Testar som** (Test sound) lets you hear it first. **Calendário** returns to the monthly view.
+Em **Tarefas**, clique em **+ Nova lista**. Dê um título, escreva um item no campo inferior e pressione **Enter** ou **+ Adicionar**. Você pode editar os itens e marcá-los conforme conclui.
 
-Changing the date or time cancels the previous schedule until you click **Agendar** again. Use **Cancelar alerta** (Cancel alert) to keep the page without its alarm.
+Use **Suas listas** para trocar de lista ou buscar pelo conteúdo. Cada lista mantém seus próprios itens, estados de conclusão e datas. O indicador de progresso mostra quantos itens foram concluídos.
 
-**Keep Caderninho running for alerts to sound; minimizing it is fine.** Closing the notebook quits the app. If an alert becomes due while the app is closed or the computer is asleep, it fires when the app reopens or the computer wakes. Alerts sound once, use your system volume, and also show an in-app message and a system notification when available. Pages in Trash do not trigger alerts.
+### Lembretes e calendário
 
-## The smart margin
+**Lembretes** abre o calendário mensal do caderno selecionado. As setas navegam pelos meses; **Hoje** volta ao mês atual. Os pontos indicam dias com alertas agendados, inclusive os associados às notas comuns. Selecione um dia e clique em um lembrete para abrir a página original.
 
-Turn a date in a regular note into a reminder without leaving the page. Write a supported **Portuguese** phrase such as:
+Clique em **+ Novo lembrete**, escreva a nota, escolha **Dia e horário** e clique em **Agendar**. **Testar som** permite ouvir o alerta. **Cancelar alerta** mantém a página sem seu agendamento.
 
-- `amanhã às 14h` — tomorrow at 2 p.m.
-- `hoje às 18h30` — today at 6:30 p.m.
-- `depois de amanhã às 9h` — the day after tomorrow at 9 a.m.
-- `05/10/2027 às 14:30` — October 5, 2027, at 2:30 p.m. Dates use day/month/year.
+Alterar a data ou hora desativa o agendamento anterior até você clicar em **Agendar** novamente.
 
-A small **Agendar** stamp offers the interpreted date and time. Check it before clicking: typing alone never activates an alarm. Each note can have one scheduled alert. **Reagendar** (Reschedule) replaces it, and the × beside the scheduled time cancels it.
+**O aplicativo precisa estar aberto para tocar; pode ficar minimizado.** Fechar a janela encerra o app. Se o horário passar com o aplicativo fechado ou o computador dormindo, o alerta dispara quando o app abrir ou o computador acordar. Cada alerta toca uma vez, usa o volume do sistema e mostra uma mensagem no app e uma notificação do sistema, quando disponível. Páginas na lixeira não disparam alertas.
 
-The time follows your computer's local time zone. After scheduling, the date is fixed; “tomorrow” does not shift each day. The same alert rules apply as in **Lembretes**. English date phrases are not currently recognized.
+## Atalhos dentro da nota
 
-### Checkboxes inside notes
+Escreva uma data como `amanhã às 14h`, `hoje às 18h30`, `depois de amanhã às 9h` ou `05/10/2027 às 14:30`. Um carimbo **Agendar** oferece o horário interpretado. Confira a data antes de clicar: escrever a frase sozinho não ativa o alerta.
 
-Start a line with `[]` or `[ ]` to turn it into a checkbox. Click the square to mark it done and strike through its text.
+Cada nota pode ter um alerta. **Reagendar** substitui o horário; o **×** ao lado do agendamento cancela. As datas seguem o fuso horário do computador e, após agendadas, ficam fixas.
 
-- **Enter** creates the next checkbox.
-- **Enter** on an empty checkbox returns to ordinary text.
-- **Backspace** at the start of an item removes its checkbox and keeps its text.
-- Pasting several lines beginning with `[ ]` creates several items.
-- Write `\[]` if you want the brackets to stay literal.
+Comece uma linha com `[]` ou `[ ]` para criar um checkbox dentro da nota:
 
-These items belong to the note; they do not create a separate list in **Tarefas**.
+- Clique para marcar ou desmarcar.
+- **Enter** cria o próximo checkbox.
+- **Enter** em um item vazio volta ao texto normal.
+- **Backspace** no começo do item remove o checkbox e mantém o texto.
+- Cole várias linhas com `[ ]` para criar vários itens.
+- Use `\[]` para manter os colchetes como texto.
 
-## A scrapbook on the page
+Esses itens pertencem à nota e não criam uma lista separada em **Tarefas**.
 
-In **Notas**, click **+ Adicionar mídia** (Add media), paste an image or a single web link into the note body, or drag image files and links onto the page. Supported images are **PNG, JPEG, and WebP**, up to **20 MB** each.
+## Imagens e links
 
-Scraps look like pieces of paper held with tape. Drag their **Arraste** (Drag) handle to choose a paragraph and the left or right side. Use **− / +** to change their width. Text wraps around smaller scraps and continues below larger ones. Placement follows paragraphs rather than a freeform canvas.
+Em **Notas**, use **+ Adicionar mídia**, cole uma imagem ou um link no texto, ou arraste arquivos de imagem e links para a página. São aceitas imagens **PNG, JPEG e WebP**, de até **20 MB** cada.
 
-Link cards capture a site's title, description, and preview image from its page metadata. Creating a preview needs an internet connection; once captured, the card and its image remain available offline. Clicking the card opens the original link in your browser.
+Use a alça **Arraste** para posicionar a mídia junto a um parágrafo, à esquerda ou à direita. Os botões **− / +** ajustam a largura; o texto acompanha a posição da mídia.
 
-Some sites provide no useful metadata or require a login. Those links still appear as cards you can open, but may have no preview. Cards are saved snapshots, not live webpages, and do not refresh automatically. Text-excerpt cards are not currently available.
+Cartões de links guardam o título, descrição e imagem obtidos das metatags do site. Depois de criada, a prévia fica disponível offline. Clicar no cartão abre o endereço no navegador. Sites sem metadados ou que exigem login podem aparecer sem prévia. Os cartões não se atualizam automaticamente.
 
-## Capture an idea without switching apps
+As imagens importadas são copiadas para a pasta de dados do aplicativo. Você pode mover ou apagar o arquivo original depois de importá-lo.
 
-With Caderninho running, press **⌘ Shift Space** on Mac or **Ctrl Shift Space** on other systems to open **Rascunho instantâneo** (Quick draft), a small window above your current app. You can also use **Rascunho** (Draft) at the top of the notebook or **Caderno → Rascunho instantâneo** in the menu.
+## Rascunho instantâneo
 
-Write your idea, optionally add a title, and choose **Nova nota** (New note) or an existing note. Click **Guardar no caderno** (Keep in notebook), or press **⌘/Ctrl Enter**, to save it as a new page or append it to the selected page.
+Com o app aberto, pressione **⌘ Shift Espaço** no Mac ou **Ctrl Shift Espaço** nos demais sistemas para abrir uma pequena janela de captura. Você também pode usar **Rascunho** no topo do app ou o menu **Caderno → Rascunho instantâneo**.
 
-The unfinished draft saves automatically. Closing its window or pressing **Escape** keeps it for later. After saving, **Abrir a nota no caderno** (Open the note in the notebook) takes you to that page.
+Escreva, escolha **Nova nota** ou uma nota existente e clique em **Guardar no caderno**, ou pressione **⌘/Ctrl Enter**. Uma nova nota vai para o caderno em que o rascunho começou; ao escolher uma nota existente, o conteúdo é acrescentado naquela página.
 
-If another app owns the shortcut, use the notebook's Draft button instead.
+O rascunho salva automaticamente mesmo antes de virar uma nota. Fechar a janela ou pressionar **Escape** mantém o texto para depois. Se outro aplicativo estiver usando o atalho global, use o botão **Rascunho**.
 
-## Undo and keyboard shortcuts
+## Teclado e janela
 
-| Action | Shortcut |
+| Ação | Atalho |
 | --- | --- |
-| Undo | **Ctrl Z** or **⌘ Z** |
-| Redo | **Ctrl/⌘ Shift Z**, or **Ctrl Y** |
-| New page in the current section | **Ctrl/⌘ N** |
-| Search pages in the current section | **Ctrl/⌘ F** |
-| Open Quick draft | **⌘ Shift Space** on Mac; **Ctrl Shift Space** elsewhere |
-| Keep a Quick draft in the notebook | **Ctrl/⌘ Enter** |
-| Close the page list or hide Quick draft | **Escape** |
+| Desfazer | **Ctrl Z** ou **⌘ Z** |
+| Refazer | **Ctrl/⌘ Shift Z** ou **Ctrl Y** |
+| Nova página na seção atual | **Ctrl/⌘ N** |
+| Buscar páginas na seção atual | **Ctrl/⌘ F** |
+| Abrir rascunho | **⌘ Shift Espaço** no Mac; **Ctrl Shift Espaço** nos demais sistemas |
+| Guardar rascunho | **Ctrl/⌘ Enter** |
+| Fechar lista de páginas ou ocultar rascunho | **Escape** |
 
-For **Notas**, undo history covers the title, text, and inline checkboxes separately for each note during the current app session. It resets when you quit or when Quick draft appends content to that page. Scrap changes and alert scheduling are not part of that history. Other text fields use their usual text-editing undo.
+Nas notas, o histórico de desfazer inclui título, texto, pills e checkboxes, separado por página durante a sessão. Ele reinicia quando você fecha o app ou quando um rascunho acrescenta conteúdo à página. Mover mídias e agendar alertas não faz parte desse histórico.
 
-## Make the notebook comfortable
+Arraste uma área não editável do caderno para mover a janela. Use as bordas para redimensionar; a marca na borda direita ajusta a largura. O botão vermelho fecha, o amarelo minimiza e o verde amplia a janela à altura disponível, com largura de até 1.200 pixels. Um clique duplo no topo também amplia ou restaura.
 
-Drag a noninteractive part of the notebook's top, paper, or sidebar to move the window. Drag an edge or corner to resize it; the marked grip on the right adjusts its width.
+A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fica salva.
 
-The red button closes the app, the yellow button minimizes it, and the green button expands the notebook to the screen's available height, centered with a width of up to 1,200 pixels. Double-click the top of the notebook to expand it too. Click green or double-click the top again to restore the previous size and position.
+## Datas e lixeira
 
-Click the folded paper tab on the left edge to collapse or reopen the sidebar. Caderninho remembers that preference.
+Páginas mostram quando foram criadas e atualizadas. Tarefas registram marcações e desmarcações; itens removidos mantêm a data de exclusão até serem restaurados. Rascunhos guardam suas próprias datas, e uma nova nota criada a partir deles preserva a data original. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
 
-## Restore something you removed
+**Mover para a lixeira** mantém uma página recuperável. Itens de tarefas e mídias também podem ser restaurados em **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado novamente.
 
-**Mover para a lixeira** (Move to Trash) keeps a page recoverable. Individual task items and scraps also go to Trash when removed.
+**Excluir definitivamente** pede confirmação e apaga o item permanentemente. Imagens continuam no disco enquanto outra página ou mídia recuperável ainda as utiliza.
 
-Open **Lixeira**, choose **Notas**, **Tarefas**, or **Lembretes**, and click **Restaurar** (Restore). A restored page keeps its content, task states, and scraps. A restored overdue reminder needs to be scheduled again.
+## Seus dados ficam no seu computador
 
-**Excluir definitivamente** (Delete permanently) asks for confirmation and permanently removes the selected item. A scrap's saved image stays on disk while another page or recoverable scrap still uses it.
+O aplicativo usa **SQLite** para guardar notas, cadernos, listas, categorias, lembretes e rascunhos. As imagens ficam em uma pasta local de mídia. Não existe conta, envio de páginas para servidor ou sincronização com a nuvem.
 
-## Your data and backups
-
-Notes, task lists, reminders, and drafts save locally in SQLite. Images are copied into Caderninho's own media folder, so you can move or delete the original image file after importing it. There is no cloud sync or account sign-in. Writing and viewing saved pages works offline; fetching a new link preview contacts the linked website.
-
-On Mac, your data is in:
+No Mac, os dados ficam em:
 
 ```text
 ~/Library/Application Support/caderninho/
 ```
 
-To make a complete backup:
+Para fazer um backup completo:
 
-1. Wait for **Salvo às…**, then close Caderninho.
-2. Copy the entire `caderninho` data folder to your backup location.
-3. Keep both **`notebook.sqlite`** and the **`media`** folder together. The database alone does not include your images.
+1. Aguarde **Salvo às…** e feche o aplicativo.
+2. Copie a pasta `caderninho` inteira para o local do backup.
+3. Mantenha `notebook.sqlite` e a pasta `media` juntos: o banco sozinho não contém as imagens.
 
-To restore a backup, close the app first, keep a copy of your current data folder, and replace it with the backed-up folder before reopening Caderninho.
+Para restaurar, feche o app, guarde uma cópia da pasta atual e substitua-a pela pasta do backup antes de abrir novamente.
 
-If you see **Falha ao salvar** (Save failed), check available disk space and access to the data folder before closing the app. Do not delete database support files while it is running.
+Se aparecer **Falha ao salvar**, confira o espaço livre e as permissões da pasta antes de fechar o aplicativo. Não remova arquivos auxiliares do banco enquanto o app estiver aberto.
+
+## Gerar o aplicativo no Mac
+
+No diretório do projeto, instale as dependências e gere o pacote:
+
+```sh
+npm install
+npm run package
+```
+
+Em um Mac com Apple Silicon, o aplicativo fica em `dist/Caderninho-darwin-arm64/Caderninho.app`. Para instalar na sua pasta de aplicativos:
+
+```sh
+mkdir -p ~/Applications
+ditto dist/Caderninho-darwin-arm64/Caderninho.app ~/Applications/Caderninho.app
+open ~/Applications/Caderninho.app
+```
+
+Use `npm start` para executar pelo projeto. Atualizar o aplicativo preserva os dados da pasta local.

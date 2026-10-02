@@ -10,7 +10,7 @@
   await click('[data-view=notes]');
   assert(document.querySelector('#note-body'), 'Editor de notas');
   assert(!document.querySelector('#themes-open') && !document.querySelector('#pin'), 'Temas e Fixar removidos');
-  assert(document.querySelectorAll('.sidebar [data-view]').length === 5, 'Cinco seções do menu');
+  assert(document.querySelectorAll('.sidebar [data-view]').length === 6, 'Seis seções do menu');
   assert(!document.querySelector('.face') && !document.querySelector('.arm'), 'Área de escrita livre do mascote');
   assert(!document.querySelector('.ribbon') && document.querySelector('.paper-tabs'), 'Marcador do topo removido');
   const widthBeforeFold = document.querySelector('#note-body').getBoundingClientRect().width;
@@ -48,13 +48,14 @@
   window.notebook.move('move', { x: Number.MAX_VALUE, y: -Number.MAX_VALUE });
   window.notebook.move('end'); await wait(100);
   assert((await window.notebook.window('state')).bounds.width === originalWindow.bounds.width, 'Coordenadas inválidas não interrompem o app');
+  const beforeMaximize = await window.notebook.window('state');
   const expandedWindow = await window.notebook.window('maximize');
   await wait(180);
   assert(expandedWindow.bounds.width === Math.min(1200, expandedWindow.workArea.width), 'Maximizar amplia largura com limite');
   assert(expandedWindow.bounds.height === expandedWindow.workArea.height && expandedWindow.bounds.y === expandedWindow.workArea.y, 'Maximizar usa altura disponível');
   const restoredWindow = await window.notebook.window('maximize');
   assert(restoredWindow.bounds.height === originalWindow.bounds.height, 'Restaurar altura anterior');
-  assert(restoredWindow.bounds.width === originalWindow.bounds.width && restoredWindow.bounds.x === originalWindow.bounds.x, 'Restaurar recupera largura e posição');
+  assert(restoredWindow.bounds.width === beforeMaximize.bounds.width && restoredWindow.bounds.x === beforeMaximize.bounds.x, 'Restaurar recupera largura e posição');
   const header = document.querySelector('.book-header');
   header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
   await wait(100);

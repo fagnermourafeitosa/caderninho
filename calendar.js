@@ -8,7 +8,7 @@ function resetReminderCalendar() {
 resetReminderCalendar();
 
 function calendarReminders() {
-  return state.notes.filter(note => !note.trashed && note.scheduledAt && (note.enabled || note.fired))
+  return state.notes.filter(note => !note.trashed && note.notebookId===state.activeNotebook && note.scheduledAt && (note.enabled || note.fired))
     .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
 }
 function reminderCalendarRows(notes) {
@@ -31,7 +31,7 @@ function renderReminderCalendar() {
     return `<button class="calendar-day ${date.getMonth() !== month ? 'outside-month' : ''} ${day === today ? 'is-today' : ''} ${selected ? 'selected' : ''}" data-calendar-day="${day}" aria-pressed="${selected}" ${day === today ? 'aria-current="date"' : ''} aria-label="${escape(dayLabel(day))}, ${reminders.length} ${reminders.length === 1 ? 'lembrete' : 'lembretes'}"><span class="calendar-number">${date.getDate()}</span><span class="calendar-dots" aria-hidden="true">${reminders.slice(0, 4).map(note => `<i class="${note.fired ? 'fired' : ''}"></i>`).join('')}${reminders.length > 4 ? `<small>+${reminders.length - 4}</small>` : ''}</span>${reminders.length ? `<small class="calendar-count">${reminders.length} ${reminders.length === 1 ? 'lembrete' : 'lembretes'}</small>` : ''}</button>`;
   }).join('');
   const selected = byDay.get(calendarDay) || [];
-  const drafts = state.notes.filter(note => note.type === 'reminders' && !note.trashed && !note.enabled && !note.fired);
+  const drafts = state.notes.filter(note => note.type === 'reminders' && !note.trashed && note.notebookId===state.activeNotebook && !note.enabled && !note.fired);
   $('#page-content').innerHTML = `<div class="view-toolbar"><button id="notes-open">☰ Seus lembretes</button><button id="new-note" class="add-note">+ Novo lembrete</button></div><div class="calendar-heading"><div><h1>Lembretes</h1><p>Escolha um dia para ver seus alertas.</p></div><div class="calendar-navigation"><button id="calendar-prev" aria-label="Mês anterior">‹</button><h2 id="calendar-month">${escape(monthLabel)}</h2><button id="calendar-next" aria-label="Próximo mês">›</button><button id="calendar-today">Hoje</button></div></div><div class="calendar-scroll scroll-list"><div class="calendar-weekdays" aria-hidden="true">${['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => `<span>${day}</span>`).join('')}</div><div class="calendar-grid" role="group" aria-label="Calendário de ${escape(monthLabel)}">${cells}</div><section class="calendar-agenda"><div class="daily-section-heading"><h2>${escape(dayLabel(calendarDay, true))}</h2><span>${selected.length} ${selected.length === 1 ? 'lembrete' : 'lembretes'}</span></div>${selected.length ? reminderCalendarRows(selected) : '<p class="daily-empty">Nenhum alerta neste dia. Use + Novo lembrete para agendar.</p>'}</section>${drafts.length ? `<section class="calendar-drafts"><div class="daily-section-heading"><h2>Sem agendamento</h2><span>${drafts.length}</span></div>${drafts.map(note => `<button class="calendar-draft" data-calendar-note="${escape(note.id)}"><strong>${escape(note.title || 'Sem título')}</strong><span>Escolher horário ↗</span></button>`).join('')}</section>` : ''}</div>`;
   $('#notes-open').onclick = openDrawer;
   $('#new-note').onclick = createNote;

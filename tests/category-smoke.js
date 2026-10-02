@@ -1,0 +1,52 @@
+(async()=>{
+  const wait=async ms=>{
+    await new Promise(resolve=>setTimeout(resolve,ms));
+    const deadline=Date.now()+3000;
+    while(pending && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,20));
+    if(pending) throw new Error('Salvamento das categorias não terminou');
+  };
+  const assert=(value,label)=>{if(!value) throw new Error(label);};
+  state=await window.notebook.action('note:create',{type:'notes',title:'Categorias no papel'});view='notes';render();
+  const id=currentNote().id;
+  $('#add-category').click(); $('#category-name').value='Trabalho';$('#category-form').requestSubmit();await wait(150);
+  assert(currentNote().categories.some(category=>category.key==='trabalho'&&category.sources.includes('manual')),'Cria categoria pelo badge');
+  const registeredBefore=state.categories.length;
+  $('#note-body').focus();
+  for(const character of '#focoeditor') { document.execCommand('insertText',false,character);await wait(25); }
+  assert(state.categories.length===registeredBefore,'Digitação real não cadastra prefixos da hashtag: '+JSON.stringify(state.categories.map(category=>category.key)));
+  document.execCommand('insertText',false,' ');await wait(120);
+  assert(currentNote().categories.some(category=>category.key==='focoeditor'),'Espaço confirma categoria digitada: '+JSON.stringify({body:$('#note-body').value,categories:state.categories.map(category=>category.key),focus:document.activeElement.outerHTML}));
+  await editPageHistory('undo');await wait(100);
+  assert($('#note-body').value==='','Undo limpa a hashtag digitada');
+  putCaret(document.querySelector('.line-text'));
+  $('#note-body').focus();document.execCommand('insertText',false,'Escrever #trabalho e #ação.');await wait(180);
+  assert(document.querySelectorAll('.inline-category').length===2,'Hashtags viram pills');
+  assert($('#note-body').value==='Escrever #trabalho e #ação.','Pills preservam texto puro');
+  assert(currentNote().categories.length===2,'Hashtags associam sem duplicar');
+  assert($('#category-badges').textContent.includes('#ação'),'Badge de categoria do texto');
+  await editPageHistory('undo');await wait(100);
+  assert(currentNote().categories.length===1&&currentNote().categories[0].sources.includes('manual'),'Undo remove hashtags e preserva escolha manual');
+  await editPageHistory('redo');await wait(100);
+  assert(document.querySelectorAll('.inline-category').length===2,'Redo restaura pills: '+JSON.stringify({body:$('#note-body').value,categories:currentNote().categories,history:pageHistories.get(id)}));
+  const categoryLine=document.querySelector('.line-text');
+  putCaret(categoryLine,'Escrever #trabalho e #ação'.length);
+  categoryLine.dispatchEvent(new KeyboardEvent('keydown',{key:'Backspace',bubbles:true,cancelable:true}));await wait(80);
+  assert($('#note-body').value==='Escrever #trabalho e .','Backspace apaga a pill inteira e preserva o texto ao redor');
+  assert(!currentNote().categories.some(category=>category.key==='ação'),'Remover pill remove associação inline');
+  await editPageHistory('undo');await wait(80);
+  assert(document.querySelectorAll('.inline-category').length===2,'Desfazer recupera pill removida e categoria');
+  state=await window.notebook.image({noteId:id,name:'Mídia com categoria',bytes:new Uint8Array(window.cutTestBytes)});renderPage();
+  assert(document.querySelector('.paper-cut')&&document.querySelectorAll('.inline-category').length===2,'Mídia e pills coexistem');
+  putCaret(document.querySelector('.line-text'),$('#note-body').value.length);document.execCommand('insertText',false,' Mais uma ideia.');await wait(100);
+  assert($('#note-body').value.endsWith(' Mais uma ideia.'),'Pode continuar escrevendo depois da pill');
+  state=await window.notebook.action('note:create',{type:'tasks',title:'Lista com categoria'});view='tasks';render();
+  $('#add-category').click();
+  const work=state.categories.find(category=>category.key==='trabalho');
+  document.querySelector(`[data-use-category="${work.id}"]`).click();await wait(100);
+  assert(currentNote().categories[0].id===work.id,'Reutiliza categoria cadastrada na lista');
+  document.querySelector('[data-remove-category]').click();await wait(100);
+  assert(!currentNote().categories.length,'Remove categoria manual');
+  state=await window.notebook.action('note:select',{id});view='notes';render();
+  $('#toast').hidden=true;await wait(350);
+  return {id,errors:window.smokeErrors};
+})()

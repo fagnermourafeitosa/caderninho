@@ -19,7 +19,7 @@ let media, observedDay;
 let quickWin, openingQuick, quitting = false, quickShortcutAvailable = false;
 const QUICK_SHORTCUT = 'CommandOrControl+Shift+Space';
 function quickState() {
-  return { draft: store.draft(), notes: store.snapshot().notes.filter(note => note.type === 'notes' && !note.trashed).map(({ id, title }) => ({ id, title })), shortcutAvailable: quickShortcutAvailable, shortcut: process.platform === 'darwin' ? '⌘⇧Espaço' : 'Ctrl+Shift+Espaço' };
+  return { draft: store.draft(), notes: store.snapshot().notes.filter(note => note.type === 'notes' && !note.trashed).map(({ id, title,notebookId }) => ({ id, title,notebookName:store.db.prepare('SELECT name FROM notebooks WHERE id=?').get(notebookId)?.name })), shortcutAvailable: quickShortcutAvailable, shortcut: process.platform === 'darwin' ? '⌘⇧Espaço' : 'Ctrl+Shift+Espaço' };
 }
 async function openQuick() {
   if (openingQuick) return openingQuick;
@@ -62,7 +62,7 @@ function reportSaveError(error) {
 }
 function flush() {
   if (saveFailed) { win?.webContents.send('notebook:save-error', 'A última alteração não foi salva. Tente salvar novamente antes de fechar.'); return false; }
-  try { store?.flush(); return true; }
+  try { if(store) { store.dispatch('category:finalize'); store.flush(); } return true; }
   catch (error) { reportSaveError(error); return false; }
 }
 function playSound() {
@@ -238,6 +238,20 @@ ipcMain.on('notebook:move', (event, phase) => {
 });
 async function runSmoke() {
   try {
+    if(process.argv.includes('--notebooks-only')) {
+      const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','notebook-smoke.js'),'utf8'));
+      if(result.errors.length) throw new Error(result.errors.join('\n'));
+      fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true}); fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
+      console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
+    if(process.argv.includes('--categories-only')) {
+      await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
+      const result=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','category-smoke.js'),'utf8'));
+      if(result.errors.length) throw new Error(result.errors.join('\n'));
+      fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});
+      fs.writeFileSync(path.join(__dirname,'artifacts','categorias.png'),(await win.webContents.capturePage()).toPNG());
+      console.log('CATEGORY_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     const result = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'app-smoke.js'), 'utf8'));
     if (result.errors.length) throw new Error(result.errors.join('\n'));
     const reopened = new Store(app.getPath('userData'));
@@ -289,16 +303,19 @@ async function runSmoke() {
     const undo = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'undo-smoke.js'), 'utf8'));
     if (undo.errors.length) throw new Error(undo.errors.join('\n'));
     win.focus();
-    await win.webContents.executeJavaScript("putCaret(document.querySelector('.line-text')); document.execCommand('insertText', false, 'Menu undo ')");
+    await win.webContents.executeJavaScript("(async () => { window.menuHistoryReceipt=0; window.notebook.onHistory(() => window.menuHistoryReceipt++); putCaret(document.querySelector('.line-text')); document.execCommand('insertText', false, 'Menu undo '); while(pending) await new Promise(resolve=>setTimeout(resolve,20)); if(!document.querySelector('#note-body').value.includes('Menu undo ')) throw new Error('Texto do teste de menu não foi inserido'); })()");
     dispatchHistory('undo', win);
-    await win.webContents.executeJavaScript("(async () => { await new Promise(resolve => setTimeout(resolve, 50)); await undoQueue; })()");
+    await win.webContents.executeJavaScript("(async () => { const deadline=Date.now()+3000; while(window.menuHistoryReceipt<1 && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,20)); if(window.menuHistoryReceipt<1) throw new Error('Menu Desfazer não foi recebido'); await undoQueue; })()");
     if (await win.webContents.executeJavaScript("document.querySelector('#note-body').value.includes('Menu undo ')") ) throw new Error('Menu Desfazer não funcionou');
     dispatchHistory('redo', win);
-    await win.webContents.executeJavaScript("(async () => { await new Promise(resolve => setTimeout(resolve, 50)); await undoQueue; })()");
-    if (!await win.webContents.executeJavaScript("document.querySelector('#note-body').value.includes('Menu undo ')") ) throw new Error('Menu Refazer não funcionou');
+    await win.webContents.executeJavaScript("(async () => { const deadline=Date.now()+3000; while(window.menuHistoryReceipt<2 && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,20)); if(window.menuHistoryReceipt<2) throw new Error('Menu Refazer não foi recebido'); await undoQueue; })()");
+    if (!await win.webContents.executeJavaScript("document.querySelector('#note-body').value.includes('Menu undo ')") ) throw new Error('Menu Refazer não funcionou: '+await win.webContents.executeJavaScript("JSON.stringify({body:$('#note-body').value,active:document.activeElement.outerHTML.slice(0,400),history:pageHistories.get(currentNote().id),errors:window.smokeErrors})"));
     const calendar = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'calendar-smoke.js'), 'utf8'));
     if (calendar.errors.length) throw new Error(calendar.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'calendario-lembretes.png'), (await win.webContents.capturePage()).toPNG());
+    const categories = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'category-smoke.js'), 'utf8'));
+    if (categories.errors.length) throw new Error(categories.errors.join('\n'));
+    fs.writeFileSync(path.join(__dirname, 'artifacts', 'categorias.png'), (await win.webContents.capturePage()).toPNG());
     const home = await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, 'tests', 'home-smoke.js'), 'utf8'));
     if (home.errors.length) throw new Error(home.errors.join('\n'));
     const homeStore = new Store(app.getPath('userData'));
@@ -315,8 +332,13 @@ async function runSmoke() {
     if (!await win.webContents.executeJavaScript(`document.querySelector('#daily-body').readOnly && document.querySelector('#daily-body').value === ${JSON.stringify(home.body)}`)) throw new Error('Página anterior não foi preservada para consulta');
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'pagina-anterior.png'), (await win.webContents.capturePage()).toPNG());
     store.now=actualNow; observedDay=store.dayKey();
+    const notebooks=await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname,'tests','notebook-smoke.js'),'utf8'));
+    if(notebooks.errors.length) throw new Error(notebooks.errors.join('\n'));
+    fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
+    console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(notebooks));
     console.log('HOME_SMOKE_OK', JSON.stringify(home));
     console.log('CALENDAR_SMOKE_OK', JSON.stringify(calendar));
+    console.log('CATEGORY_SMOKE_OK', JSON.stringify(categories));
     console.log('UNDO_SMOKE_OK', JSON.stringify(undo));
     console.log('MARGIN_SMOKE_OK', JSON.stringify(margin));
     console.log('CUTS_SMOKE_OK', JSON.stringify(cuts));

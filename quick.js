@@ -22,7 +22,7 @@ async function refresh() {
   $('#quick-title').value = state.draft.title;
   $('#quick-body').value = state.draft.body;
   const select = $('#quick-target'); select.replaceChildren(new Option('Nova nota', ''));
-  state.notes.forEach(note => select.add(new Option(note.title || 'Sem título', note.id)));
+  state.notes.forEach(note => select.add(new Option(`${note.title || 'Sem título'} · ${note.notebookName}`, note.id)));
   if (state.draft.targetId && !state.notes.some(note => note.id === state.draft.targetId)) select.add(new Option('Nota indisponível — escolha outra', state.draft.targetId));
   select.value = state.draft.targetId;
   $('#quick-shortcut').textContent = state.shortcutAvailable ? state.shortcut : 'Atalho indisponível; use o botão Rascunho';

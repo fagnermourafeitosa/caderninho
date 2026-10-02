@@ -11,7 +11,7 @@ let reminderEditor = false;
 window.smokeErrors = [];
 window.addEventListener('error', event => window.smokeErrors.push(event.message));
 window.addEventListener('unhandledrejection', event => window.smokeErrors.push(String(event.reason)));
-const visibleNotes = () => state.notes.filter(note => note.type === view && !note.trashed);
+const visibleNotes = () => state.notes.filter(note => note.type === view && !note.trashed && note.notebookId===state.activeNotebook);
 const currentNote = () => state.notes.find(note => note.id === state.selected[view] && !note.trashed);
 const prettyDate = date => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(date));
 const listDate = date => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(date));
@@ -32,7 +32,7 @@ async function action(name, input = {}, options = {}) {
     if (name === 'view:select' && input.view === 'reminders') { reminderEditor = false; resetReminderCalendar(); }
     if (['note:create', 'note:select', 'note:restore'].includes(name) && state.activeView === 'reminders') reminderEditor = true;
     if (name === 'note:trash' && view === 'reminders') reminderEditor = false;
-    pending--; saved(); updateTemporalLabels(); return true;
+    pending--; saved(); updateTemporalLabels(); renderCategoryBadges(); return true;
   } catch (error) {
     pending--; $('#save-state').textContent = 'Falha ao salvar'; $('#save-state').classList.add('failed');
     toast(error.message.replace(/^Error invoking remote method '[^']+': Error: /, ''), 8000); return false;
@@ -50,15 +50,15 @@ function renderSidebar() {
   $('#sidebar-toggle').title = label;
 }
 function render() {
-  renderSidebar();
+  renderSidebar(); renderNotebookTabs();
   document.querySelectorAll('[data-view]').forEach(button => {
     button.classList.toggle('active', button.dataset.view === view);
     if (button.dataset.view === view) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
   });
-  $('#footer-label').textContent = { home: 'Um dia de cada vez.', notes: 'Um lugar para suas ideias.', tasks: 'Uma lista, vários pequenos passos.', reminders: 'Dia, hora e um toque para lembrar.', archive: 'Sua lixeira, separada por tipo.' }[view];
+  $('#footer-label').textContent = { home: 'Um dia de cada vez.', notes: 'Um lugar para suas ideias.', tasks: 'Uma lista, vários pequenos passos.', reminders: 'Dia, hora e um toque para lembrar.', notebooks:'Seus cadernos, suas páginas.', archive: 'Sua lixeira, separada por tipo.' }[view];
   $('#page-number').textContent = '';
   renderProgress();
-  if (view === 'home') renderHome(); else if (view === 'archive') renderTrash(); else if (view === 'reminders' && !reminderEditor) renderReminderCalendar(); else renderPage();
+  if (view === 'notebooks') renderNotebooks(); else if (view === 'home') renderHome(); else if (view === 'archive') renderTrash(); else if (view === 'reminders' && !reminderEditor) renderReminderCalendar(); else renderPage();
   $('#save-state').title = `Salvamento automático em ${state.storagePath}`;
 }
 function renderPage() {
@@ -72,7 +72,7 @@ function renderPage() {
   const bottom = `<div class="note-bottom"><button id="trash-note" class="trash-page">Mover para a lixeira</button><span id="page-detail"></span><div class="note-pager"><button id="previous-note" aria-label="Página anterior" ${index <= 0 ? 'disabled' : ''}>‹</button><span>${index + 1} / ${notes.length}</span><button id="next-note" aria-label="Próxima página" ${index >= notes.length - 1 ? 'disabled' : ''}>›</button></div></div>`;
   const title = `<input id="note-title" class="note-title" type="text" maxlength="160" aria-label="Título ${view === 'tasks' ? 'da lista' : 'da nota'}" placeholder="Sem título" value="${escape(note.title)}">`;
   const editor = view === 'tasks' ? `<div class="checklist-body"><div id="task-list" class="scroll-list"></div><form id="task-form" class="entry-form task-entry"><input id="task-input" placeholder="Escreva uma tarefa e pressione Enter…" aria-label="Nova tarefa" maxlength="500" required><button type="submit">+ Adicionar</button></form></div>` : `${view === 'reminders' ? '<div id="schedule-panel" class="schedule-panel"></div><p class="reminder-help">O app precisa estar aberto, mesmo minimizado, para tocar o alerta.</p>' : ''}<textarea id="note-body" class="note-body ${view === 'reminders' ? 'reminder-body' : ''}" spellcheck="true" lang="pt-BR" maxlength="200000" aria-label="Texto da nota" placeholder="${view === 'reminders' ? 'Escreva o que você quer lembrar…' : 'Comece uma ideia…'}">${escape(note.body)}</textarea>`;
-  const metadata = `<p id="note-dates" class="list-date">${noteDates(note)}</p>`;
+  const metadata = `${notebookAssociation(note)}<div id="category-badges" class="category-badges" aria-label="Categorias da página"></div><p id="note-dates" class="list-date">${noteDates(note)}</p>`;
   $('#page-content').innerHTML = toolbar + title + metadata + (view === 'notes' ? '<div id="smart-margin" class="smart-margin" hidden></div>' : '') + editor + bottom;
   $('#notes-open').onclick = openDrawer;
   if ($('#back-calendar')) $('#back-calendar').onclick = () => { reminderEditor = false; render(); };
@@ -89,13 +89,14 @@ function renderPage() {
   } else {
     $('#note-body').oninput = event => { if (view === 'notes') smartNoteInput(note.id, event); else { updateDetail(); action('note:update', { id: note.id, body: $('#note-body').value }); } };
     if (view === 'reminders') renderSchedule();
-    if (view === 'notes' && (note.cuts?.length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
+    if (view === 'notes' && (note.cuts?.length || categoryText.tokens(note.body).length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
     if (view === 'notes') renderSmartMargin();
   }
   $('#trash-note').onclick = async () => { if (await turn('note:trash', { id: note.id })) toast('Página movida para a lixeira. Você pode restaurá-la.'); };
   $('#previous-note').onclick = () => turn('note:select', { id: notes[index - 1].id });
   $('#next-note').onclick = () => turn('note:select', { id: notes[index + 1].id });
   updateTemporalLabels();
+  renderCategoryBadges(); wireNotebookAssociation(note);
   ensurePageHistory(note);
   updateDetail();
 }
@@ -129,7 +130,10 @@ function renderItems() {
       input.closest('.task-row').classList.toggle('done', item.done); updateDetail();
     } else input.checked = !input.checked;
   });
-  document.querySelectorAll('[data-item-text]').forEach(input => input.oninput = () => action('item:update', { id: input.dataset.itemText, title: input.value }));
+  document.querySelectorAll('[data-item-text]').forEach(input => {
+    input.oninput=event=>{const cursor=categoryCursorFor(event,input);input.dataset.pendingCategory=String(cursor!==null&&categoryText.tokens(input.value).some(token=>cursor>token.start&&cursor<=token.end));action('item:update',{id:input.dataset.itemText,title:input.value,categoryCursor:cursor});};
+    input.onblur=()=>{if(input.dataset.pendingCategory==='true'){input.dataset.pendingCategory='false';action('item:update',{id:input.dataset.itemText,title:input.value});}};
+  });
   document.querySelectorAll('[data-trash-item]').forEach(button => button.onclick = async () => {
     if (await action('item:trash', { id: button.dataset.trashItem })) { renderItems(); toast('Tarefa movida para a lixeira de tarefas.'); }
   });
@@ -177,6 +181,7 @@ async function turn(name, input = {}) {
   clone.remove(); $('.notebook').classList.remove('turning'); $('.notebook').removeAttribute('aria-busy'); return true;
 }
 async function createNote() {
+  if(view==='notebooks') {openNotebookDialog();return;}
   const type = view === 'home' ? 'notes' : view === 'archive' ? trashType : view;
   const day = type === 'reminders' && !reminderEditor ? calendarDay : null;
   if (await turn('note:create', { type })) {
@@ -188,7 +193,7 @@ async function createNote() {
     $('#note-title')?.focus(); $('#note-title')?.select();
   }
 }
-function openDrawer() { if (view === 'home') { $('#daily-select')?.focus(); return; } renderDrawer(); $('#notes-drawer').hidden = false; $('#search').focus(); }
+function openDrawer() { if(view==='notebooks') {$('#notebook-new')?.focus();return;} if (view === 'home') { $('#daily-select')?.focus(); return; } renderDrawer(); $('#notes-drawer').hidden = false; $('#search').focus(); }
 function closeDrawer() { $('#notes-drawer').hidden = true; $('#search').value = ''; }
 function renderDrawer() {
   $('#drawer-title').textContent = labels[view].heading;

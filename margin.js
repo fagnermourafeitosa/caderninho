@@ -7,6 +7,7 @@ function makeWritingLine(text, index) {
   const line = document.createElement('div'); line.className = 'writing-line'; line.contentEditable = 'false'; line.dataset.lineIndex = index;
   const span = document.createElement('span'); span.className = 'line-text'; span.contentEditable = 'true'; span.spellcheck = true; span.lang = 'pt-BR'; span.setAttribute('role', 'textbox'); span.setAttribute('aria-label', `Texto da nota, parágrafo ${index + 1}`); span.textContent = text; if (!text) span.append(document.createElement('br')); line.append(span);
   convertInlineCheckbox(line);
+  highlightCategoryTokens(span);
   return line;
 }
 function caretOffset(element, end = false) {
@@ -32,15 +33,22 @@ function convertInlineCheckbox(line) {
 }
 function smartNoteInput(noteId, event) {
   let editor = $('#note-body');
-  if (editor.tagName === 'TEXTAREA' && editor.value.split('\n').some(line => smartText.checkbox(line))) {
+  const categoryCursor=categoryCursorFor(event,editor);
+  unfinishedCategoryNote=categoryCursor!==null&&categoryText.tokens(editor.value).some(token=>categoryCursor>token.start&&categoryCursor<=token.end)?noteId:null;
+  if (!event?.isComposing && editor.tagName === 'TEXTAREA' && (categoryText.tokens(editor.value).length || editor.value.split('\n').some(line => smartText.checkbox(line)))) {
     const body = editor.value, before = body.slice(0, editor.selectionStart), lineIndex = before.split('\n').length - 1;
     const offset = before.split('\n').at(-1).length, prefix = smartText.checkbox(body.split('\n')[lineIndex]);
-    mountCollage({ ...currentNote(), body }); editor = $('#note-body');
-    const line = editor.querySelectorAll('.writing-line')[lineIndex]; putCaret(editableText(line), Math.max(0, offset - (prefix?.[0].length || 0)));
+    transformingCategoryEditor=true;
+    try {
+      mountCollage({ ...currentNote(), body }); editor = $('#note-body');
+      const line = editor.querySelectorAll('.writing-line')[lineIndex]; putCaret(editableText(line), Math.max(0, offset - (prefix?.[0].length || 0)));
+    } finally { transformingCategoryEditor=false; }
   } else if (editor.classList.contains('collage-editor')) {
-    const line = event?.target.closest('.writing-line'); if (line) convertInlineCheckbox(line);
+    const line = event?.target.closest('.writing-line');
+    const lines=line?[line]:[...editor.querySelectorAll('.writing-line')];
+    for(const item of lines) { convertInlineCheckbox(item); if(!event?.isComposing) highlightCategoryTokens(editableText(item)); }
   }
-  updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value });
+  updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor });
 }
 function handleWritingKey(event) {
   const line = event.target.closest('.writing-line'); if (!line || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;

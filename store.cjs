@@ -3,6 +3,8 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 const { installTemporal, event, syncInline, taskDTO } = require('./temporal.cjs');
+const {installCategories,category,associate,detach,syncCategories,categoryState}=require('./categories.cjs');
+const {COLORS,installNotebooks,getNotebook,activeNotebook,notebookCommand,notebookState}=require('./notebooks.cjs');
 const TYPES = ['notes', 'tasks', 'reminders'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
 const iso = value => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
@@ -56,9 +58,12 @@ class Store {
     `);
     if (!this.db.prepare('PRAGMA table_info(task_items)').all().some(column => column.name === 'completed_at')) this.db.exec('ALTER TABLE task_items ADD COLUMN completed_at TEXT');
     installTemporal(this);
+    installCategories(this);
+    installNotebooks(this);
     if (!this.getSetting('initialized')) this.initialize();
-    const draft = this.draft(); if ((draft.title || draft.body) && !draft.id) this.setSetting('quick_draft',JSON.stringify({...draft,id:randomUUID()}));
+    const draft = this.draft(); if ((draft.title || draft.body) && (!draft.id || !draft.notebookId)) this.setSetting('quick_draft',JSON.stringify({...draft,id:draft.id || randomUUID(),notebookId:draft.notebookId || activeNotebook(this)}));
     if (!this.getSetting('inline_initialized')) this.transaction(() => { for (const note of this.db.prepare("SELECT * FROM notes WHERE type='notes'").all()) syncInline(this,note,new Date(this.now()).toISOString(),true); this.setSetting('inline_initialized','1'); });
+    if (!this.getSetting('categories_initialized')) this.transaction(()=>{ const stamp=new Date(this.now()).toISOString(); for(const note of this.db.prepare('SELECT id FROM notes').all()) syncCategories(this,note.id,stamp); this.setSetting('categories_initialized','1'); });
   }
   getSetting(key) { return this.db.prepare('SELECT value FROM settings WHERE key = ?').get(key)?.value; }
   setSetting(key, value) { const stamp=new Date(this.now()).toISOString(); this.db.prepare('INSERT INTO settings(key,value,created_at,updated_at) VALUES(?,?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at WHERE settings.value<>excluded.value').run(key, String(value),stamp,stamp); }
@@ -69,9 +74,9 @@ class Store {
     catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
   insert(note) {
-    this.db.prepare(`INSERT INTO notes(id,type,title,body,created,updated,trashed,scheduled_at,reminder_enabled,fired) VALUES(?,?,?,?,?,?,?,?,?,?)`).run(
+    this.db.prepare(`INSERT INTO notes(id,type,title,body,created,updated,trashed,scheduled_at,reminder_enabled,fired,notebook_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)`).run(
       note.id, note.type, text(note.title, 160), text(note.body, 200_000), note.created, note.updated,
-      Number(Boolean(note.trashed)), iso(note.scheduledAt), Number(Boolean(note.enabled)), Number(Boolean(note.fired))
+      Number(Boolean(note.trashed)), iso(note.scheduledAt), Number(Boolean(note.enabled)), Number(Boolean(note.fired)), getNotebook(this,note.notebookId || activeNotebook(this)).id
     );
     event(this,'note',note.id,'create',note.created);
   }
@@ -116,7 +121,7 @@ class Store {
     });
   }
   dto(row, items = []) {
-    return { id: row.id, type: row.type, title: row.title, body: row.body, created: row.created, updated: row.updated, trashed: Boolean(row.trashed), deletedAt:row.deleted_at, scheduledAt: row.scheduled_at, enabled: Boolean(row.reminder_enabled), fired: Boolean(row.fired), firedAt:row.fired_at,items: items.filter(item => item.note_id === row.id && !item.trashed).map(taskDTO) };
+    return { id: row.id, notebookId:row.notebook_id, type: row.type, title: row.title, body: row.body, created: row.created, updated: row.updated, trashed: Boolean(row.trashed), deletedAt:row.deleted_at, scheduledAt: row.scheduled_at, enabled: Boolean(row.reminder_enabled), fired: Boolean(row.fired), firedAt:row.fired_at,items: items.filter(item => item.note_id === row.id && !item.trashed).map(taskDTO) };
   }
   dayKey(time = this.now()) {
     const date = new Date(time);
@@ -139,19 +144,21 @@ class Store {
     const today = this.ensureDaily();
     const items = this.db.prepare('SELECT * FROM task_items ORDER BY position,rowid').all();
     const notes = this.db.prepare('SELECT * FROM notes ORDER BY created,rowid').all().map(row => this.dto(row, items));
+    const categories=categoryState(this,notes);
     const cuts = this.db.prepare('SELECT * FROM cuts ORDER BY created,rowid').all().map(row => ({ id: row.id, noteId: row.note_id, kind: row.kind, blobId: row.blob_id, url: row.url, title: row.title, description: row.description, status: row.status, side: row.side, anchor: row.anchor, width: row.width, trashed: Boolean(row.trashed), created: row.created, updated:row.updated_at, deletedAt:row.deleted_at }));
     notes.forEach(note => { note.inlineTasks = this.db.prepare('SELECT * FROM inline_tasks WHERE note_id=? AND deleted_at IS NULL ORDER BY line_index').all(note.id).map(taskDTO); note.cuts = cuts.filter(cut => cut.noteId === note.id && !cut.trashed); });
+    const activeBook=activeNotebook(this);
     const selected = {};
     for (const type of TYPES) {
       const id = this.getSetting('selected:' + type);
-      selected[type] = notes.find(note => note.id === id && note.type === type && !note.trashed)?.id || notes.find(note => note.type === type && !note.trashed)?.id || null;
+      selected[type] = notes.find(note => note.id === id && note.type === type && !note.trashed && note.notebookId===activeBook)?.id || notes.find(note => note.type === type && !note.trashed && note.notebookId===activeBook)?.id || null;
     }
     const trashItems = this.db.prepare('SELECT i.*,n.title AS note_title FROM task_items i JOIN notes n ON n.id=i.note_id WHERE i.trashed=1 AND n.trashed=0 ORDER BY i.position').all().map(item => ({ id: item.id, noteId: item.note_id, noteTitle: item.note_title, title: item.title, source:'list', ...taskDTO(item) }));
     const days = this.db.prepare('SELECT day FROM daily_pages ORDER BY day DESC').all().map(row => row.day);
     const day = days.includes(this.getSetting('selected_day')) ? this.getSetting('selected_day') : today;
     const row = this.db.prepare('SELECT * FROM daily_pages WHERE day=?').get(day);
     const daily = { day, today, body: row.body, created:row.created,updated:row.updated, overview: JSON.parse(row.overview), days };
-    return { version: 2, daily, notes, selected, trashItems, trashCuts: cuts.filter(cut => cut.trashed && notes.some(note => note.id === cut.noteId && !note.trashed)), activeView: this.getSetting('active_view') || 'home', sidebarCollapsed: this.getSetting('sidebar_collapsed') === '1', storagePath: this.file };
+    return { version: 2, notebooks:notebookState(this),activeNotebook:activeBook,notebookColors:COLORS, categories, daily, notes, selected, trashItems, trashCuts: cuts.filter(cut => cut.trashed && notes.some(note => note.id === cut.noteId && !note.trashed)), activeView: this.getSetting('active_view') || 'home', sidebarCollapsed: this.getSetting('sidebar_collapsed') === '1', storagePath: this.file };
   }
   note(id, type) {
     const note = this.db.prepare('SELECT * FROM notes WHERE id=?').get(id);
@@ -164,12 +171,30 @@ class Store {
     return item;
   }
   cut(id) { const cut = this.db.prepare('SELECT * FROM cuts WHERE id=?').get(id); if (!cut) throw new Error('Recorte não encontrado.'); return cut; }
-  select(note) { this.setSetting('selected:' + note.type, note.id); this.setSetting('active_view', note.type); }
+  select(note) { this.setSetting('active_notebook',note.notebook_id); this.setSetting('selected:' + note.type, note.id); this.setSetting('active_view', note.type); }
   dispatch(action, input = {}) {
     this.ensureDaily();
     const stamp = new Date(this.now()).toISOString();
     this.transaction(() => {
+      if(['view:select','note:select','note:create','note:trash','category:finalize','notebook:select','notebook:create'].includes(action)) {
+        const activeView=this.getSetting('active_view'), selectedId=this.getSetting('selected:'+activeView);
+        if(selectedId&&this.db.prepare('SELECT id FROM notes WHERE id=? AND trashed=0').get(selectedId)) syncCategories(this,selectedId,stamp);
+      }
+      if(notebookCommand(this,action,input,stamp)) return;
       switch (action) {
+        case 'category:finalize': break;
+        case 'category:attach': {
+          const note=this.note(input.noteId); if(note.trashed) throw new Error('Restaure a página primeiro.');
+          const row=input.categoryId ? this.db.prepare('SELECT * FROM categories WHERE id=?').get(input.categoryId) : category(this,input.name,stamp);
+          if(!row) throw new Error('Categoria não encontrada.');
+          associate(this,note.id,row.id,'manual',stamp);
+          this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp,note.id); break;
+        }
+        case 'category:detach': {
+          const note=this.note(input.noteId); if(note.trashed) throw new Error('Restaure a página primeiro.');
+          detach(this,note.id,input.categoryId,'manual',stamp);
+          this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp,note.id); break;
+        }
         case 'day:select': {
           if (!this.db.prepare('SELECT day FROM daily_pages WHERE day=?').get(input.day)) throw new Error('Não há página para esse dia.');
           this.setSetting('selected_day', input.day); this.setSetting('active_view', 'home'); break;
@@ -223,7 +248,7 @@ class Store {
           }
           const previous = this.draft();
           if (['title','body','targetId'].some(key => previous[key] !== draft[key])) {
-            if (!previous.id && !previous.title && !previous.body && (draft.title || draft.body)) { draft.id=randomUUID(); draft.created=stamp; event(this,'draft',draft.id,'create',stamp); }
+            if (!previous.id && !previous.title && !previous.body && (draft.title || draft.body)) { draft.id=randomUUID(); draft.created=stamp; draft.notebookId=activeNotebook(this); event(this,'draft',draft.id,'create',stamp); }
             draft.updated=stamp;
           }
           this.setSetting('quick_draft', JSON.stringify(draft)); break;
@@ -242,9 +267,10 @@ class Store {
           } else {
             if (this.db.prepare('SELECT count(*) AS total FROM notes').get().total >= 3000) throw new Error('Limite de 3.000 páginas atingido.');
             id = randomUUID();
-            this.insert({ id, type: 'notes', title: draft.title.trim() || draft.body.trim().split('\n')[0].slice(0, 80), body: draft.body, created: draft.created || stamp, updated: stamp });
+            this.insert({ id, type: 'notes', title: draft.title.trim() || draft.body.trim().split('\n')[0].slice(0, 80), body: draft.body, notebookId:draft.notebookId, created: draft.created || stamp, updated: stamp });
           }
           syncInline(this,this.note(id),stamp);
+          syncCategories(this,id,stamp);
           event(this,'draft',draft.id || 'legacy-quick','commit',stamp,{noteId:id,created:draft.created,updated:draft.updated});
           this.setSetting('quick_saved_note', id);
           this.setSetting('quick_draft', JSON.stringify({ title: '', body: '', targetId: '' }));
@@ -255,7 +281,7 @@ class Store {
           this.setSetting('sidebar_collapsed', input.collapsed ? '1' : '0'); break;
         }
         case 'view:select': {
-          if (![...TYPES, 'archive', 'home'].includes(input.view)) throw new Error('Seção inválida.');
+          if (![...TYPES, 'archive', 'home', 'notebooks'].includes(input.view)) throw new Error('Seção inválida.');
           this.setSetting('active_view', input.view); if (input.view === 'home') this.setSetting('selected_day', this.dayKey()); break;
         }
         case 'note:create': {
@@ -263,8 +289,8 @@ class Store {
           if (!TYPES.includes(type)) throw new Error('Tipo inválido.');
           const count = this.db.prepare('SELECT count(*) AS total FROM notes').get().total;
           if (count >= 3000) throw new Error('Limite de 3.000 páginas atingido.');
-          const note = { id: randomUUID(), type, title: text(input.title || { notes: 'Nova nota', tasks: 'Nova lista', reminders: 'Novo lembrete' }[type], 160), body: '', created: stamp, updated: stamp };
-          this.insert(note); this.select(note); break;
+          const note = { id: randomUUID(), type, title: text(input.title || { notes: 'Nova nota', tasks: 'Nova lista', reminders: 'Novo lembrete' }[type], 160), body: '', notebookId:input.notebookId, created: stamp, updated: stamp };
+          this.insert(note); this.select(this.note(note.id)); break;
         }
         case 'note:update': {
           const note = this.note(input.id);
@@ -274,6 +300,7 @@ class Store {
             Object.hasOwn(input, 'body') ? text(input.body, 200_000) : note.body, stamp, note.id
           );
           if (note.type === 'notes') syncInline(this,this.note(note.id),stamp);
+          if(Object.hasOwn(input,'body')) syncCategories(this,note.id,stamp,Number.isInteger(input.categoryCursor)?input.categoryCursor:null);
           break;
         }
         case 'note:select': {
@@ -337,6 +364,16 @@ class Store {
           this.db.prepare('UPDATE notes SET reminder_enabled=0,updated=? WHERE id=?').run(stamp,input.id); event(this,'note',input.id,'cancel-schedule',stamp); break;
         }
         default: throw new Error('Ação inválida.');
+      }
+      if (['item:create','item:update','item:trash','item:restore'].includes(action)) {
+        const noteId=action==='item:create'?input.noteId:this.item(input.id).note_id;
+        let cursor=null;
+        if(action==='item:update'&&Number.isInteger(input.categoryCursor)) {
+          const rows=this.db.prepare('SELECT id,title FROM task_items WHERE note_id=? AND trashed=0 ORDER BY position').all(noteId);
+          cursor=this.note(noteId).body.length+1+input.categoryCursor;
+          for(const row of rows) { if(row.id===input.id) break; cursor+=row.title.length+1; }
+        }
+        syncCategories(this,noteId,stamp,cursor);
       }
     });
     return this.snapshot();

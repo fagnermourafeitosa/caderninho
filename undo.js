@@ -49,13 +49,14 @@ function editPageHistory(direction) {
     const history = pageHistories.get(noteId); if (!history) return;
     const selection = editorSelection();
     const restored = history.step(direction); if (!restored) return;
+    unfinishedCategoryNote=null;
     // Restore the page immediately so typing after the shortcut cannot be
     // overwritten when the asynchronous SQLite acknowledgement arrives.
     if (currentNote()?.id === noteId && view !== 'archive') {
       const note = { ...currentNote(), title: restored.title, body: restored.body }, editor = $('#note-body'), scroll = editor?.scrollTop || 0;
       $('#note-title').value = note.title;
       if (editor) {
-        if (view === 'notes' && (editor.classList.contains('collage-editor') || note.cuts.length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
+        if (view === 'notes' && (editor.classList.contains('collage-editor') || note.cuts.length || categoryText.tokens(note.body).length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
         else editor.value = note.body;
         $('#note-body').scrollTop = scroll;
       }
