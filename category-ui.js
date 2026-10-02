@@ -1,6 +1,6 @@
 function renderCategoryBadges() {
   const region=$('#category-badges'), note=currentNote(); if(!region||!note) return;
-  region.innerHTML=note.categories.map(category=>`<span class="category-badge" title="${category.sources.includes('inline')?'Também usada no texto. Apague a hashtag para remover essa associação.':'Categoria escolhida para esta página.'}"><span>#${escape(category.name)}</span>${category.sources.includes('manual')?`<button data-remove-category="${escape(category.id)}" aria-label="Remover categoria ${escape(category.name)}">×</button>`:''}</span>`).join('')+'<button id="add-category" class="category-add">+ Categoria</button>';
+  region.innerHTML=note.categories.map(category=>`<span class="category-badge" title="${category.sources.includes('inline')?'Também usada no texto. Apague a hashtag para remover essa associação.':'Categoria escolhida para esta página.'}"><span>#${escape(category.name)}</span>${category.sources.includes('manual')?`<button data-remove-category="${escape(category.id)}" aria-label="Remover categoria ${escape(category.name)}">×</button>`:''}</span>`).join('')+`<button id="add-category" class="category-add">${actionLabel('add','Categoria')}</button>`;
   $('#add-category').onclick=openCategoryDialog;
   region.querySelectorAll('[data-remove-category]').forEach(button=>button.onclick=()=>action('category:detach',{noteId:note.id,categoryId:button.dataset.removeCategory}));
 }

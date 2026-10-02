@@ -8,7 +8,7 @@ function cutCard(cut) {
   const card = document.createElement('aside');
   card.className = `paper-cut cut-${cut.side}${cut.width > .65 ? ' cut-wide' : ''}`; card.contentEditable = 'false'; card.dataset.cutId = cut.id;
   card.style.width = `${cut.width * 100}%`;
-  card.innerHTML = `<div class="cut-controls"><button class="cut-grip" aria-label="Arrastar mídia" title="Arraste para posicionar na página">⠿ <span>Arraste</span></button><span><button class="cut-action" aria-label="Criar ação ligada à mídia" title="Criar tarefa ou lembrete">${commandIcon('check')}</button><button data-size="-1" aria-label="Diminuir mídia">−</button><button data-size="1" aria-label="Aumentar mídia">+</button><button class="cut-remove" aria-label="Mover mídia para a lixeira">×</button></span></div><div class="cut-preview"></div>`;
+  card.innerHTML = `<div class="cut-controls"><button class="cut-grip" aria-label="Arrastar mídia" title="Arraste para posicionar na página">${icon('grip')}<span>Arraste</span></button><span><button class="cut-action" aria-label="Criar ação ligada à mídia" title="Criar tarefa ou lembrete">${commandIcon('check')}</button><button data-size="-1" aria-label="Diminuir mídia">${icon('minus')}</button><button data-size="1" aria-label="Aumentar mídia">${icon('add')}</button><button class="cut-remove" aria-label="Mover mídia para a lixeira">${icon('trash')}</button></span></div><div class="cut-preview"></div>`;
   fillCutPreview(card, cut);
   card.querySelector('.cut-action').onclick=()=>openSourceComposer({kind:'cut',cutId:cut.id,quote:cut.title||'Imagem'});
   card.querySelector('.cut-remove').onclick = async () => { if (await action('cut:trash', { id: cut.id })) { renderPage(); toast('Mídia guardada na lixeira de notas.'); } };

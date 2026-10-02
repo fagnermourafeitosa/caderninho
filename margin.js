@@ -95,7 +95,7 @@ function renderSmartMargin() {
   const signature = JSON.stringify([candidate?.due, note.scheduledAt, note.enabled, note.fired]);
   if (margin.dataset.signature === signature) return; margin.dataset.signature = signature;
   margin.hidden = !candidate && !note.scheduledAt;
-  margin.innerHTML = `${note.scheduledAt ? `<div class="margin-existing"><span>${note.enabled ? '◷ Agendado' : note.fired ? '✓ Alerta disparado' : 'Alerta cancelado'} · ${escape(formatStamp(note.scheduledAt))}</span>${note.enabled ? '<button id="margin-cancel" aria-label="Cancelar alerta da nota">×</button>' : ''}</div>` : ''}${candidate ? `<button id="margin-schedule" class="margin-stamp" title="${escape(candidate.phrase)} · Clique para ativar o alerta sonoro">◷ ${note.enabled ? 'Reagendar' : 'Agendar'}<strong>${escape(formatStamp(candidate.due))}</strong></button>` : ''}`;
+  margin.innerHTML = `${note.scheduledAt ? `<div class="margin-existing"><span>${note.enabled ? '◷ Agendado' : note.fired ? '✓ Alerta disparado' : 'Alerta cancelado'} · ${escape(formatStamp(note.scheduledAt))}</span>${note.enabled ? `<button id="margin-cancel" aria-label="Cancelar alerta da nota">${icon('close')}</button>` : ''}</div>` : ''}${candidate ? `<button id="margin-schedule" class="margin-stamp" title="${escape(candidate.phrase)} · Clique para ativar o alerta sonoro">◷ ${note.enabled ? 'Reagendar' : 'Agendar'}<strong>${escape(formatStamp(candidate.due))}</strong></button>` : ''}`;
   if ($('#margin-schedule')) $('#margin-schedule').onclick = async () => {
     if (await action('schedule:activate', { id: note.id, due: candidate.due })) { renderSmartMargin(); toast(`Alerta sonoro agendado para ${formatStamp(candidate.due)}. O app precisa estar aberto.`); }
   };

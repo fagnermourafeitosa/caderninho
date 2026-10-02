@@ -2,6 +2,7 @@
 const {app,BrowserWindow,ipcMain,nativeImage,protocol,net}=require('electron');
 const {pathToFileURL}=require('node:url');
 const {MediaStore}=require('../media.cjs');
+const {RelatedService}=require('../related-service.cjs');
 protocol.registerSchemesAsPrivileged([{scheme:'caderno-media',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 const fs=require('node:fs');
 const os=require('node:os');
@@ -11,7 +12,7 @@ const doc=require('../editor-document.js');
 const root=path.resolve(__dirname,'..');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'caderninho-readme-'));
 app.setPath('userData',directory);
-let store,win,media;
+let store,win,media,related;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 app.whenReady().then(async()=>{
   store=new Store(directory,{now:()=>new Date('2026-10-01T13:00:00-03:00').getTime()});
@@ -47,23 +48,32 @@ app.whenReady().then(async()=>{
   }
   command('day:update',{day:'2026-10-01',body:'Hoje, quero terminar o essencial e deixar espaço para uma boa ideia.\n\nUma coisa de cada vez também é progresso.'});
   command('view:select',{view:'home'});
+  related=new RelatedService(store,media,{onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');}});
+  related.cacheDir=path.join(root,'artifacts','embedding-cache');
+  ipcMain.handle('related:query',(_event,id)=>related.query(id));
+  ipcMain.handle('related:retry',()=>related.run());
+  await related.run();
+  if(related.status!=='ready')throw new Error(related.error||'Related indexing failed');
   ipcMain.handle('notebook:state',()=>store.snapshot());
   ipcMain.handle('notebook:action',(_event,name,input)=>command(name,input));
   ipcMain.handle('notebook:window',()=>null);
   win=new BrowserWindow({width:1080,height:900,frame:false,transparent:true,backgroundColor:'#00000000',show:false,webPreferences:{preload:path.join(root,'preload.cjs'),contextIsolation:true,sandbox:true,backgroundThrottling:false}});
   await win.loadFile(path.join(root,'index.html'));await pause(900);
-  const capture=async(name,code)=>{
+  const capture=async(name,code,outputDirectory=path.join(root,'docs','images'))=>{
     if(code)await win.webContents.executeJavaScript(code);
-    await pause(250);
+    await pause(500);
     await win.webContents.executeJavaScript('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
     const errors=await win.webContents.executeJavaScript('window.smokeErrors');if(errors.length)throw new Error(errors.join('\n'));
-    fs.writeFileSync(path.join(root,'docs','images',name),(await win.webContents.capturePage()).resize({width:1440}).toPNG());
+    fs.writeFileSync(path.join(outputDirectory,name),(await win.webContents.capturePage()).resize({width:1440}).toPNG());
   };
   if(!process.argv.includes('--features-only')) {
+  win.setSize(1080,1100);
   await capture('pagina-do-dia.png',"(async()=>{state=await window.notebook.state();view='home';render();})()");
+  win.setSize(1080,900);
   await capture('editor.png',`(async()=>{state=await window.notebook.action('note:select',{id:${JSON.stringify(note)}});view='notes';render();})()`);
   await capture('tarefas.png',`(async()=>{state=await window.notebook.action('note:select',{id:${JSON.stringify(tasks)}});view='tasks';render();})()`);
-  await capture('calendario.png',"(async()=>{state=await window.notebook.action('view:select',{view:'reminders'});view='reminders';reminderEditor=false;render();})()");
+  win.setSize(1080,1100);
+  await capture('calendario.png',"(async()=>{state=await window.notebook.action('view:select',{view:'reminders'});view='reminders';reminderEditor=false;calendarMonth=new Date('2026-10-01T12:00:00');calendarDay='2026-10-01';render();})()");
   }
   win.setSize(1080,1100);
   const project=create('notes','Um espaço para criar');
@@ -87,7 +97,24 @@ app.whenReady().then(async()=>{
   command('category:attach',{noteId:collage,name:'viagem'});
   let shot=command('cut:create',{noteId:collage,kind:'image',blobId,title:'Paisagens para o fim de semana'});let cut=shot.notes.find(n=>n.id===collage).cuts.at(-1);command('cut:layout',{id:cut.id,side:'right',anchor:1,width:.36});
   shot=command('cut:create',{noteId:collage,kind:'link',url:'https://example.org/trilhas',title:'Caminhos na serra'});cut=shot.notes.find(n=>n.id===collage).cuts.at(-1);command('cut:preview',{id:cut.id,title:'Caminhos na serra',description:'Trilhas curtas, mirantes e boas pausas pelo caminho. Uma referência para o nosso roteiro.',status:'ready'});command('cut:layout',{id:cut.id,side:'left',anchor:6,width:.40});
+  const itinerary=create('tasks','Preparar a viagem à serra','Planejar o fim de semana na serra: caminhada, mirantes e uma trilha curta.');
+  command('category:attach',{noteId:itinerary,name:'viagem'});
+  for(const title of ['Escolher a trilha e conferir a previsão do tempo','Separar água, câmera e mochila'])command('item:create',{noteId:itinerary,title});
+  const trails=create('notes','Trilhas e mirantes','Referências para o fim de semana na serra. Uma caminhada curta pela manhã, pausa no mirante e paisagens para fotografar.');
+  command('category:attach',{noteId:trails,name:'viagem'});
+  const travelReminder=create('reminders','Conferir o tempo na serra','Antes da viagem, conferir a previsão para escolher uma trilha segura e preparar a mochila.');
+  command('category:attach',{noteId:travelReminder,name:'viagem'});
+  command('schedule:activate',{id:travelReminder,due:'2026-10-02T18:00:00-03:00'});
+  await related.run();
+  if(related.query(collage).results.length<3)throw new Error('Expected related fictional travel pages');
   await capture('colagem.png',`(async()=>{state=await window.notebook.action('note:select',{id:${JSON.stringify(collage)}});view='notes';render();getSelection().removeAllRanges();hideEditorMenus();await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));})()`);
+  win.setSize(1080,900);
+  await capture('relacionados.png',"(async()=>{document.querySelector('#related-open').click();await refreshRelated();})()");
+  if(process.argv.includes('--review-sections')){
+    const output=path.join(root,'artifacts');fs.mkdirSync(output,{recursive:true});
+    await capture('controles-cadernos.png',"document.querySelector('#related-dialog').close();view='notebooks';render();",output);
+    await capture('controles-lixeira.png',"view='archive';render();",output);
+  }
   console.log('README screenshots captured with fictional local data.');
-  store.close();win.destroy();fs.rmSync(directory,{recursive:true,force:true});app.quit();
-}).catch(error=>{console.error(error);try{store?.close();}catch{}fs.rmSync(directory,{recursive:true,force:true});app.exit(1);});
+  related.close();store.close();win.destroy();fs.rmSync(directory,{recursive:true,force:true});app.quit();
+}).catch(error=>{console.error(error);try{related?.close();store?.close();}catch{}fs.rmSync(directory,{recursive:true,force:true});app.exit(1);});

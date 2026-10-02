@@ -132,3 +132,50 @@ button.related-whisper:focus-visible { outline:2px solid #ab8847; outline-offset
 .view-toolbar .trash-toolbar:hover { color:#b9796c; background:#f2d3cb66; }
 .view-toolbar .trash-toolbar:focus-visible { outline:2px solid #cb8d81; outline-offset:3px; }
 @media(max-width:760px) { .toolbar-action-label {display:none;} .view-toolbar .toolbar-action {gap:0;} }
+/* Consistent listing affordance, in the existing left toolbar position. */
+.view-toolbar button { font-size:12px; line-height:1.35; }
+.view-toolbar #notes-open { font-weight:700; white-space:nowrap; }
+.view-toolbar #notes-open .small-icon { width:21px; height:21px; flex:none; }
+.view-toolbar #notes-open .subtle { font-weight:400; }
+/* A brief ink-icon wobble; the button hit area never moves. */
+.view-toolbar button > svg { pointer-events:none; transform-origin:50% 60%; }
+@media(hover:hover) {
+  .view-toolbar button { transition:color .15s ease; }
+  .view-toolbar button:not(:disabled):hover { color:#66502d; }
+  .view-toolbar .trash-toolbar:hover { color:#b9796c; }
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference) {
+  .view-toolbar button:not(:disabled):hover > svg { animation:toolbar-icon-wobble .28s ease-out; }
+}
+@keyframes toolbar-icon-wobble {
+  0%,100% { transform:rotate(0deg); }
+  25% { transform:rotate(-7deg); }
+  50% { transform:rotate(5deg); }
+  75% { transform:rotate(-2deg); }
+}
+
+/* Daily overview uses the same stationery icons and control sizing as page tools. */
+.daily-picker { font:12px var(--body-font); color:var(--ink); gap:7px; }
+.daily-picker > .small-icon,.daily-toolbar button > .small-icon { width:21px; height:21px; flex:none; }
+.daily-picker select { font-size:12px; border-radius:5px; padding:5px 7px; background:var(--toolbar); }
+.daily-picker select:hover { border-color:var(--muted); }
+.daily-section-heading { align-items:center; }
+.daily-section-heading h2 { display:flex; align-items:center; gap:8px; }
+.daily-section-heading h2 > .small-icon { width:27px; height:27px; flex:none; }
+.daily-link { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink); border-radius:3px; }
+.daily-link > .small-icon { width:20px; height:20px; flex:none; pointer-events:none; }
+.daily-link > .small-icon:last-child { width:15px; height:15px; color:var(--muted); }
+.daily-link:hover { background:var(--accent-soft); color:var(--ink); }
+.daily-bottom .note-pager button { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:5px; }
+.daily-bottom .note-pager .small-icon { width:21px; height:21px; }
+#daily-next .small-icon { transform:rotate(180deg); }
+.daily-bottom .note-pager button:not(:disabled):hover { background:var(--accent-soft); }
+@media(hover:hover) and (prefers-reduced-motion:no-preference) {
+ .daily-link:hover > .small-icon:first-child { animation:toolbar-icon-wobble .28s ease-out; }
+}
+@media(max-width:760px) {
+ .daily-picker { gap:5px; }
+ .daily-picker select { max-width:130px; }
+ .daily-toolbar .toolbar-action > span { display:none; }
+ .daily-section-heading { flex-wrap:wrap; }
+}

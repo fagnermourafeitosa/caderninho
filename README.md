@@ -55,6 +55,8 @@ Cada ação mantém uma cópia do trecho original e um caminho de volta à orige
 
 ## Reencontre ideias que se conectam
 
+![Grafo com notas, tarefas e lembretes relacionados à viagem à serra](docs/images/relacionados.png)
+
 Enquanto você escreve, o Caderninho procura relações com outras notas, tarefas e lembretes do mesmo caderno. As conexões aparecem discretamente no rodapé. Abra **Relacionados** para explorá-las em um grafo: conteúdos com mais afinidade ficam mais próximos, e um clique leva à página de origem.
 
 O texto de imagens também participa, com reconhecimento local no Mac. O primeiro uso baixa o modelo de análise; depois, as conexões são calculadas no seu computador, inclusive sem internet.
