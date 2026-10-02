@@ -289,6 +289,10 @@ async function runSmoke() {
       console.log('SELECTION_SMOKE_OK',JSON.stringify(selectionResult));
       console.log('EDITOR_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
+    if(process.argv.includes('--search-only')) {
+      const result=await win.webContents.executeJavaScript(smokeScript('search-smoke.js'));
+      console.log('SEARCH_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     if(process.argv.includes('--home-preview-only')) {
       media.fetch=async url=>({bytes:Buffer.from('<meta property="og:title" content="Referência">'),type:'text/html',url});
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);

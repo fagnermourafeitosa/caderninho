@@ -24,6 +24,7 @@
   <script defer src="block-editor.js"></script>
   <script defer src="source-actions.js"></script>
   <script defer src="related-ui.js"></script>
+  <script defer src="global-search.js"></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -73,7 +74,7 @@
       </button>
       <div class="sheet" id="sheet">
         <div class="window-controls" aria-label="Controles da janela"><div class="traffic-lights"><button id="close" aria-label="Fechar" title="Fechar"></button><button id="minimize" aria-label="Minimizar" title="Minimizar"></button><button id="maximize" aria-label="Maximizar janela" title="Ampliar ou restaurar"></button></div></div>
-        <header class="book-header"><span id="save-state" class="save-state" role="status" title="Salvamento local automático">Salvo neste Mac</span></header>
+        <header class="book-header"><span id="save-state" class="save-state" role="status" title="Salvamento local automático">Salvo neste Mac</span><div class="global-search" id="global-search-control"><div class="global-search-field"><input id="global-search" type="search" placeholder="Buscar em todos os cadernos…" aria-label="Buscar em todos os cadernos" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="global-search-results" autocomplete="off" disabled></div><button id="global-search-toggle" aria-label="Abrir busca" title="Buscar (⌘F)" aria-expanded="false" aria-controls="global-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg></button><div id="global-search-results" role="listbox" aria-label="Resultados da busca" hidden></div></div></header>
         <div id="list-progress" class="list-progress" hidden></div>
         <div class="page-content" id="page-content"></div>
         <footer class="book-footer"><span id="footer-label">Uma coisa de cada vez.</span><span id="page-number">01</span></footer>

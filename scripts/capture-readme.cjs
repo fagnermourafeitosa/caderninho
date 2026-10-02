@@ -114,6 +114,9 @@ app.whenReady().then(async()=>{
   store.now=()=>new Date('2026-10-01T13:05:00-03:00').getTime();
   command('note:update',{id:collage,body:store.snapshot().notes.find(note=>note.id===collage).body});
   await capture('pagina-do-dia.png',"(async()=>{document.querySelector('#related-dialog').close();state=await window.notebook.action('view:select',{view:'home'});view='home';render();})()");
+  win.setSize(1080,900);
+  await capture('busca.png',"openGlobalSearch();searchInput.value='serra';renderGlobalSearch();");
+  await win.webContents.executeJavaScript('closeGlobalSearch()');
   if(process.argv.includes('--review-sections')){
     const output=path.join(root,'artifacts');fs.mkdirSync(output,{recursive:true});
     await capture('controles-cadernos.png',"document.querySelector('#related-dialog').close();view='notebooks';render();",output);

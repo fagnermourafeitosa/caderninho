@@ -59,6 +59,10 @@ Amanhã, a página de hoje continua disponível para consulta. O retrato das tar
 
 Separe projetos, estudos e vida pessoal em cadernos, com abas coloridas para trocar entre eles. Categorias atravessam as páginas de cada caderno: comece a escrever uma hashtag e encontre as que você já usa.
 
+A lupa no topo encontra páginas pelo título ou pelo conteúdo em todos os cadernos, de qualquer seção. Cada resultado mostra um trecho e o caderno de origem; clique para retomar a página.
+
+![Busca por serra reunindo notas, lista de preparativos e lembrete, com trechos e caderno de origem](docs/images/busca.png)
+
 Quer levar uma página com você? Exporte para PDF e guarde ou compartilhe suas anotações, referências e ações com o mesmo fundo de papel.
 
 ## Seu caderninho fica com você

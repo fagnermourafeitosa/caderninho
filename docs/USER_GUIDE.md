@@ -6,7 +6,13 @@
 
 Abra **Caderninho.app**. A primeira tela, **Caderninho**, reúne suas tarefas pendentes, lembretes de hoje, últimas notas e uma prévia da nota mais recentemente atualizada do caderno, com seu grafo de conexões.
 
-Para escrever, abra **Notas** e clique em **+ Nova nota**. Dê um título e comece. Não há botão Salvar: **Salvando automaticamente…** mostra o salvamento em andamento; **Salvo às…** confirma que seus dados foram guardados localmente.
+Para escrever, abra **Notas** e clique em **+ Nova nota**. Dê um título e comece. As alterações são salvas automaticamente no seu computador. Se ocorrer uma falha, o app mostra um aviso.
+
+## Busca em todos os cadernos
+
+Clique na **lupa no topo** ou pressione **⌘F**. O campo se abre da direita para a esquerda e procura títulos e conteúdo de notas, listas e lembretes em todos os cadernos, independentemente da seção aberta. A busca ignora diferenças entre acentos e maiúsculas; páginas na lixeira ficam de fora.
+
+Cada resultado mostra o tipo de página, o caderno e um trecho do conteúdo. Clique para abrir, ou use **↑/↓** e **Enter**. **Escape** recolhe o campo.
 
 ## Cadernos
 

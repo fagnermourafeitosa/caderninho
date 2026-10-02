@@ -271,7 +271,7 @@ let movingPointer = null;
 document.addEventListener('pointerdown', event => {
   const target = event.target;
   if (event.button !== 0 || !target.closest('.notebook, .sidebar')) return;
-  if (target.closest('input, textarea, button, select, a, [contenteditable], [data-resize]')) return;
+  if (target.closest('input, textarea, button, select, a, [contenteditable], [data-resize], #global-search-control')) return;
   const scroller = target.closest('.scroll-list, #notes-list');
   if (scroller && event.clientX >= scroller.getBoundingClientRect().left + scroller.clientWidth) return;
   event.preventDefault(); movingPointer = event.pointerId;
@@ -293,7 +293,7 @@ document.addEventListener('lostpointercapture', endMove);
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') closeDrawer();
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'n') { event.preventDefault(); createNote(); }
-  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f' && view !== 'archive') { event.preventDefault(); openDrawer(); }
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') { event.preventDefault(); openGlobalSearch(); }
 });
 window.notebook.onSaveError(message => { $('#save-state').textContent = 'Falha ao salvar'; $('#save-state').classList.add('failed'); toast(message, 12000); });
 window.notebook.onNavigate(next => { cancelTurn(); closeDrawer(); state = next; view = state.activeView; render(); });

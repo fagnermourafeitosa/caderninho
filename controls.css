@@ -115,3 +115,23 @@ button > svg {pointer-events:none;}
 }
 .view-toolbar .related-open > svg {width:var(--control-icon-size);height:var(--control-icon-size);flex:none;}
 .source-card-footer button[data-source-remove] {color:var(--control-danger);}
+
+.book-header{z-index:6;min-height:30px;margin-top:-8px}
+.global-search{position:relative;display:flex;align-items:center;flex:none;max-width:100%;letter-spacing:normal}
+.global-search-field{width:0;overflow:hidden;opacity:0;transition:width .24s ease,opacity .18s ease}
+.global-search.open .global-search-field{width:clamp(100px,28vw,280px);opacity:1}
+#global-search{width:100%;min-width:0;font:12px var(--body-font);color:var(--ink);padding:7px 9px;background:var(--toolbar);border:1px solid var(--line);border-radius:6px;box-sizing:border-box}
+#global-search-toggle{display:flex;align-items:center;justify-content:center;width:32px;height:32px;padding:6px;color:var(--ink);flex:none}
+#global-search-toggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+#global-search-results{position:absolute;top:39px;right:0;width:min(420px,calc(100vw - 180px));max-height:min(420px,calc(100vh - 180px));overflow:auto;background:var(--paper);border:1px solid var(--edge);border-radius:8px;box-shadow:3px 5px 12px #40332525;padding:6px;font:12px/1.5 var(--body-font);color:var(--ink)}
+#global-search-results[hidden]{display:none}
+#global-search-results button{display:block;width:100%;padding:10px;text-align:left;border-bottom:1px solid var(--line)}
+#global-search-results button:last-child{border-bottom:0}
+#global-search-results button:hover,#global-search-results button[aria-selected=true]{background:var(--accent-soft)}
+#global-search-results strong,#global-search-results small,#global-search-results span{display:block;overflow-wrap:anywhere}
+#global-search-results strong{font-size:14px}#global-search-results small{font-size:10px;color:var(--muted);margin:3px 0}#global-search-results span{font-size:12px}#global-search-results p{padding:10px;margin:0}
+.book-header:has(.global-search.open) .save-state{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important}
+@media(prefers-reduced-motion:reduce){.global-search-field{transition:none}}
+
+.book-header .save-state:not(.failed){display:none}
+.book-header .global-search{margin-left:auto}
