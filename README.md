@@ -39,6 +39,12 @@ Uma nota pode começar com uma frase e ganhar títulos, listas, checkboxes, cita
 - **Categorias no texto:** escreva `#ideias` ou `#trabalho` para organizar a página enquanto escreve.
 - **Salvamento automático:** acompanhe a confirmação de salvamento sem interromper a escrita.
 
+## Da ideia à ação, sem perder o contexto
+
+Selecione um trecho da nota e use o **ícone de tarefa**, ou use a mesma opção em uma imagem ou cartão de link. Defina uma tarefa ou um lembrete na margem, sem sair da página.
+
+Cada ação mantém uma cópia do trecho original e um caminho de volta à origem. As tarefas aparecem na Página do dia; os lembretes também entram no calendário. Você pode concluir, editar, reagendar ou recolher a margem para continuar escrevendo.
+
 ## Transforme planos em próximos passos
 
 Crie listas independentes para a rotina, um projeto ou uma viagem. Cada lista tem título, categorias e seus próprios itens, com progresso e registro de conclusão.

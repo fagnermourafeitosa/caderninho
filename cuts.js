@@ -8,8 +8,9 @@ function cutCard(cut) {
   const card = document.createElement('aside');
   card.className = `paper-cut cut-${cut.side}${cut.width > .65 ? ' cut-wide' : ''}`; card.contentEditable = 'false'; card.dataset.cutId = cut.id;
   card.style.width = `${cut.width * 100}%`;
-  card.innerHTML = `<div class="cut-controls"><button class="cut-grip" aria-label="Arrastar mídia" title="Arraste para posicionar na página">⠿ <span>Arraste</span></button><span><button data-size="-1" aria-label="Diminuir mídia">−</button><button data-size="1" aria-label="Aumentar mídia">+</button><button class="cut-remove" aria-label="Mover mídia para a lixeira">×</button></span></div><div class="cut-preview"></div>`;
+  card.innerHTML = `<div class="cut-controls"><button class="cut-grip" aria-label="Arrastar mídia" title="Arraste para posicionar na página">⠿ <span>Arraste</span></button><span><button class="cut-action" aria-label="Criar ação ligada à mídia" title="Criar tarefa ou lembrete">${commandIcon('check')}</button><button data-size="-1" aria-label="Diminuir mídia">−</button><button data-size="1" aria-label="Aumentar mídia">+</button><button class="cut-remove" aria-label="Mover mídia para a lixeira">×</button></span></div><div class="cut-preview"></div>`;
   fillCutPreview(card, cut);
+  card.querySelector('.cut-action').onclick=()=>openSourceComposer({kind:'cut',cutId:cut.id,quote:cut.title||'Imagem'});
   card.querySelector('.cut-remove').onclick = async () => { if (await action('cut:trash', { id: cut.id })) { renderPage(); toast('Mídia guardada na lixeira de notas.'); } };
   card.querySelectorAll('[data-size]').forEach(button => button.onclick = async () => {
     if (await action('cut:layout', { id: cut.id, side: cut.side, anchor: cut.anchor, width: Math.max(.25, Math.min(.85, cut.width + Number(button.dataset.size) * .1)) })) renderPage();
@@ -70,9 +71,10 @@ document.addEventListener('paste', event => {
   else if(event.target.closest('.table-cell-text')) { event.preventDefault();document.execCommand('insertText',false,event.clipboardData.getData('text/plain')); }
   else if (getSelection().anchorNode?.parentElement?.closest('.writing-line')) { event.preventDefault(); pasteWritingText(event.clipboardData.getData('text/plain')); }
 });
-document.addEventListener('dragover', event => { if (view === 'notes' && currentNote() && event.target.closest('#page-content')) { event.preventDefault(); $('#note-body')?.classList.add('drop-active'); } });
+document.addEventListener('dragover', event => { if(event.dataTransfer.types.includes('application/x-caderninho-action'))return; if (view === 'notes' && currentNote() && event.target.closest('#page-content')) { event.preventDefault(); $('#note-body')?.classList.add('drop-active'); } });
 document.addEventListener('dragleave', event => { if (!event.relatedTarget?.closest('#page-content')) $('#note-body')?.classList.remove('drop-active'); });
 document.addEventListener('drop', event => {
+  if(event.dataTransfer.types.includes('application/x-caderninho-action'))return;
   event.preventDefault(); $('#note-body')?.classList.remove('drop-active');
   if (view !== 'notes' || !currentNote() || !event.target.closest('#page-content')) return;
   const files = [...event.dataTransfer.files], text = event.dataTransfer.getData('text/uri-list').split('\n').find(line => line && !line.startsWith('#')) || event.dataTransfer.getData('text/plain');

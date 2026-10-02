@@ -51,3 +51,7 @@
 
 10. **[2026-10-01] Undo must include the custom paper editor**
    Do instead: use bounded per-page text/title snapshots for textarea and rich checkbox edits, intercept Ctrl/Cmd+Z and redo, route native menus to the same history, retain media/scheduling state, and reset the baseline after external quick-capture changes. Keep history session-local and autosave undo results to SQLite.
+
+
+11. **[2026-10-01] Actions preserve their page context**
+   Do instead: persist linked tasks and independent reminder alarms in source_actions, retaining the selected text and stable block/cut origin. Offer selection/menu drag and media creation with an inline collapsible margin, completion dates, edit/reschedule, daily/calendar navigation and typed trash. Resolve edited origins only when unambiguous; keep the original excerpt when removed. Keep margin controls outside contenteditable and verify native editor regressions plus source-action smoke tests. Run Electron smoke processes sequentially: they share a test data directory and desktop focus. Keep permanent origin highlights derived from source_actions, outside saved rich-text marks; reapply after formatting and undo.

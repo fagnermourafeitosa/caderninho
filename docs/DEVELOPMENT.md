@@ -28,6 +28,12 @@ Para executar apenas os cenários com teclado e mouse nativos:
 npm run test:app -- --native-only
 ```
 
+Para validar apenas ações ligadas a trechos e mídias:
+
+```sh
+npm run test:app -- --source-only
+```
+
 ## Gerar o pacote
 
 ```sh

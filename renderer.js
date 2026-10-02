@@ -50,6 +50,7 @@ function renderSidebar() {
   $('#sidebar-toggle').title = label;
 }
 function render() {
+  sourceDraft=null;
   hideEditorMenus();
   renderSidebar(); renderNotebookTabs();
   document.querySelectorAll('[data-view]').forEach(button => {
@@ -68,6 +69,7 @@ function renderPage() {
   const toolbar = `<div class="view-toolbar"><span class="toolbar-right">${view === 'reminders' ? '<button id="back-calendar">‹ Calendário</button>' : ''}<button id="notes-open">☰ &nbsp; ${label.heading} <span class="subtle">(${notes.length})</span></button></span><span class="toolbar-right">${view === 'notes' && note ? '<button id="add-block" class="add-note">+ Bloco</button><button id="add-cut" class="add-note">+ Adicionar mídia</button>' : ''}<button id="new-note" class="add-note">+ ${label.create}</button></span></div>`;
   if (!note) {
     $('#page-content').innerHTML = toolbar + empty({ notes: 'Uma página nova?', tasks: 'Sua primeira lista?', reminders: 'Uma nota para lembrar?' }[view], { notes: 'Escreva e deixe o caderninho guardar.', tasks: 'Crie uma lista com quantos checkboxes precisar.', reminders: 'Escreva uma nota e agende seu alerta sonoro.' }[view], view, `<button id="empty-create" class="primary">${label.create}</button>`);
+    if(view==='tasks'&&(state.sourceActions||[]).some(item=>item.kind==='task'&&item.notebookId===state.activeNotebook)){ $('#page-content').innerHTML=toolbar+'<div id="source-task-only" class="scroll-list"></div>';renderSourceTasks();$('#new-note').onclick=createNote;$('#notes-open').onclick=openDrawer;return;}
     $('#empty-create').onclick = createNote; $('#new-note').onclick = createNote; $('#notes-open').onclick = openDrawer; return;
   }
   const bottom = `<div class="note-bottom"><button id="trash-note" class="trash-page">Mover para a lixeira</button><span id="page-detail"></span><div class="note-pager"><button id="previous-note" aria-label="Página anterior" ${index <= 0 ? 'disabled' : ''}>‹</button><span>${index + 1} / ${notes.length}</span><button id="next-note" aria-label="Próxima página" ${index >= notes.length - 1 ? 'disabled' : ''}>›</button></div></div>`;
@@ -99,6 +101,8 @@ function renderPage() {
   $('#next-note').onclick = () => turn('note:select', { id: notes[index + 1].id });
   updateTemporalLabels();
   renderCategoryBadges(); wireNotebookAssociation(note);
+  if(view==='notes') renderSourceMargin();
+  if(view==='tasks') renderSourceTasks();
   ensurePageHistory(note);
   updateDetail();
 }
@@ -138,6 +142,7 @@ function renderItems() {
     input.oninput=event=>{const cursor=categoryCursorFor(event,input);input.dataset.pendingCategory=String(cursor!==null&&categoryText.tokens(input.value).some(token=>cursor>token.start&&cursor<=token.end));action('item:update',{id:input.dataset.itemText,title:input.value,categoryCursor:cursor});};
     input.onblur=()=>{if(input.dataset.pendingCategory==='true'){input.dataset.pendingCategory='false';action('item:update',{id:input.dataset.itemText,title:input.value});}};
   });
+  renderSourceTasks();
   document.querySelectorAll('[data-trash-item]').forEach(button => button.onclick = async () => {
     if (await action('item:trash', { id: button.dataset.trashItem })) { renderItems(); toast('Tarefa movida para a lixeira de tarefas.'); }
   });
@@ -212,7 +217,8 @@ function renderTrash() {
   const rows = state.notes.filter(note => note.trashed && note.type === trashType).map(note => ({ ...note, kind: 'note', detail: `${note.deletedAt ? 'Removida em '+formatDateTime(note.deletedAt) : 'Data da remoção não registrada'} · ${note.type === 'tasks' ? `${note.items.length} tarefas` : note.body.replace(/\s+/g, ' ').slice(0, 50)}` }));
   if (trashType === 'tasks') rows.push(...state.trashItems.map(item => ({ ...item, kind: 'item', detail: `Item da lista ${item.noteTitle || 'Sem título'}` })));
   if (trashType === 'notes') rows.push(...(state.trashCuts || []).map(cut => ({ ...cut, kind: 'cut', detail: `Mídia da nota ${state.notes.find(note => note.id === cut.noteId)?.title || 'Sem título'}` })));
-  const count = type => state.notes.filter(note => note.trashed && note.type === type).length + (type === 'tasks' ? state.trashItems.length : type === 'notes' ? (state.trashCuts || []).length : 0);
+  rows.push(...(state.trashSourceActions||[]).filter(item=>item.kind===(trashType==='tasks'?'task':trashType==='reminders'?'reminder':'none')).map(item=>({...item,kind:'source',detail:'Ação da nota '+item.noteTitle})));
+  const count = type => (state.trashSourceActions||[]).filter(item=>item.kind===(type==='tasks'?'task':type==='reminders'?'reminder':'none')).length + state.notes.filter(note => note.trashed && note.type === type).length + (type === 'tasks' ? state.trashItems.length : type === 'notes' ? (state.trashCuts || []).length : 0);
   $('#page-content').innerHTML = `<div class="view-toolbar"><span>LIXEIRA</span><span>${rows.length} ${rows.length === 1 ? 'item' : 'itens'}</span></div><h1>Guardado por tipo</h1><p class="view-description">Restaure uma página ou exclua definitivamente.</p><div class="trash-tabs">${Object.entries(labels).map(([type]) => `<button data-trash-type="${type}" class="${trashType === type ? 'active' : ''}" aria-pressed="${trashType === type}">${{ notes: 'Notas', tasks: 'Tarefas', reminders: 'Lembretes' }[type]} (${count(type)})</button>`).join('')}</div><div class="scroll-list">${rows.length ? rows.map(row => `<div class="archive-row"><div class="row-copy"><strong>${escape(row.title || 'Sem título')}</strong><small>${escape(row.detail)}</small></div><div class="trash-actions"><button data-restore-id="${escape(row.id)}" data-kind="${row.kind}">Restaurar</button><button class="purge" data-purge-id="${escape(row.id)}" data-kind="${row.kind}">Excluir definitivamente</button></div></div>`).join('') : empty('Lixeira vazia por aqui.', `As ${trashType === 'tasks' ? 'listas e tarefas removidas' : trashType === 'reminders' ? 'notas de lembrete removidas' : 'notas removidas'} ficam nesta seção.`, 'archive')}</div>`;
   document.querySelectorAll('[data-trash-type]').forEach(button => button.onclick = () => { trashType = button.dataset.trashType; renderTrash(); });
   document.querySelectorAll('[data-restore-id]').forEach(button => button.onclick = async () => { if (await turn(button.dataset.kind + ':restore', { id: button.dataset.restoreId })) toast('De volta ao caderno.'); });
@@ -292,7 +298,7 @@ window.notebook.onNavigate(next => { cancelTurn(); closeDrawer(); state = next; 
 window.notebook.onReminder(async reminders => {
   state = await window.notebook.state();
   if (view === 'reminders') { if (reminderEditor) renderSchedule(); else renderReminderCalendar(); }
-  if (view === 'notes') renderSmartMargin();
+  if (view === 'notes') {renderSmartMargin();renderSourceMargin();}
   if (view === 'home') refreshHomePanels();
   updateTemporalLabels();
   toast(`Lembrete: ${reminders.map(reminder => reminder.title || 'Sem título').join(' · ')}`, 12000);

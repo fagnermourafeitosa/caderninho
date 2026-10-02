@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('notebook', {
   onDayUpdated: callback => ipcRenderer.on('notebook:day-updated', (_event, state) => callback(state)),
   onHistory: callback => ipcRenderer.on('notebook:history', (_event, direction) => callback(direction)),
+  onSourceOrigin: callback => ipcRenderer.on('notebook:source-origin', (_event, id) => callback(id)),
   state: () => ipcRenderer.invoke('notebook:state'),
   action: (action, input) => ipcRenderer.invoke('notebook:action', action, input),
   purge: (kind, id) => ipcRenderer.invoke('notebook:purge', kind, id),

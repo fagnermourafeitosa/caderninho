@@ -160,3 +160,21 @@ Para restaurar, feche o app, guarde uma cópia da pasta atual e substitua-a pela
 
 Se aparecer **Falha ao salvar**, confira o espaço livre e as permissões da pasta antes de fechar o aplicativo. Não remova arquivos auxiliares do banco enquanto o app estiver aberto.
 
+
+
+## Ações ligadas à página
+
+Selecione um trecho de uma nota e clique no **ícone de tarefa** no menu de formatação. Você também pode arrastar esse botão até a margem. Em imagens e cartões de link, use o **ícone de tarefa** na faixa de controles da mídia.
+
+Escolha **Tarefa** ou **Lembrete**, escreva seu próximo passo e, para um lembrete, defina dia e hora. A criação não modifica o texto original nem cria uma segunda nota. Uma mesma página pode ter várias ações e vários alertas independentes.
+
+- Trechos com ações recebem um destaque suave e tracejado permanente. Concluir a tarefa muda o destaque para verde.
+- A margem guarda as ações junto de uma cópia do contexto. Use a seta ao lado de **Ações desta nota** para recolhê-la.
+- Tarefas também aparecem na Página do dia e em **Tarefas**, na seção **Da margem das notas** do caderno atual.
+- Lembretes aparecem no calendário e na Página do dia do agendamento. O app precisa estar aberto para tocar o alerta.
+- **Ver origem** e **Voltar à origem** abrem a nota e destacam o trecho ou a mídia.
+- O lápis permite editar a tarefa ou reagendar o lembrete. A conclusão deixa um carimbo com a data; desmarcar mantém o histórico.
+- Se a origem mudar ou for removida, a cópia do trecho continua disponível e a margem avisa quando não consegue localizar o conteúdo.
+- O botão **×** move a ação para a lixeira de tarefas ou lembretes, onde ela pode ser restaurada. Remover a ação preserva a nota original.
+
+No formulário, **Esc** cancela e devolve a seleção de texto. Nada é criado até confirmar em **Criar tarefa** ou **Agendar lembrete**.

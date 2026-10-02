@@ -143,7 +143,7 @@ function checkReminders() {
       notification.on('click', () => {
         try {
           const note = store.note(reminder.id);
-          if (!note.trashed) win?.webContents.send('notebook:navigate', store.dispatch('note:select', { id: note.id }));
+          if (!note.trashed) {win?.webContents.send('notebook:navigate', store.dispatch('note:select', { id: note.id }));if(reminder.sourceActionId)win?.webContents.send('notebook:source-origin',reminder.sourceActionId);}
         } catch (error) { console.error(error.message); }
         if (win?.isMinimized()) win.restore(); win?.show(); win?.focus();
       });
@@ -171,14 +171,14 @@ ipcMain.handle('quick:reveal', (_event, id) => {
   if (win?.isMinimized()) win.restore(); win?.show(); win?.focus(); quickWin?.hide();
 });
 ipcMain.handle('notebook:action', (_event, action, input) => {
-  if (['note:purge','item:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
+  if (['source:purge','note:purge','item:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
   try { const state = store.dispatch(action, input); saveFailed = false; return state; }
   catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
 });
 ipcMain.handle('notebook:purge', async (_event, kind, id) => {
-  if (!['note', 'item', 'cut'].includes(kind)) throw new Error('Tipo inválido.');
-  const item = kind === 'note' ? store.note(id) : kind === 'cut' ? store.cut(id) : store.item(id);
-  if (!item.trashed) throw new Error('Este item não está na lixeira.');
+  if (!['note', 'item', 'cut', 'source'].includes(kind)) throw new Error('Tipo inválido.');
+  const item = kind === 'source' ? store.db.prepare('SELECT *,deleted_at AS trashed FROM source_actions WHERE id=?').get(id) : kind === 'note' ? store.note(id) : kind === 'cut' ? store.cut(id) : store.item(id);
+  if (!item || !item.trashed) throw new Error('Este item não está na lixeira.');
   const result = await dialog.showMessageBox(win, { type: 'warning', title: 'Excluir definitivamente?', message: `Excluir “${item.title || 'Sem título'}”?`, detail: 'Esta ação não pode ser desfeita.', buttons: ['Cancelar', 'Excluir definitivamente'], defaultId: 0, cancelId: 0, noLink: true });
   if (result.response !== 1) return null;
   const state = store.dispatch(kind + ':purge', { id }); media.collect(); saveFailed = false; return state;
@@ -275,6 +275,7 @@ async function runNativeEditorSmoke(){
 }
 async function runSmoke() {
   try {
+    if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(__dirname,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript('openSourceComposer(actionsForNote()[0].origin)');await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(__dirname,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());app.quit();return;}
     if(process.argv.includes('--native-only')){await runNativeEditorSmoke();app.quit();return;}
     if(process.argv.includes('--editor-only')) {
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
@@ -394,6 +395,7 @@ async function runSmoke() {
     const editorResult=await win.webContents.executeJavaScript(smokeScript('editor-smoke.js'));
     if(editorResult.errors.length)throw new Error(editorResult.errors.join('\n'));
     fs.writeFileSync(path.join(__dirname,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+    console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'))));
     console.log('EDITOR_SMOKE_OK',JSON.stringify(editorResult));
     await runNativeEditorSmoke();
     console.log('SELECTION_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('selection-smoke.js'))));

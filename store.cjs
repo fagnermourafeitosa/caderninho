@@ -6,6 +6,7 @@ const { installTemporal, event, syncInline, taskDTO } = require('./temporal.cjs'
 const {installCategories,category,associate,detach,syncCategories,categoryState}=require('./categories.cjs');
 const {COLORS,installNotebooks,getNotebook,activeNotebook,notebookCommand,notebookState}=require('./notebooks.cjs');
 const pageDocument=require('./editor-document.js');
+const {installSourceActions,sourceActions,sourceCommand,dueSourceActions}=require('./source-actions.cjs');
 const TYPES = ['notes', 'tasks', 'reminders'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
 const iso = value => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
@@ -62,6 +63,7 @@ class Store {
     installTemporal(this);
     installCategories(this);
     installNotebooks(this);
+    installSourceActions(this);
     if (!this.getSetting('initialized')) this.initialize();
     const draft = this.draft(); if ((draft.title || draft.body) && (!draft.id || !draft.notebookId)) this.setSetting('quick_draft',JSON.stringify({...draft,id:draft.id || randomUUID(),notebookId:draft.notebookId || activeNotebook(this)}));
     if (!this.getSetting('inline_initialized')) this.transaction(() => { for (const note of this.db.prepare("SELECT * FROM notes WHERE type='notes'").all()) syncInline(this,note,new Date(this.now()).toISOString(),true); this.setSetting('inline_initialized','1'); });
@@ -135,8 +137,12 @@ class Store {
     const active = new Map(notes.map(note => [note.id, note]));
     let tasks = this.db.prepare('SELECT * FROM task_items WHERE trashed=0 ORDER BY done,position,rowid').all().filter(item => active.has(item.note_id) && (!item.done || (item.completed_at && this.dayKey(item.completed_at) === day))).map(item => ({ id: item.id, noteId: item.note_id, listTitle: active.get(item.note_id).title, title: item.title, source:'list', ...taskDTO(item) }));
     tasks.push(...this.db.prepare('SELECT * FROM inline_tasks WHERE deleted_at IS NULL ORDER BY done,line_index').all().filter(item => active.has(item.note_id) && (!item.done || (item.checked_at && this.dayKey(item.checked_at) === day))).map(item => ({...taskDTO(item),noteId:item.note_id,listTitle:'Nota · '+active.get(item.note_id).title,source:'inline'})));
+    const linked=sourceActions(this);
+    tasks.push(...linked.filter(item=>item.kind==='task'&&(!item.done||(item.checkedAt&&this.dayKey(item.checkedAt)===day))).map(item=>({...item,source:'source',listTitle:'Na margem · '+item.noteTitle})));
     tasks.sort((a,b) => Number(a.done)-Number(b.done));
     const reminders = notes.filter(note => note.scheduled_at && this.dayKey(note.scheduled_at) === day && (note.reminder_enabled || note.fired)).sort((a,b) => a.scheduled_at.localeCompare(b.scheduled_at)).map(note => ({ id: note.id, title: note.title, due: note.scheduled_at, fired: Boolean(note.fired), created:note.created,updated:note.updated,body: note.body.slice(0, 180) }));
+    reminders.push(...linked.filter(item=>item.kind==='reminder'&&this.dayKey(item.due)===day).map(item=>({...item,id:item.noteId,sourceActionId:item.id,body:item.origin.quote})));
+    reminders.sort((a,b)=>a.due.localeCompare(b.due));
     const recentNotes = notes.filter(note => note.type === 'notes').slice(0, 4).map(note => ({ id: note.id, title: note.title, body: note.body.replace(/\s+/g, ' ').slice(0, 140), created:note.created,updated: note.updated }));
     const overview = JSON.stringify({ tasks, reminders, recentNotes });
     this.db.prepare('INSERT INTO daily_pages(day,overview,created,updated) VALUES(?,?,?,?) ON CONFLICT(day) DO UPDATE SET overview=excluded.overview,updated=excluded.updated WHERE daily_pages.overview<>excluded.overview').run(day, overview, stamp, stamp);
@@ -160,7 +166,7 @@ class Store {
     const day = days.includes(this.getSetting('selected_day')) ? this.getSetting('selected_day') : today;
     const row = this.db.prepare('SELECT * FROM daily_pages WHERE day=?').get(day);
     const daily = { day, today, body: row.body, created:row.created,updated:row.updated, overview: JSON.parse(row.overview), days };
-    return { version: 2, notebooks:notebookState(this),activeNotebook:activeBook,notebookColors:COLORS, categories, daily, notes, selected, trashItems, trashCuts: cuts.filter(cut => cut.trashed && notes.some(note => note.id === cut.noteId && !note.trashed)), activeView: this.getSetting('active_view') || 'home', sidebarCollapsed: this.getSetting('sidebar_collapsed') === '1', storagePath: this.file };
+    return { version: 2, sourceActions:sourceActions(this),trashSourceActions:sourceActions(this,true), notebooks:notebookState(this),activeNotebook:activeBook,notebookColors:COLORS, categories, daily, notes, selected, trashItems, trashCuts: cuts.filter(cut => cut.trashed && notes.some(note => note.id === cut.noteId && !note.trashed)), activeView: this.getSetting('active_view') || 'home', sidebarCollapsed: this.getSetting('sidebar_collapsed') === '1', storagePath: this.file };
   }
   note(id, type) {
     const note = this.db.prepare('SELECT * FROM notes WHERE id=?').get(id);
@@ -183,6 +189,7 @@ class Store {
         if(selectedId&&this.db.prepare('SELECT id FROM notes WHERE id=? AND trashed=0').get(selectedId)) syncCategories(this,selectedId,stamp);
       }
       if(notebookCommand(this,action,input,stamp)) return;
+      if(sourceCommand(this,action,input,stamp)) return;
       switch (action) {
         case 'category:finalize': break;
         case 'category:attach': {
@@ -318,6 +325,7 @@ class Store {
         case 'note:restore': {
           const note = this.note(input.id);
           this.db.prepare('UPDATE notes SET trashed=0,deleted_at=NULL,updated=?,reminder_enabled=? WHERE id=?').run(stamp,Number(Boolean(note.reminder_enabled && (!note.scheduled_at || Date.parse(note.scheduled_at) > this.now()))), note.id);
+          this.db.prepare("UPDATE source_actions SET cancelled_at=?,updated_at=? WHERE note_id=? AND kind='reminder' AND fired_at IS NULL AND due<=?").run(stamp,stamp,note.id,stamp);
           event(this,'note',note.id,'restore',stamp); this.select(note); break;
         }
         case 'note:purge': {
@@ -390,7 +398,7 @@ class Store {
     return this.transaction(() => {
       const rows = this.db.prepare("SELECT * FROM notes WHERE type IN ('notes','reminders') AND trashed=0 AND reminder_enabled=1 AND fired=0 AND scheduled_at<=? ORDER BY scheduled_at").all(new Date(this.now()).toISOString());
       for (const row of rows) { const stamp=new Date(this.now()).toISOString(); this.db.prepare('UPDATE notes SET fired=1,reminder_enabled=0,fired_at=?,updated=? WHERE id=?').run(stamp,stamp,row.id); event(this,'note',row.id,'fire',stamp); }
-      return rows.map(row => this.dto(row));
+      return [...rows.map(row => this.dto(row)),...dueSourceActions(this,new Date(this.now()).toISOString())];
     });
   }
   flush() { this.db.exec('PRAGMA wal_checkpoint(PASSIVE)'); }

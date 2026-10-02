@@ -72,6 +72,7 @@ function editPageHistory(direction) {
       // Do not remove an edit made while the save was in flight.
       if (history.current.title === restored.title && history.current.body === restored.body) history.step(direction === 'undo' ? 'redo' : 'undo');
     }
+    if(view==='notes'&&currentNote()?.id===noteId)renderSourceMargin();
   }).catch(error => toast(error.message));
   return undoQueue;
 }
