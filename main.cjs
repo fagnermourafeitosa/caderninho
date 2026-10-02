@@ -248,6 +248,10 @@ async function runNativeEditorSmoke(){
   // Recover browser-created paragraphs rather than silently saving an empty document.
   await js("$('#note-body').innerHTML='<div>Texto visível</div><div>Outra linha</div>';const editor=$('#note-body');editor.focus();const r=document.createRange();r.selectNodeContents(editor);r.collapse(false);getSelection().removeAllRanges();getSelection().addRange(r);editor.dispatchEvent(new InputEvent('input',{bubbles:true}));");await pause();
   if(!await js("currentNote().body==='Texto visível\\nOutra linha'"))throw new Error('Native unwrapped paragraphs were not recovered');
+  await setup();await js("putCaret($('#note-body .line-text'),0)");key('ArrowRight',['shift','meta']);await pause();
+  const clickFormat=async selector=>{const point=await js(`(()=>{const button=document.querySelector(${JSON.stringify(selector)});if(!button)throw Error('Botão contextual ausente');const r=button.getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`);win.webContents.sendInputEvent({type:'mouseDown',button:'left',clickCount:1,...point});win.webContents.sendInputEvent({type:'mouseUp',button:'left',clickCount:1,...point});await pause();};
+  await clickFormat('[data-format=highlight]');await pause();await clickFormat('[data-highlight]');
+  if(!await js("currentNote().editorDoc[0].runs.some(run=>run.marks.highlight)&&$('#note-body mark')"))throw Error('Marca-texto por clique nativo não persistiu');
   console.log('NATIVE_EDITOR_SMOKE_OK');
 }
 async function runSmoke() {

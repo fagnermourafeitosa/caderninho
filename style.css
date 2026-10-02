@@ -190,3 +190,5 @@ button.related-whisper:focus-visible { outline:2px solid #ab8847; outline-offset
 @media(prefers-reduced-motion:reduce) {.category-bounce {animation:none;}}
 
 @media(max-width:1000px){#export-pdf .toolbar-action-label{display:none;}}
+
+.format-menu>button>svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}

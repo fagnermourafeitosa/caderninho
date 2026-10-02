@@ -27,6 +27,9 @@
 4. **[2026-10-01] Actions preserve their page context**
    Do instead: persist linked tasks and independent reminder alarms in source_actions, retaining the selected text and stable block/cut origin. Offer selection/menu drag and media creation with an inline collapsible margin, completion dates, edit/reschedule, daily/calendar navigation and typed trash. Resolve edited origins only when unambiguous; keep the original excerpt when removed. Keep margin controls outside contenteditable and verify native editor regressions plus source-action smoke tests. Run Electron smoke processes sequentially: they share a test data directory and desktop focus. Keep permanent origin highlights derived from source_actions, outside saved rich-text marks; reapply after formatting and undo.
 
+5. **[2026-10-02] Selection changes must preserve contextual submenus**
+   Do instead: do not rebuild the formatting toolbar for an unchanged DOM range; opening a color palette restores Selection and queues selectionchange. Test separate clicks with an event-loop delay and native mouse input, including link dialog focus. Use sized stroke-only SVG icons for formatting controls.
+
 ## Documentation
 1. **[2026-10-01] User-facing Portuguese README**
    Do instead: lead with actual features and local storage, emphasize no cloud upload or accounts; explain link-preview website requests accurately and avoid design commentary in the opening.

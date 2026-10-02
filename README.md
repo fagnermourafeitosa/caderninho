@@ -31,6 +31,8 @@ No dia seguinte, a página anterior continua disponível para consulta. Você ac
 
 Uma nota pode começar com uma frase e ganhar títulos, listas, checkboxes, citações e tabelas. Selecione o texto para formatar ou digite `/` para encontrar o bloco de que precisa, direto na página.
 
+A barra contextual aparece ao selecionar um trecho, inclusive nas células de uma tabela. Use **Marca-texto** para escolher uma cor na paleta ou remover o destaque; use **Link** para inserir um endereço e **Código** para destacar um trecho de programação. A formatação é salva automaticamente e permanece ao reabrir a nota.
+
 ![Nota com categorias, títulos, lista, citação e tabela no editor do Caderninho](docs/images/editor.png)
 
 - **Editor com formatação:** negrito, itálico, sublinhado, tachado, links, código e marca-texto.
