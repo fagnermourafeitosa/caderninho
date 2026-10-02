@@ -32,7 +32,7 @@
 
 ## Documentation
 1. **[2026-10-01] User-facing Portuguese README**
-   Do instead: lead with actual features and local storage, emphasize no cloud upload or accounts; explain link-preview website requests accurately and avoid design commentary in the opening.
+   Do instead: focus README on distinctive benefits (source-linked actions, related ideas, collage and daily history), use real screenshots with fictional data, and omit technical implementation details and obvious editing features. Keep setup/technical instructions in linked guides; explain external link-preview requests accurately.
 
 ## User Directives
 1. **[2026-10-01] Daily overview and temporal records**

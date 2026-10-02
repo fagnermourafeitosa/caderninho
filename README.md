@@ -5,114 +5,70 @@
 <h1 align="center">Caderninho</h1>
 
 <p align="center">
-  <strong>Notas, tarefas e lembretes. Tudo no seu computador.</strong>
+  <strong>Um lugar para suas ideias — e para o que nasce delas.</strong>
 </p>
 
 <p align="center">
-  Organize seus projetos em cadernos, capture ideias e acompanhe o dia.<br>
-  Sem criar uma conta. Sem enviar suas páginas para a nuvem.
+  Escreva, reúna referências e transforme trechos da página em próximos passos.<br>
+  Tudo no seu computador, sem criar uma conta.
 </p>
 
 <p align="center">
-  <a href="#seu-dia-em-uma-página">Conheça o aplicativo</a> ·
+  <a href="#da-anotação-ao-próximo-passo">Conheça o Caderninho</a> ·
   <a href="docs/INSTALLATION.md">Instalação no Mac</a> ·
   <a href="docs/USER_GUIDE.md">Guia de uso</a>
 </p>
 
-![Página do dia do Caderninho com tarefas, lembretes, notas recentes e espaço para escrever](docs/images/pagina-do-dia.png)
+![Uma nota com tarefas e lembrete na margem, ligados aos trechos que deram origem a cada ação](docs/images/acoes-na-nota.png)
 
-## Seu dia em uma página
+## Da anotação ao próximo passo
 
-Comece com uma visão do que merece atenção: tarefas pendentes, itens concluídos, lembretes e suas últimas notas. Um espaço livre de escrita permite registrar ideias e acontecimentos sem sair dessa tela.
+Uma ideia vira tarefa sem precisar sair da nota. Selecione um trecho e crie uma tarefa ou um lembrete na margem. Uma imagem ou referência também pode dar origem a uma ação.
 
-No dia seguinte, a página anterior continua disponível para consulta. Você acompanha o presente sem perder o que ficou para trás.
+O trecho fica marcado na página, e a ação guarda o caminho de volta à origem. Você sabe **o que fazer e por que aquilo importa**, mesmo quando retoma o assunto dias depois.
 
-## Escreva uma ideia. Dê forma a ela.
+As tarefas entram na Página do dia e os lembretes no calendário. Conclua, reagende ou volte à anotação que começou tudo.
 
-Uma nota pode começar com uma frase e ganhar títulos, listas, checkboxes, citações e tabelas. Selecione o texto para formatar ou digite `/` para encontrar o bloco de que precisa, direto na página.
+## Ideias que encontram outras ideias
 
-A barra contextual aparece ao selecionar um trecho, inclusive nas células de uma tabela. Use **Marca-texto** para escolher uma cor na paleta ou remover o destaque; use **Link** para inserir um endereço e **Código** para destacar um trecho de programação. A formatação é salva automaticamente e permanece ao reabrir a nota.
+O Caderninho aproxima páginas que falam de assuntos parecidos, mesmo quando você usa palavras diferentes. Notas, listas e lembretes do mesmo caderno podem se conectar; o texto das imagens também ajuda a encontrar essas relações.
 
-![Nota com categorias, títulos, lista, citação e tabela no editor do Caderninho](docs/images/editor.png)
+![Conexões entre a nota da viagem, referências de trilhas, uma lista de preparativos e um lembrete](docs/images/relacionados.png)
 
-- **Editor com formatação:** negrito, itálico, sublinhado, tachado, links, código e marca-texto.
-- **Tabelas com seleção visual:** escolha linhas e colunas passando o mouse pela grade.
-- **Imagens e cartões de links:** cole ou arraste conteúdos para perto das suas anotações.
-- **Categorias com autocomplete:** digite `#` e a primeira letra para encontrar categorias já cadastradas. Escolha com as setas e confirme com Enter, Tab ou clique; a busca ignora acentos e maiúsculas.
-- **Salvamento automático:** acompanhe a confirmação de salvamento sem interromper a escrita.
+No rodapé, as páginas mais próximas vêm primeiro. No grafo, ficam mais perto do centro. Clique em uma delas e continue de onde aquela ideia te levou.
 
-## Suas referências, coladas na página
+As conexões acompanham suas mudanças e são encontradas no seu computador, sem enviar o conteúdo das páginas para a nuvem.
 
-Cole ou arraste imagens e links para a nota. Posicione as mídias como pedacinhos de papel, ajuste o tamanho e escreva ao redor. Os cartões de links guardam título, descrição e imagem quando o site disponibiliza uma prévia.
+## Referências com lugar na página
 
-![Página com imagem e cartão de link posicionados como colagem, com anotações ao redor](docs/images/colagem.png)
+Uma paisagem, um roteiro, uma inspiração: cole ou arraste imagens e links para perto do que está escrevendo. Posicione os recortes e escreva ao redor, como num caderno de papel.
 
-## Da ideia à ação, sem perder o contexto
+![Paisagem e cartão de referência organizados junto às anotações de uma viagem](docs/images/colagem.png)
 
-Selecione um trecho da nota e use o **ícone de tarefa**, ou use a mesma opção em uma imagem ou cartão de link. Defina uma tarefa ou um lembrete na margem, sem sair da página.
+A referência fica junto da ideia que ela despertou. E, quando surgir algo para fazer a partir dela, a ação pode ficar ali também.
 
-![Nota com trechos marcados e ações associadas: tarefa pendente, tarefa concluída e lembrete](docs/images/acoes-na-nota.png)
+## O dia tem uma página própria
 
-Cada ação mantém uma cópia do trecho original e um caminho de volta à origem. As tarefas aparecem na Página do dia; os lembretes também entram no calendário. Você pode concluir, editar, reagendar ou recolher a margem para continuar escrevendo.
+Tarefas das suas listas e das margens das notas se encontram com os lembretes e as páginas recentes. Você acompanha o dia sem precisar abrir cada projeto para descobrir o que ficou pendente.
 
-## Reencontre ideias que se conectam
+![Página do dia reunindo tarefas das listas e da margem de uma nota, lembretes e um registro diário](docs/images/pagina-do-dia.png)
 
-![Grafo com notas, tarefas e lembretes relacionados à viagem à serra](docs/images/relacionados.png)
+Há espaço para escrever sobre o dia. Amanhã, a página de hoje continua disponível para consulta — suas anotações e o retrato daquele momento ficam guardados.
 
-Enquanto você escreve, o Caderninho procura relações com outras notas, tarefas e lembretes do mesmo caderno. As conexões aparecem discretamente no rodapé, da mais próxima para a menos próxima. Abra **Relacionados** para explorá-las em um grafo: quanto maior a afinidade com a página central, menor a distância até ela. Um clique leva à página de origem.
+## Um caderno para cada assunto
 
-O texto de imagens também participa, com reconhecimento local no Mac. O primeiro uso baixa o modelo de análise; depois, as conexões são calculadas no seu computador, inclusive sem internet. Ao editar o texto, adicionar ou remover uma imagem, o aplicativo atualiza as conexões automaticamente e reutiliza a análise do conteúdo que não mudou.
+Separe projetos, estudos e vida pessoal em cadernos, com abas coloridas para trocar entre eles. Categorias atravessam as páginas de cada caderno: comece a escrever uma hashtag e encontre as que você já usa.
 
-## Transforme planos em próximos passos
+Quer levar uma página com você? Exporte para PDF e guarde ou compartilhe suas anotações, referências e ações com o mesmo fundo de papel.
 
-Crie listas independentes para a rotina, um projeto ou uma viagem. Cada lista tem título, categorias e seus próprios itens, com progresso e registro de conclusão.
+## Seu caderninho fica com você
 
-![Lista de tarefas com itens concluídos e pendentes, categoria e indicador de progresso](docs/images/tarefas.png)
+Sem conta e sem sincronização com a nuvem. Suas páginas e imagens ficam no seu computador; você pode escrever e consultar o que guardou sem internet.
 
-As tarefas também aparecem na Página do dia. Marque uma delas ali e a lista original acompanha a mudança.
+A prévia de um link consulta o site indicado. As conexões entre páginas precisam de um download inicial para começar a funcionar; depois, também estão disponíveis sem internet.
 
-## Lembre do que importa, na hora certa
-
-Consulte os compromissos no calendário mensal e abra a nota por trás de cada lembrete. Agende dia e hora para receber um alerta sonoro.
-
-![Calendário de lembretes com marcações nos dias agendados](docs/images/calendario.png)
-
-Escreveu `amanhã às 14h` em uma nota? O Caderninho oferece um carimbo para agendar o lembrete. Você confere a data e decide quando ativá-lo.
-
-> Para emitir alertas, o aplicativo precisa estar aberto, mesmo que minimizado. Se o horário passar com o app fechado ou o computador dormindo, o alerta será emitido quando ele voltar a funcionar.
-
-## Leve uma página com você
-
-Use **Exportar PDF** na barra de uma nota, lista ou lembrete e escolha onde salvar o arquivo. O PDF mantém título, categorias, datas, texto formatado, tabelas, checkboxes, imagens e cartões de links, além das tarefas e lembretes ligados à página.
-
-O fundo de papel cobre toda a folha A4, incluindo as margens. Conteúdos longos continuam em páginas numeradas. As últimas alterações são salvas antes da exportação, e a geração acontece no seu computador, sem internet.
-
-## Um caderno para cada parte da sua vida
-
-Separe trabalho, estudos e projetos pessoais em cadernos com nome, descrição e cor. As abas laterais deixam a troca de contexto sempre à mão, e você pode mover páginas entre cadernos quando seus planos mudarem.
-
-| Recurso | O que você ganha |
-| --- | --- |
-| **Exportação para PDF** | Guarde ou compartilhe uma página com texto formatado, tabelas, imagens e tarefas. |
-| **Categorias reutilizáveis** | Identifique assuntos com etiquetas abaixo do título ou hashtags no texto. |
-| **Página do dia** | Reúna tarefas, lembretes e anotações em uma visão diária. |
-| **Lixeira por tipo** | Recupere páginas, itens de tarefas e mídias removidos. |
-| **Datas de atividade** | Consulte quando uma página foi criada, atualizada ou uma tarefa foi concluída. |
-
-## Seus dados ficam com você
-
-O Caderninho guarda suas páginas em **SQLite** e suas imagens em uma pasta local. Não há conta, servidor de armazenamento nem sincronização com a nuvem.
-
-Você pode escrever, organizar e consultar o conteúdo salvo **sem internet**. A criação de uma prévia de link acessa apenas o site indicado para obter título, descrição e imagem; suas notas não são enviadas nessa consulta.
-
-O backup fica sob seu controle: basta copiar a pasta de dados com o aplicativo fechado. O [guia de uso](docs/USER_GUIDE.md#seus-dados-ficam-no-seu-computador) explica onde ela fica e como restaurá-la.
-
-## Comece a usar
-
-O aplicativo pode ser gerado e instalado no macOS a partir deste projeto. Consulte as [instruções de instalação](docs/INSTALLATION.md).
-
-Quer conhecer os detalhes antes de começar? Veja o [guia de uso](docs/USER_GUIDE.md), com atalhos, organização de cadernos, mídia e lembretes.
+Veja como instalar no [guia para Mac](docs/INSTALLATION.md) e conheça os detalhes no [guia de uso](docs/USER_GUIDE.md).
 
 ---
 
-As capturas mostram o aplicativo real com dados fictícios de demonstração. Para executar testes ou contribuir com o código, consulte o [guia de desenvolvimento](docs/DEVELOPMENT.md).
+As imagens mostram o aplicativo real com exemplos fictícios.

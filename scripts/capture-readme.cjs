@@ -40,7 +40,7 @@ app.whenReady().then(async()=>{
   create('notes','Livros para a próxima leitura','Guardar aqui os títulos que surgirem nas conversas.');
   create('notes','Uma ideia para o fim de semana','Visitar a feira, comprar flores e preparar um almoço com calma.');
   const tasks=create('tasks','Uma semana mais leve');command('category:attach',{noteId:tasks,name:'rotina'});
-  for(const [title,done] of [['Organizar a mesa de trabalho',true],['Separar os livros para doação',true],['Agendar a consulta de rotina',false],['Planejar as refeições da semana',false],['Reservar uma noite para descansar',false]]){
+  for(const [title,done] of [['Organizar a mesa de trabalho',true],['Separar os livros para doação',true],['Agendar a consulta de rotina',false]]){
     const snapshot=command('item:create',{noteId:tasks,title}),item=snapshot.notes.find(n=>n.id===tasks).items.at(-1);if(done)command('item:toggle',{id:item.id});
   }
   for(const [day,hour,title] of [[1,14,'Revisar o planejamento'],[1,18,'Pausa para caminhar'],[3,10,'Café com a Ana'],[7,15,'Consulta de rotina'],[15,9,'Revisar as metas do mês'],[22,16,'Separar os documentos']]){
@@ -66,7 +66,7 @@ app.whenReady().then(async()=>{
     const errors=await win.webContents.executeJavaScript('window.smokeErrors');if(errors.length)throw new Error(errors.join('\n'));
     fs.writeFileSync(path.join(outputDirectory,name),(await win.webContents.capturePage()).resize({width:1440}).toPNG());
   };
-  if(!process.argv.includes('--features-only')) {
+  if(!process.argv.includes('--features-only')&&!process.argv.includes('--readme-focus')) {
   win.setSize(1080,1100);
   await capture('pagina-do-dia.png',"(async()=>{state=await window.notebook.state();view='home';render();})()");
   win.setSize(1080,900);
@@ -75,18 +75,19 @@ app.whenReady().then(async()=>{
   win.setSize(1080,1100);
   await capture('calendario.png',"(async()=>{state=await window.notebook.action('view:select',{view:'reminders'});view='reminders';reminderEditor=false;calendarMonth=new Date('2026-10-01T12:00:00');calendarDay='2026-10-01';render();})()");
   }
-  win.setSize(1080,1100);
+  win.setSize(1080,1000);
   const project=create('notes','Um espaço para criar');
-  const first=block('paragraph','Quero uma mesa mais livre, boa luz e tempo para tirar as ideias do papel.');
+  const first=block('paragraph','Quero um canto para desenhar, ler e começar os projetos que ficam esperando.');
   const next=block('paragraph','Pedir orçamento da bancada e escolher uma luminária.');
-  const last=block('paragraph','Revisar as referências na sexta, com calma.');
-  command('note:update',{id:project,editorDoc:[first,block('h2','Próximos passos'),next,last]});
+  const last=block('paragraph','Revisar as referências hoje, com calma.');
+  command('note:update',{id:project,editorDoc:[first,block('h2','Tirar a ideia do papel'),next,last,block('paragraph','A luminária já está escolhida. Falta comparar os orçamentos e decidir onde a bancada vai ficar.')]});
   command('category:attach',{noteId:project,name:'projeto'});
   const linkAction=(source,quote,title,kind,due)=>command('source:create',{noteId:project,title,kind,due,origin:{kind:'text',quote,parts:[{blockId:source.id,start:source.runs[0].text.indexOf(quote),end:source.runs[0].text.indexOf(quote)+quote.length}]}});
   linkAction(next,'Pedir orçamento da bancada','Pedir dois orçamentos','task');
   const completed=linkAction(next,'escolher uma luminária','Escolher a luminária','task').sourceActions.at(-1);command('source:toggle',{id:completed.id});
-  linkAction(last,'Revisar as referências','Revisar as referências','reminder','2026-10-02T16:00:00-03:00');
+  linkAction(last,'Revisar as referências','Revisar as referências','reminder','2026-10-01T16:00:00-03:00');
   await capture('acoes-na-nota.png',`(async()=>{state=await window.notebook.action('note:select',{id:${JSON.stringify(project)}});view='notes';render();getSelection().removeAllRanges();hideEditorMenus();})()`);
+  win.setSize(1080,950);
   // A locally authored SVG illustration supplies reproducible image media.
   const art=new BrowserWindow({width:720,height:460,frame:false,show:false,webPreferences:{contextIsolation:true,sandbox:true}});
   const svg=fs.readFileSync(path.join(root,'docs','demo','serra.svg'),'utf8');
@@ -110,6 +111,9 @@ app.whenReady().then(async()=>{
   await capture('colagem.png',`(async()=>{state=await window.notebook.action('note:select',{id:${JSON.stringify(collage)}});view='notes';render();getSelection().removeAllRanges();hideEditorMenus();await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));})()`);
   win.setSize(1080,900);
   await capture('relacionados.png',"(async()=>{document.querySelector('#related-open').click();await refreshRelated();})()");
+  win.setSize(1080,1100);
+  command('day:update',{day:'2026-10-01',body:'Hoje escolhi a luminária do meu canto de trabalho.\n\nQuero comparar os orçamentos sem pressa e guardar as referências da viagem. Um projeto de cada vez.'});
+  await capture('pagina-do-dia.png',"(async()=>{document.querySelector('#related-dialog').close();state=await window.notebook.action('view:select',{view:'home'});view='home';render();})()");
   if(process.argv.includes('--review-sections')){
     const output=path.join(root,'artifacts');fs.mkdirSync(output,{recursive:true});
     await capture('controles-cadernos.png',"document.querySelector('#related-dialog').close();view='notebooks';render();",output);
