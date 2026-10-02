@@ -37,7 +37,7 @@
   state = await window.notebook.action('note:select', { id: firstId }); render();
   assert($('#note-body').value === firstBody, 'Navegar preserva texto e histórico da outra página');
   await editPageHistory('undo'); assert(!$('#note-body').value.includes('Outra ideia'), 'Histórico recuperado após navegação');
-  // Appended quick-capture content must not be erased by an older page history.
+  // Externally appended content must not be erased by an older page history.
   state = await window.notebook.action('note:update', { id: firstId, body: $('#note-body').value + '\nCapturado em outra janela' }); render();
   $('#note-body').focus(); await editPageHistory('undo'); assert($('#note-body').value.includes('Capturado em outra janela'), 'Atualização externa reinicia a base do histórico');
   state = await window.notebook.image({ noteId: firstId, name: 'Undo image', bytes: new Uint8Array(window.cutTestBytes) }); renderPage();

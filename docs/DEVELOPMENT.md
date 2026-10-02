@@ -89,3 +89,11 @@ npx electron . --smoke-test --related-only
 ```
 
 O segundo comando valida o grafo com vetores determinísticos em um banco temporário; não mede a qualidade semântica. Para gerar o aplicativo no macOS, a máquina de desenvolvimento precisa das ferramentas de linha de comando da Apple (`swiftc`).
+
+Para validar a exportação de notas, listas e lembretes em PDF com dados fictícios:
+
+```sh
+npx electron . --smoke-test --pdf-only
+```
+
+Os PDFs de teste ficam em `artifacts/pdf/`; incluem imagens grandes e cartões de links com e sem capa. A exportação usa um WebContentsView isolado sem janela visível e um arquivo HTML temporário com mídias locais incorporadas, sem carregar recursos da rede.

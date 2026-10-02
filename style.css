@@ -33,7 +33,7 @@ body.vertical-expanded .app{padding-top:35px;padding-bottom:14px}
 .fold-tab{position:absolute;left:-29px;top:132px;width:34px;height:72px;padding:0;z-index:12;filter:drop-shadow(-2px 3px 0 #40332518);cursor:pointer}.fold-tab svg{width:100%;height:100%;overflow:visible}.tab-paper{fill:var(--paper);stroke:var(--edge);stroke-width:2.5;stroke-linejoin:round;transition:fill .15s}.tab-fold{fill:var(--paper-shade);stroke:#8a8068;stroke-width:1;stroke-linejoin:round}.tab-arrow{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transform-origin:17px 36px;transition:transform .24s}.fold-tab:hover .tab-paper{fill:var(--accent-soft)}.sidebar-collapsed .tab-arrow{transform:rotate(180deg)}.fold-tab:focus-visible{outline:2px solid #ae772f;outline-offset:4px;border-radius:8px}
 .window-controls{position:absolute;top:36px;left:32px;z-index:3}.window-controls .traffic-lights{margin:0;gap:7px}.book-header{left:112px}.traffic-lights button{cursor:pointer}
 @media(max-height:650px){.window-controls{top:28px}.fold-tab{top:112px}}
-.book-header{gap:10px}.quick-open{font:11px var(--hand-font);letter-spacing:0;white-space:nowrap;padding:3px 0;border-bottom:1px dashed var(--line);margin-left:auto}.book-header .save-state{white-space:nowrap}
+.book-header{gap:10px}.book-header .save-state{white-space:nowrap;margin-left:auto}
 /* Recortes retain the same ink, paper and tape as the notebook. */
 .collage-editor{overflow-y:auto;display:flow-root;padding:12px 4px 40px;user-select:text;cursor:text}.writing-line{min-height:32px;white-space:pre-wrap;overflow-wrap:anywhere;outline:none}.writing-line:focus{background:#fff8df28}.paper-cut{position:relative;float:right;clear:right;margin:10px 0 16px 18px;padding:7px;background:#fff9e7;border:1.5px solid #877453;border-radius:2px 5px 3px 1px;box-shadow:2px 4px 0 #4b3b2120;font:13px/1.4 var(--body-font);user-select:none;cursor:default;max-width:85%;break-inside:avoid}.paper-cut.cut-left{float:left;clear:left;margin-left:0;margin-right:18px}.paper-cut::before{content:'';position:absolute;width:62px;height:18px;top:-12px;left:calc(50% - 31px);background:#e6c880aa;border:1px solid #b7995740;transform:rotate(-5deg);pointer-events:none}.cut-controls{display:flex;justify-content:space-between;gap:3px;margin:3px 0 5px;color:var(--muted)}.cut-controls button{padding:1px 4px;font-size:15px}.cut-controls .cut-grip{font-size:17px;cursor:grab;touch-action:none}.cut-grip span{font:10px var(--body-font)}.cut-preview img{display:block;width:100%;max-height:240px;object-fit:contain;background:#f3e6cd;border-radius:2px}.cut-open{display:block;text-align:left;width:100%;padding:8px 3px 3px;overflow-wrap:anywhere;cursor:pointer}.cut-open small{display:block;color:var(--muted);font:10px var(--body-font);margin-bottom:5px}.cut-open strong{display:block;font:600 15px/1.35 var(--body-font)}.cut-open p{font:12px/1.5 var(--body-font);margin:7px 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.cut-open span{display:block;font:10px var(--body-font);margin-top:7px;color:var(--muted)}.cut-dragging{z-index:20;opacity:.8;box-shadow:4px 8px 12px #4b3b2133}.cut-dragging .cut-grip{cursor:grabbing}.drop-active{outline:2px dashed #9c7942;outline-offset:-3px;background-color:#eec97622}.cut-dialog{width:min(370px,80vw);padding:24px;background:var(--paper);color:var(--ink);border:3px solid var(--edge);border-radius:8px 12px 9px 6px;box-shadow:5px 7px 0 #33291935;font:16px/1.5 var(--body-font)}.cut-dialog::backdrop{background:#34271955}.cut-dialog form{display:flex;flex-direction:column;gap:14px}.cut-dialog h2{font:27px var(--hand-font);margin:0}.cut-dialog p{margin:0;color:var(--muted)}.cut-dialog label{font-size:13px;margin-bottom:-10px}.cut-dialog input[type=url]{width:100%;padding:10px;border:1px solid var(--line);border-radius:3px;background:#fff8e4;font:16px var(--body-font)}.cut-dialog small{font-size:12px;color:var(--muted)}
 .paper-cut.cut-left,.paper-cut.cut-right{clear:both}.paper-cut.cut-wide{float:none;margin-left:0;margin-right:0}.collage-editor:empty::before{content:'Comece uma ideia…';color:var(--muted)}
@@ -98,7 +98,7 @@ body.vertical-expanded .app{padding-top:35px;padding-bottom:14px}
 .related-dialog::backdrop { background:rgba(48,48,37,.30); }
 .related-dialog .drawer-heading { margin-bottom:4px; }
 .related-caption { color:var(--muted,#8a8068); font-size:14px; margin:8px 0 0; }
-.related-graph { position:relative; aspect-ratio:760/530; width:100%; min-height:310px; }
+.related-graph { position:relative; aspect-ratio:1; width:100%; max-width:640px; margin:auto; }
 .related-edges { position:absolute; width:100%; height:100%; inset:0; }
 .related-edges path { stroke:#b2a27b; stroke-width:1.5; fill:none; stroke-dasharray:4 5; }
 .related-node { position:absolute; transform:translate(-50%,-50%); width:124px; display:flex; flex-direction:column; align-items:center; gap:7px; padding:8px 3px; border:0; background:none; font:14px Georgia,serif; color:var(--ink,#303025); cursor:pointer; line-height:1.3; }
@@ -179,3 +179,14 @@ button.related-whisper:focus-visible { outline:2px solid #ab8847; outline-offset
  .daily-toolbar .toolbar-action > span { display:none; }
  .daily-section-heading { flex-wrap:wrap; }
 }
+
+.category-suggestions {position:fixed;z-index:1000;width:min(280px,calc(100vw - 24px));padding:7px;background:var(--paper,#fbf0d5);color:var(--ink,#303025);border:1.5px solid var(--edge,#36352a);border-radius:9px;box-shadow:3px 4px 0 #8a806833;transform-origin:top left;}
+.category-suggestions[hidden] {display:none;}
+.category-suggestions button {display:block;width:100%;min-height:40px;padding:8px 12px;text-align:left;border-radius:5px;font:16px/1.4 Georgia,serif;overflow-wrap:anywhere;}
+.category-suggestions button[aria-selected=true],.category-suggestions button:hover {background:var(--accent-soft,#f8d985);}
+.category-suggestions small {display:block;padding:8px 5px 3px;color:var(--muted,#8a8068);font:11px/1.4 var(--body-font);}
+.category-bounce {animation:category-bounce .24s ease-out both;}
+@keyframes category-bounce {0% {opacity:0;transform:translateY(5px) scale(.96);}65% {opacity:1;transform:translateY(-2px) scale(1.015);}100% {opacity:1;transform:translateY(0) scale(1);}}
+@media(prefers-reduced-motion:reduce) {.category-bounce {animation:none;}}
+
+@media(max-width:1000px){#export-pdf .toolbar-action-label{display:none;}}

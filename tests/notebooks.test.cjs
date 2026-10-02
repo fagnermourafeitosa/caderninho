@@ -14,21 +14,20 @@ test('every page has a notebook and changing notebooks scopes selected pages',t=
   const reopened=open().snapshot();assert.equal(reopened.activeNotebook,first);assert.equal(reopened.notebooks.find(book=>book.id===second).name,'Pesquisa');assert.equal(reopened.notebooks.find(book=>book.id===second).color,COLORS[3]);
   assert.deepEqual(store.db.prepare('PRAGMA foreign_key_check').all(),[]);
 });
-test('removing a notebook transfers active pages, trash, and unfinished drafts without losing reminders',t=>{
+test('removing a notebook transfers active pages and trash without losing reminders',t=>{
   const {store}=fixture(t),first=store.snapshot().activeNotebook,second=createBook(store,'Segundo');
   store.dispatch('note:create',{type:'tasks'});const tasks=store.snapshot().selected.tasks;store.dispatch('item:create',{noteId:tasks,title:'Preservar'});store.dispatch('note:trash',{id:tasks});
-  store.dispatch('note:create',{type:'reminders'});const reminder=store.snapshot().selected.reminders;const due=new Date(Date.now()+60000).toISOString();store.dispatch('schedule:activate',{id:reminder,due});store.dispatch('draft:update',{body:'Continuar depois'});
+  store.dispatch('note:create',{type:'reminders'});const reminder=store.snapshot().selected.reminders;const due=new Date(Date.now()+60000).toISOString();store.dispatch('schedule:activate',{id:reminder,due});
   store.dispatch('notebook:remove',{id:second,targetId:first});
-  const state=store.snapshot();assert.equal(state.notebooks.length,1);assert.equal(state.activeNotebook,first);assert.equal(state.notes.find(note=>note.id===tasks).notebookId,first);assert.equal(state.notes.find(note=>note.id===tasks).trashed,true);assert.equal(state.notes.find(note=>note.id===reminder).scheduledAt,due);assert.equal(store.draft().notebookId,first);
-  store.dispatch('draft:commit');assert.equal(store.note(store.getSetting('quick_saved_note')).notebook_id,first);
+  const state=store.snapshot();assert.equal(state.notebooks.length,1);assert.equal(state.activeNotebook,first);assert.equal(state.notes.find(note=>note.id===tasks).notebookId,first);assert.equal(state.notes.find(note=>note.id===tasks).trashed,true);assert.equal(state.notes.find(note=>note.id===reminder).scheduledAt,due);
   assert.ok(store.db.prepare('SELECT deleted_at FROM notebooks WHERE id=?').get(second).deleted_at);
   assert.throws(()=>store.dispatch('notebook:remove',{id:first,targetId:first}));assert.equal(store.snapshot().notebooks.length,1);
 });
-test('page moves, quick drafts and reminder alerts preserve their notebook context',t=>{
+test('page moves and reminder alerts preserve their notebook context',t=>{
   const {store}=fixture(t),first=store.snapshot().activeNotebook;
-  store.dispatch('draft:update',{body:'Uma ideia'});const second=createBook(store,'Outro');store.dispatch('draft:commit');assert.equal(store.note(store.getSetting('quick_saved_note')).notebook_id,first);
+  const second=createBook(store,'Outro');
   store.dispatch('note:move',{id:'welcome',notebookId:second});assert.equal(store.note('welcome').notebook_id,second);
-  store.dispatch('note:select',{id:store.getSetting('quick_saved_note')});assert.equal(store.snapshot().activeNotebook,first);
+  store.dispatch('notebook:select',{id:first});assert.equal(store.snapshot().activeNotebook,first);
   store.dispatch('note:create',{type:'reminders'});const id=store.snapshot().selected.reminders;store.dispatch('schedule:activate',{id,due:new Date(store.now()+1000).toISOString()});store.dispatch('notebook:select',{id:second});store.now=()=>Date.now()+2000;assert.equal(store.due()[0].id,id);
   assert.throws(()=>store.dispatch('notebook:create',{name:'',color:COLORS[0]}));assert.throws(()=>store.dispatch('notebook:create',{name:'Inválido',color:'#000000'}));
 });

@@ -19,6 +19,7 @@
   <script defer src="calendar.js"></script>
   <script defer src="dates.js"></script>
   <script defer src="category-ui.js"></script>
+  <script defer src="category-autocomplete.js"></script>
   <script defer src="notebook-ui.js"></script>
   <script defer src="block-editor.js"></script>
   <script defer src="source-actions.js"></script>
@@ -27,6 +28,7 @@
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
+      <symbol id="icon-export" viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z M14 3v5h5 M12 10v7 M9 14l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="icon-home" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13H55Q60 13 59 20L58 62H16Q11 62 11 56V20Q11 13 17 13Z" fill="#fff4d8"/><path d="M18 14V62M25 7V19M36 7V19M47 7V19M26 44H47M26 53H44"/><circle cx="42" cy="31" r="7" fill="#f6ba45"/><path d="M42 20V18M42 44V42M31 31H29M55 31H53"/></g></symbol>
       <symbol id="icon-notebooks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20L43 14L52 57L20 63Z" fill="#c5d3ae"/><path d="M23 12L55 8L61 54L29 59Z" fill="#deb9a7"/><path d="M29 12L34 57M37 22L51 20M38 30L51 28"/><path d="M12 20L19 21L27 62"/></g></symbol>
       <symbol id="icon-notes" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11L50 7Q55 6 55 12L59 52Q59 56 53 57L20 61Q15 62 15 55L11 18Q10 12 17 11Z" fill="#fff4d8"/><path d="M23 23L43 20M24 32L45 29M25 42L37 40"/><path d="M39 53L43 38L58 17Q61 13 65 17L68 20L51 43Z" fill="#f6ba45"/><path d="M43 38L51 43M58 17L66 23M39 53L42 44"/><path d="M7 52L3 56M64 51L69 54"/></g></symbol>
@@ -71,7 +73,7 @@
       </button>
       <div class="sheet" id="sheet">
         <div class="window-controls" aria-label="Controles da janela"><div class="traffic-lights"><button id="close" aria-label="Fechar" title="Fechar"></button><button id="minimize" aria-label="Minimizar" title="Minimizar"></button><button id="maximize" aria-label="Maximizar janela" title="Ampliar ou restaurar"></button></div></div>
-        <header class="book-header"><button id="quick-open" class="quick-open" title="Abrir rascunho instantâneo"><svg class="small-icon" aria-hidden="true"><use href="#icon-edit"/></svg><span>Rascunho</span></button><span id="save-state" class="save-state" role="status" title="Salvamento local automático">Salvo neste Mac</span></header>
+        <header class="book-header"><span id="save-state" class="save-state" role="status" title="Salvamento local automático">Salvo neste Mac</span></header>
         <div id="list-progress" class="list-progress" hidden></div>
         <div class="page-content" id="page-content"></div>
         <footer class="book-footer"><span id="footer-label">Uma coisa de cada vez.</span><span id="page-number">01</span></footer>

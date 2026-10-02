@@ -53,7 +53,6 @@ function notebookCommand(store,action,input,stamp) {
       const notes=store.db.prepare('SELECT id FROM notes WHERE notebook_id=?').all(input.id);
       store.db.prepare('UPDATE notes SET notebook_id=?,updated=? WHERE notebook_id=?').run(input.targetId,stamp,input.id);
       for(const note of notes) event(store,'note',note.id,'move-notebook',stamp,{from:input.id,to:input.targetId});
-      const draft=store.draft(); if(draft.notebookId===input.id) store.setSetting('quick_draft',JSON.stringify({...draft,notebookId:input.targetId,updated:stamp}));
       store.db.prepare('UPDATE notebooks SET deleted_at=?,updated_at=? WHERE id=?').run(stamp,stamp,input.id);
       event(store,'notebook',input.id,'remove',stamp,{targetId:input.targetId});
       if(activeNotebook(store)===input.id || store.getSetting('active_notebook')===input.id) store.setSetting('active_notebook',input.targetId);

@@ -2,7 +2,7 @@ const pageHistories = new Map();
 let undoQueue = Promise.resolve();
 function ensurePageHistory(note) {
   let history = pageHistories.get(note.id);
-  // External edits (such as quick capture) become a fresh baseline instead of
+  // External edits become a fresh baseline instead of
   // allowing an old snapshot to erase content appended from another window.
   if (!history || history.current.title !== note.title || history.current.body !== note.body || JSON.stringify(history.current.editorDoc??null)!==JSON.stringify(note.editorDoc??null)) {
     history = new EditHistory({ title: note.title, body: note.body,editorDoc:note.editorDoc }); pageHistories.set(note.id, history);

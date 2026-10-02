@@ -36,7 +36,7 @@ Uma nota pode começar com uma frase e ganhar títulos, listas, checkboxes, cita
 - **Editor com formatação:** negrito, itálico, sublinhado, tachado, links, código e marca-texto.
 - **Tabelas com seleção visual:** escolha linhas e colunas passando o mouse pela grade.
 - **Imagens e cartões de links:** cole ou arraste conteúdos para perto das suas anotações.
-- **Categorias no texto:** escreva `#ideias` ou `#trabalho` para organizar a página enquanto escreve.
+- **Categorias com autocomplete:** digite `#` e a primeira letra para encontrar categorias já cadastradas. Escolha com as setas e confirme com Enter, Tab ou clique; a busca ignora acentos e maiúsculas.
 - **Salvamento automático:** acompanhe a confirmação de salvamento sem interromper a escrita.
 
 ## Suas referências, coladas na página
@@ -57,9 +57,9 @@ Cada ação mantém uma cópia do trecho original e um caminho de volta à orige
 
 ![Grafo com notas, tarefas e lembretes relacionados à viagem à serra](docs/images/relacionados.png)
 
-Enquanto você escreve, o Caderninho procura relações com outras notas, tarefas e lembretes do mesmo caderno. As conexões aparecem discretamente no rodapé. Abra **Relacionados** para explorá-las em um grafo: conteúdos com mais afinidade ficam mais próximos, e um clique leva à página de origem.
+Enquanto você escreve, o Caderninho procura relações com outras notas, tarefas e lembretes do mesmo caderno. As conexões aparecem discretamente no rodapé, da mais próxima para a menos próxima. Abra **Relacionados** para explorá-las em um grafo: quanto maior a afinidade com a página central, menor a distância até ela. Um clique leva à página de origem.
 
-O texto de imagens também participa, com reconhecimento local no Mac. O primeiro uso baixa o modelo de análise; depois, as conexões são calculadas no seu computador, inclusive sem internet.
+O texto de imagens também participa, com reconhecimento local no Mac. O primeiro uso baixa o modelo de análise; depois, as conexões são calculadas no seu computador, inclusive sem internet. Ao editar o texto, adicionar ou remover uma imagem, o aplicativo atualiza as conexões automaticamente e reutiliza a análise do conteúdo que não mudou.
 
 ## Transforme planos em próximos passos
 
@@ -79,13 +79,19 @@ Escreveu `amanhã às 14h` em uma nota? O Caderninho oferece um carimbo para age
 
 > Para emitir alertas, o aplicativo precisa estar aberto, mesmo que minimizado. Se o horário passar com o app fechado ou o computador dormindo, o alerta será emitido quando ele voltar a funcionar.
 
+## Leve uma página com você
+
+Use **Exportar PDF** na barra de uma nota, lista ou lembrete e escolha onde salvar o arquivo. O PDF mantém título, categorias, datas, texto formatado, tabelas, checkboxes, imagens e cartões de links, além das tarefas e lembretes ligados à página.
+
+O fundo de papel cobre toda a folha A4, incluindo as margens. Conteúdos longos continuam em páginas numeradas. As últimas alterações são salvas antes da exportação, e a geração acontece no seu computador, sem internet.
+
 ## Um caderno para cada parte da sua vida
 
 Separe trabalho, estudos e projetos pessoais em cadernos com nome, descrição e cor. As abas laterais deixam a troca de contexto sempre à mão, e você pode mover páginas entre cadernos quando seus planos mudarem.
 
 | Recurso | O que você ganha |
 | --- | --- |
-| **Rascunho instantâneo** | Capture uma ideia com `⌘ Shift Espaço` e transforme-a em uma nota depois. |
+| **Exportação para PDF** | Guarde ou compartilhe uma página com texto formatado, tabelas, imagens e tarefas. |
 | **Categorias reutilizáveis** | Identifique assuntos com etiquetas abaixo do título ou hashtags no texto. |
 | **Página do dia** | Reúna tarefas, lembretes e anotações em uma visão diária. |
 | **Lixeira por tipo** | Recupere páginas, itens de tarefas e mídias removidos. |

@@ -9,7 +9,7 @@
 }
 :is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
     .schedule-status,.calendar-navigation,.entry-form,.source-card-footer) button,
-.primary,.daily-link,.quick-open,.category-add {
+.primary,.daily-link,.category-add {
   display:inline-flex;
   align-items:center;
   gap:var(--control-gap);
@@ -19,7 +19,7 @@
 }
 :is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
     .schedule-status,.calendar-navigation,.entry-form,.source-card-footer) button > .small-icon,
-.primary > .small-icon,.quick-open > .small-icon,.category-add > .small-icon {
+.primary > .small-icon,.category-add > .small-icon {
   width:var(--control-icon-size);
   height:var(--control-icon-size);
   flex:none;
@@ -53,20 +53,18 @@
 .source-origin {min-width:0;}
 .source-origin > span {overflow-wrap:anywhere;}
 :is(.purge,[data-remove-book],[data-source-remove],.row-delete) {color:var(--control-danger);}
-.quick-open {padding:3px 0;}
-.quick-open > .small-icon {width:17px;height:17px;}
 .category-add > .small-icon {width:17px;height:17px;}
 button > svg {pointer-events:none;}
 :is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
     .schedule-status,.calendar-navigation,.entry-form,.source-card-footer) button:focus-visible,
-.primary:focus-visible,.daily-link:focus-visible,.quick-open:focus-visible,.category-add:focus-visible {
+.primary:focus-visible,.daily-link:focus-visible,.category-add:focus-visible {
   outline:2px solid #ae772f;
   outline-offset:3px;
 }
 @media(hover:hover) {
  :is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
      .schedule-status,.calendar-navigation,.entry-form,.source-card-footer,.note-pager,.drawer-heading) button:not(:disabled):hover,
- .primary:not(:disabled):hover,.quick-open:hover,.category-add:hover,.row-delete:hover {
+ .primary:not(:disabled):hover,.category-add:hover,.row-delete:hover {
    background:var(--control-hover);
  }
  :is(.purge,[data-remove-book],[data-source-remove],.row-delete):not(:disabled):hover,
@@ -75,7 +73,7 @@ button > svg {pointer-events:none;}
 @media(hover:hover) and (prefers-reduced-motion:no-preference) {
  :is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
      .schedule-status,.entry-form,.source-card-footer) button:not(:disabled):hover > .small-icon,
- .primary:not(:disabled):hover > .small-icon,.quick-open:hover > .small-icon,.category-add:hover > .small-icon {
+ .primary:not(:disabled):hover > .small-icon,.category-add:hover > .small-icon {
    transform-origin:50% 60%;
    animation:toolbar-icon-wobble .28s ease-out;
  }

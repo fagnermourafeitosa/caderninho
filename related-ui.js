@@ -1,6 +1,7 @@
 /* Related pages: view component. Ranking, OCR and inference stay in the main process. */
 let relatedRequest=0,relatedTimer,relatedFocus=null;
 const relatedGraphIcon='<svg viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" stroke-width="1.8"><path d="M7 7L17 6M7 7L11 18M17 6L11 18" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7" cy="7" r="3"/><circle cx="17" cy="6" r="3"/><circle cx="11" cy="18" r="3"/></svg>';
+function orderRelated(results){return [...results].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));}
 function refreshRelatedSoon(){clearTimeout(relatedTimer);relatedTimer=setTimeout(refreshRelated,300);}
 async function refreshRelated(){
  const request=++relatedRequest,note=['notes','tasks','reminders'].includes(view)?currentNote():null;
@@ -8,8 +9,9 @@ async function refreshRelated(){
  if(!note||!$('#related-open')){footer.replaceChildren();delete footer.dataset.connections;return;}
  try {
   const data=await window.notebook.related(note.id);
+  data.results=orderRelated(data.results);
   if(request!==relatedRequest||currentNote()?.id!==note.id)return;
-  const signature=JSON.stringify(data.results.map(d=>[d.id,d.title]));
+  const signature=JSON.stringify(data.results.map(d=>[d.id,d.title,d.score]));
   if(footer.dataset.connections!==signature){
    footer.dataset.connections=signature;
    footer.innerHTML=data.results.length?'<span class="related-prefix">Relacionados:</span>'+data.results.slice(0,2).map(d=>`<button type="button" class="related-whisper" data-related-footer="${escape(d.id)}" aria-label="Abrir ${escape(d.title)}" title="${escape(d.title)}">${icon(d.type)}<span>${escape(d.title)}</span></button>`).join(''):'';
@@ -35,10 +37,10 @@ function renderRelatedGraph(note,data){
   host.innerHTML=`<div class="related-empty">${relatedGraphIcon}<p role="status">${text}</p>${data.status==='error'?'<button id="related-retry" class="primary">Tentar novamente</button>':''}</div>`;
   if($('#related-retry'))$('#related-retry').onclick=()=>window.notebook.relatedRetry();return;
  }
- // Stable slots, radial distance based on combined affinity; no scores in the UI.
+ // Stable angular slots; equal scaling on both axes preserves affinity distances.
  const nodes=[...data.results].sort((a,b)=>a.id.localeCompare(b.id));
- const points=nodes.map((node,i)=>{const angle=-Math.PI/2+i*2*Math.PI/nodes.length;const radius=145+(1-node.score)*95;return {...node,x:380+Math.cos(angle)*radius*1.20,y:265+Math.sin(angle)*radius*0.90};});
- host.innerHTML=`<p class="related-caption">Páginas mais próximas têm mais em comum. Clique para abrir.</p><div class="related-graph" aria-label="Conexões desta página"><svg viewBox="0 0 760 530" class="related-edges" aria-hidden="true">${points.map(p=>`<path d="M380 265L${p.x} ${p.y}"/>`).join('')}</svg><div class="related-node related-center" style="left:50%;top:50%">${icon(note.type)}<strong>${escape(note.title||'Sem título')}</strong><small>Esta página</small></div>${points.map(p=>`<button class="related-node" data-related-id="${escape(p.id)}" style="left:${p.x/760*100}%;top:${p.y/530*100}%" aria-label="Abrir ${escape(p.title)}">${icon(p.type)}<span>${escape(p.title)}</span></button>`).join('')}</div>`;
+ const points=nodes.map((node,i)=>{const angle=-Math.PI/2+i*2*Math.PI/nodes.length;const radius=125+(1-Math.max(0,Math.min(1,node.score)))*200;return {...node,x:320+Math.cos(angle)*radius,y:320+Math.sin(angle)*radius};});
+ host.innerHTML=`<p class="related-caption">Quanto mais perto desta página, mais afinidade. Clique para abrir.</p><div class="related-graph" aria-label="Conexões desta página"><svg viewBox="0 0 640 640" class="related-edges" aria-hidden="true">${points.map(p=>`<path d="M320 320L${p.x} ${p.y}"/>`).join('')}</svg><div class="related-node related-center" style="left:50%;top:50%">${icon(note.type)}<strong>${escape(note.title||'Sem título')}</strong><small>Esta página</small></div>${points.map(p=>`<button class="related-node" data-related-id="${escape(p.id)}" style="left:${p.x/640*100}%;top:${p.y/640*100}%" aria-label="Abrir ${escape(p.title)}">${icon(p.type)}<span>${escape(p.title)}</span></button>`).join('')}</div>`;
  host.querySelectorAll('[data-related-id]').forEach(button=>button.onclick=async()=>{const target=points.find(p=>p.id===button.dataset.relatedId);$('#related-dialog').close();await openRelatedPage(target);});
 }
 document.addEventListener('DOMContentLoaded',()=>{

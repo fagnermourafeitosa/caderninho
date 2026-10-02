@@ -65,13 +65,11 @@ class Store {
     installNotebooks(this);
     installSourceActions(this);
     if (!this.getSetting('initialized')) this.initialize();
-    const draft = this.draft(); if ((draft.title || draft.body) && (!draft.id || !draft.notebookId)) this.setSetting('quick_draft',JSON.stringify({...draft,id:draft.id || randomUUID(),notebookId:draft.notebookId || activeNotebook(this)}));
     if (!this.getSetting('inline_initialized')) this.transaction(() => { for (const note of this.db.prepare("SELECT * FROM notes WHERE type='notes'").all()) syncInline(this,note,new Date(this.now()).toISOString(),true); this.setSetting('inline_initialized','1'); });
     if (!this.getSetting('categories_initialized')) this.transaction(()=>{ const stamp=new Date(this.now()).toISOString(); for(const note of this.db.prepare('SELECT id FROM notes').all()) syncCategories(this,note.id,stamp); this.setSetting('categories_initialized','1'); });
   }
   getSetting(key) { return this.db.prepare('SELECT value FROM settings WHERE key = ?').get(key)?.value; }
   setSetting(key, value) { const stamp=new Date(this.now()).toISOString(); this.db.prepare('INSERT INTO settings(key,value,created_at,updated_at) VALUES(?,?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at WHERE settings.value<>excluded.value').run(key, String(value),stamp,stamp); }
-  draft() { return { id:null,created:null,updated:null,...JSON.parse(this.getSetting('quick_draft') || '{"title":"","body":"","targetId":""}') }; }
   transaction(work) {
     this.db.exec('BEGIN IMMEDIATE');
     try { const result = work(); this.db.exec('COMMIT'); return result; }
@@ -248,44 +246,6 @@ class Store {
         case 'cut:trash': { this.cut(input.id); this.db.prepare('UPDATE cuts SET trashed=1,deleted_at=?,updated_at=? WHERE id=?').run(stamp,stamp,input.id); event(this,'cut',input.id,'trash',stamp); this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp,this.cut(input.id).note_id); break; }
         case 'cut:restore': { const cut = this.cut(input.id), note = this.note(cut.note_id); if (note.trashed) throw new Error('Restaure a nota primeiro.'); this.db.prepare('UPDATE cuts SET trashed=0,deleted_at=NULL,updated_at=? WHERE id=?').run(stamp,cut.id); event(this,'cut',cut.id,'restore',stamp); this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp,note.id); this.select(note); break; }
         case 'cut:purge': { const cut = this.cut(input.id); if (!cut.trashed) throw new Error('Mova o recorte para a lixeira primeiro.'); event(this,'cut',cut.id,'purge',stamp); this.db.prepare('DELETE FROM cuts WHERE id=?').run(cut.id); break; }
-        case 'draft:update': {
-          const draft = this.draft();
-          for (const key of ['title', 'body', 'targetId']) {
-            if (Object.hasOwn(input, key)) {
-              if (typeof input[key] !== 'string' || input[key].length > (key === 'body' ? 200_000 : 160)) throw new Error('Rascunho inválido ou muito longo.');
-              draft[key] = input[key];
-            }
-          }
-          const previous = this.draft();
-          if (['title','body','targetId'].some(key => previous[key] !== draft[key])) {
-            if (!previous.id && !previous.title && !previous.body && (draft.title || draft.body)) { draft.id=randomUUID(); draft.created=stamp; draft.notebookId=activeNotebook(this); event(this,'draft',draft.id,'create',stamp); }
-            draft.updated=stamp;
-          }
-          this.setSetting('quick_draft', JSON.stringify(draft)); break;
-        }
-        case 'draft:commit': {
-          const draft = this.draft();
-          if (!draft.body.trim()) throw new Error('Escreva algo para guardar.');
-          let id;
-          if (draft.targetId) {
-            const note = this.note(draft.targetId, 'notes');
-            if (note.trashed) throw new Error('Esta nota está na lixeira. Escolha outra página.');
-            const body = note.body ? note.body + '\n\n' + draft.body : draft.body;
-            if (body.length > 200_000) throw new Error('A nota ficou muito longa. Guarde como nova nota.');
-            this.db.prepare('UPDATE notes SET body=?,updated=?,editor_document=? WHERE id=?').run(body, stamp,note.editor_document?JSON.stringify(pageDocument.reconcile(JSON.parse(note.editor_document),body)):null, note.id);
-            id = note.id;
-          } else {
-            if (this.db.prepare('SELECT count(*) AS total FROM notes').get().total >= 3000) throw new Error('Limite de 3.000 páginas atingido.');
-            id = randomUUID();
-            this.insert({ id, type: 'notes', title: draft.title.trim() || draft.body.trim().split('\n')[0].slice(0, 80), body: draft.body, notebookId:draft.notebookId, created: draft.created || stamp, updated: stamp });
-          }
-          syncInline(this,this.note(id),stamp);
-          syncCategories(this,id,stamp);
-          event(this,'draft',draft.id || 'legacy-quick','commit',stamp,{noteId:id,created:draft.created,updated:draft.updated});
-          this.setSetting('quick_saved_note', id);
-          this.setSetting('quick_draft', JSON.stringify({ title: '', body: '', targetId: '' }));
-          break;
-        }
         case 'ui:sidebar': {
           if (typeof input.collapsed !== 'boolean') throw new Error('Estado do menu inválido.');
           this.setSetting('sidebar_collapsed', input.collapsed ? '1' : '0'); break;

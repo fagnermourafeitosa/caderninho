@@ -8,10 +8,9 @@ test('structured text and tables persist, derive searchable text and survive tra
  store.dispatch('note:update',{id,editorDoc:doc});const note=open().snapshot().notes.find(note=>note.id===id);assert.equal(note.editorDoc[1].rows[1][0][0].text,'Ana');assert.equal(note.editorDoc[0].runs[0].marks.bold,true);assert.ok(note.body.includes('| Ana | #projeto |'));assert.ok(note.categories.some(category=>category.key==='projeto'));
  store.dispatch('note:trash',{id});store.dispatch('note:restore',{id});assert.deepEqual(store.snapshot().notes.find(note=>note.id===id).editorDoc,note.editorDoc);
 });
-test('quick capture and daily checkbox edits preserve formatted blocks',t=>{
+test('daily checkbox edits preserve formatted blocks',t=>{
  const {store}=fixture(t);store.dispatch('note:create',{type:'notes'});const id=store.snapshot().selected.notes;
  const doc=[paragraph('Título',{italic:true}),{id:document.id(),type:'check',checked:false,runs:[{text:'Comprar papel',marks:{bold:true}}]}];store.dispatch('note:update',{id,editorDoc:doc});const item=store.snapshot().notes.find(note=>note.id===id).inlineTasks[0];store.dispatch('inline:toggle',{id:item.id});assert.equal(JSON.parse(store.note(id).editor_document)[1].checked,true);assert.equal(JSON.parse(store.note(id).editor_document)[1].runs[0].marks.bold,true);
- store.dispatch('draft:update',{body:'Mais uma ideia',targetId:id});store.dispatch('draft:commit');const saved=JSON.parse(store.note(id).editor_document);assert.equal(saved[0].runs[0].marks.italic,true);assert.equal(document.runText(saved.at(-1).runs),'Mais uma ideia');
 });
 test('schema rejects malformed or oversized tables and removes unsafe attributes',()=>{
  assert.throws(()=>document.normalize([{type:'table',rows:[[],[]]}]));assert.throws(()=>document.normalize([{type:'table',rows:[[document.plainRuns('a')],[]]}]));assert.throws(()=>document.normalize([{type:'script',runs:[]}])) ;

@@ -42,7 +42,7 @@ test('a hashtag still being typed does not create partial categories',t=>{
   store.dispatch('view:select',{view:'home'});
   assert.equal(page(store,id).categories[0].key,'pessoal');
 });
-test('task lists and quick capture share registered categories',t=>{
+test('task lists and notes share registered categories',t=>{
   const {store}=fixture(t);store.dispatch('note:create',{type:'tasks'}); const id=store.snapshot().selected.tasks;
   store.dispatch('item:create',{noteId:id,title:'Preparar #trabalho'});
   const categoryId=page(store,id).categories[0].id;
@@ -52,8 +52,8 @@ test('task lists and quick capture share registered categories',t=>{
   store.dispatch('item:update',{id:itemId,title:'Preparar #trabalho'});
   store.dispatch('item:trash',{id:itemId});assert.equal(page(store,id).categories.length,0);
   store.dispatch('item:restore',{id:itemId});assert.equal(page(store,id).categories[0].id,categoryId);
-  store.dispatch('draft:update',{body:'Ideia #TRABALHO',title:'Captura'});store.dispatch('draft:commit');
-  assert.equal(page(store,store.getSetting('quick_saved_note')).categories[0].id,categoryId);
+  store.dispatch('note:create',{type:'notes',title:'Ideia'});store.dispatch('note:update',{id:store.snapshot().selected.notes,body:'Ideia #TRABALHO'});
+  assert.equal(page(store,store.snapshot().selected.notes).categories[0].id,categoryId);
   store.dispatch('note:create',{type:'tasks'}); const other=store.snapshot().selected.tasks;
   store.dispatch('category:attach',{noteId:other,categoryId});
   assert.equal(page(store,other).categories[0].id,categoryId);

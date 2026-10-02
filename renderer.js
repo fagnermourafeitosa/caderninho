@@ -68,7 +68,7 @@ function render() {
 function renderPage() {
   const notes = visibleNotes(), note = currentNote(), label = labels[view];
   const index = notes.findIndex(n => n.id === note?.id);
-  const toolbar = `<div class="view-toolbar"><span class="toolbar-right">${view === 'reminders' ? `<button id="back-calendar">${actionLabel('calendar','Calendário')}</button>` : ''}<button id="notes-open" title="${label.heading}">${icon('list')}<span>${label.heading}</span><span class="subtle">(${notes.length})</span></button></span><span class="toolbar-right">${note ? '<button id="related-open" class="related-open" aria-label="Relacionados" title="Relacionados">'+relatedGraphIcon+'<span class="related-label">Relacionados</span></button>' : ''}${view === 'notes' && note ? '<button id="add-cut" class="add-note toolbar-action" aria-label="Adicionar mídia" title="Adicionar mídia">'+icon('media')+'<span class="toolbar-action-label">Adicionar mídia</span></button>' : ''}<button id="new-note" class="add-note toolbar-action" aria-label="${label.create}" title="${label.create}">${icon(view)}<span class="toolbar-action-label">${label.create}</span></button>${note ? '<span class="toolbar-separator" aria-hidden="true"></span><button id="trash-note" class="trash-toolbar" aria-label="Mover para a lixeira" title="Mover para a lixeira">'+icon('trash')+'</button>' : ''}</span></div>`;
+  const toolbar = `<div class="view-toolbar"><span class="toolbar-right">${view === 'reminders' ? `<button id="back-calendar">${actionLabel('calendar','Calendário')}</button>` : ''}<button id="notes-open" title="${label.heading}">${icon('list')}<span>${label.heading}</span><span class="subtle">(${notes.length})</span></button></span><span class="toolbar-right">${note ? '<button id="related-open" class="related-open" aria-label="Relacionados" title="Relacionados">'+relatedGraphIcon+'<span class="related-label">Relacionados</span></button>' : ''}${view === 'notes' && note ? '<button id="add-cut" class="add-note toolbar-action" aria-label="Adicionar mídia" title="Adicionar mídia">'+icon('media')+'<span class="toolbar-action-label">Adicionar mídia</span></button>' : ''}<button id="new-note" class="add-note toolbar-action" aria-label="${label.create}" title="${label.create}">${icon(view)}<span class="toolbar-action-label">${label.create}</span></button>${note ? '<button id="export-pdf" class="toolbar-action" aria-label="Exportar PDF" title="Exportar PDF">'+icon('export')+'<span class="toolbar-action-label">Exportar PDF</span></button>' : ''}${note ? '<span class="toolbar-separator" aria-hidden="true"></span><button id="trash-note" class="trash-toolbar" aria-label="Mover para a lixeira" title="Mover para a lixeira">'+icon('trash')+'</button>' : ''}</span></div>`;
   if (!note) {
     $('#page-content').innerHTML = toolbar + empty({ notes: 'Uma página nova?', tasks: 'Sua primeira lista?', reminders: 'Uma nota para lembrar?' }[view], { notes: 'Escreva e deixe o caderninho guardar.', tasks: 'Crie uma lista com quantos checkboxes precisar.', reminders: 'Escreva uma nota e agende seu alerta sonoro.' }[view], view, `<button id="empty-create" class="primary">${actionLabel(view,label.create)}</button>`);
     if(view==='tasks'&&(state.sourceActions||[]).some(item=>item.kind==='task'&&item.notebookId===state.activeNotebook)){ $('#page-content').innerHTML=toolbar+'<div id="source-task-only" class="scroll-list"></div>';renderSourceTasks();$('#new-note').onclick=createNote;$('#notes-open').onclick=openDrawer;return;}
@@ -82,6 +82,7 @@ function renderPage() {
   $('#notes-open').onclick = openDrawer;
   if ($('#back-calendar')) $('#back-calendar').onclick = () => { reminderEditor = false; render(); };
   $('#new-note').onclick = createNote;
+  $('#export-pdf').onclick=exportCurrentPDF;
   if ($('#add-cut')) $('#add-cut').onclick = openCutDialog;
   if($('#related-open')) $('#related-open').onclick=openRelated;
   $('#page-number').textContent = String(index + 1).padStart(2, '0');
@@ -93,7 +94,7 @@ function renderPage() {
       if (await action('item:create', { noteId: note.id, title: $('#task-input').value })) { $('#task-input').value = ''; renderItems(); $('#task-input').focus(); }
     };
   } else {
-    $('#note-body').oninput = event => { if (view === 'notes') smartNoteInput(note.id, event); else { updateDetail(); action('note:update', { id: note.id, body: $('#note-body').value }); } };
+    $('#note-body').oninput = event => { if (view === 'notes') smartNoteInput(note.id, event); else { const editor=$('#note-body'),categoryCursor=categoryCursorFor(event,editor);unfinishedCategoryNote=categoryCursor!==null&&categoryText.tokens(editor.value).some(token=>categoryCursor>token.start&&categoryCursor<=token.end)?note.id:null;updateDetail(); action('note:update', { id: note.id, body: editor.value, categoryCursor }); } };
     if (view === 'reminders') renderSchedule();
     if (view === 'notes' && (note.editorDoc || note.cuts?.length || categoryText.tokens(note.body).length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
     if (view === 'notes') renderSmartMargin();
@@ -241,7 +242,6 @@ $('#sidebar-toggle').onclick = async () => {
   if (await action('ui:sidebar', { collapsed: !state.sidebarCollapsed })) renderSidebar();
 };
 $('#search').oninput = renderDrawer;
-$('#quick-open').onclick = () => window.notebook.quick().catch(error => toast(error.message));
 $('#drawer-close').onclick = closeDrawer;
 for (const name of ['close', 'minimize', 'maximize']) $(`#${name}`).onclick = () => window.notebook.window(name);
 $('#sheet').addEventListener('dblclick', event => {
@@ -306,3 +306,15 @@ window.notebook.onReminder(async reminders => {
   toast(`Lembrete: ${reminders.map(reminder => reminder.title || 'Sem título').join(' · ')}`, 12000);
 });
 document.addEventListener('DOMContentLoaded',()=>{window.notebook.state().then(next => { state = next; view = state.activeView; render(); });});
+
+async function exportCurrentPDF(){
+ const note=currentNote(),button=$('#export-pdf');if(!note||button.disabled)return;
+ button.disabled=true;button.setAttribute('aria-busy','true');
+ try{
+  const editor=$('#note-body');
+  if(!await action('note:update',{id:note.id,title:$('#note-title').value,...(editor?{body:editor.value,...(editor.dataset.structured==='true'?{editorDoc:readEditorDocument()}:{})}:{})},{history:false}))return;
+  const result=await window.notebook.exportPDF(note.id);
+  if(!result.canceled)toast('PDF exportado.');
+ }catch(error){toast('Não foi possível exportar o PDF. '+error.message.replace(/^Error invoking remote method '[^']+': Error: /,''));}
+ finally{button.disabled=false;button.removeAttribute('aria-busy');}
+}

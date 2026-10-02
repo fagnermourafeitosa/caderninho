@@ -16,35 +16,6 @@ function fixture(t, legacy) {
 }
 function create(store, type, title) { store.dispatch('note:create', { type, title }); return store.snapshot().selected[type]; }
 const note = (store, id) => store.snapshot().notes.find(n => n.id === id);
-test('quick draft survives reopening and transfers atomically into a new note', t => {
-  const { store, open } = fixture(t);
-  store.dispatch('draft:update', { title: 'Uma ideia', body: 'Rascunho\ncom duas linhas', targetId: '' });
-  const reopened = open();
-  assert.equal(reopened.draft().body, 'Rascunho\ncom duas linhas');
-  reopened.dispatch('draft:commit');
-  const saved = note(store, store.getSetting('quick_saved_note'));
-  assert.equal(saved.title, 'Uma ideia');
-  assert.equal(saved.body, 'Rascunho\ncom duas linhas');
-  assert.equal(saved.type, 'notes');
-  assert.deepEqual(open().draft(), { title: '', body: '', targetId: '', id:null,created:null,updated:null });
-  assert.throws(() => store.dispatch('draft:commit'));
-});
-test('quick draft appends to an existing note and keeps content if destination is invalid', t => {
-  const { store } = fixture(t);
-  const id = create(store, 'notes', 'Destino');
-  store.dispatch('note:update', { id, body: 'Original' });
-  store.dispatch('draft:update', { body: 'Acrescentado', targetId: id });
-  store.dispatch('draft:commit');
-  assert.equal(note(store, id).body, 'Original\n\nAcrescentado');
-  store.dispatch('draft:update', { body: 'Não perder', targetId: id });
-  store.dispatch('note:trash', { id });
-  assert.throws(() => store.dispatch('draft:commit'));
-  assert.equal(store.draft().body, 'Não perder');
-  const list = create(store, 'tasks', 'Lista');
-  store.dispatch('draft:update', { targetId: list });
-  assert.throws(() => store.dispatch('draft:commit'));
-  assert.equal(store.draft().body, 'Não perder');
-});
 test('sidebar preference persists independently of pages after reopening', t => {
   const { store, open } = fixture(t);
   const before = store.snapshot().notes;
@@ -278,11 +249,14 @@ test('inline tasks keep identity and dates while edited, moved, removed and rest
   const restored=note(open(),id).inlineTasks.find(item=>item.id===first.id); assert.equal(restored.deletedAt,null); assert.equal(restored.created,first.created);
   assert.ok(store.snapshot().daily.overview.tasks.some(item=>item.id===first.id && item.source==='inline'));
 });
-test('unassociated quick draft dates persist and original creation transfers into a new note', t => {
-  const { store,open,advance }=fixture(t); store.dispatch('draft:update',{body:'Primeira ideia'});
-  const original=store.draft(); assert.ok(original.id); assert.ok(original.created); assert.equal(original.created,original.updated);
-  advance(1000); store.dispatch('draft:update',{body:'Ideia melhorada'}); const updated=open().draft();
-  assert.equal(updated.id,original.id); assert.equal(updated.created,original.created); assert.notEqual(updated.updated,original.updated);
-  advance(1000); store.dispatch('draft:commit'); const saved=note(store,store.getSetting('quick_saved_note'));
-  assert.equal(saved.created,original.created); assert.notEqual(saved.created,saved.updated); assert.equal(store.draft().id,null);
+
+test('removing quick capture preserves legacy saved data without accepting draft commands', t => {
+  const {store,open}=fixture(t);
+  const legacy=JSON.stringify({title:'Uma ideia antiga',body:'Texto preservado',notebookId:store.snapshot().activeNotebook});
+  store.setSetting('quick_draft',legacy);
+  const reopened=open();
+  assert.equal(reopened.getSetting('quick_draft'),legacy);
+  assert.throws(()=>reopened.dispatch('draft:update',{body:'Outro texto'}));
+  assert.throws(()=>reopened.dispatch('draft:commit'));
+  assert.equal(reopened.getSetting('quick_draft'),legacy);
 });

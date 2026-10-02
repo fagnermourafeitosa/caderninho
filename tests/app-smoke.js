@@ -60,11 +60,12 @@
   const restoredWindow = await window.notebook.window('maximize');
   assert(restoredWindow.bounds.height === originalWindow.bounds.height, 'Restaurar altura anterior');
   assert(restoredWindow.bounds.width === beforeMaximize.bounds.width && restoredWindow.bounds.x === beforeMaximize.bounds.x, 'Restaurar recupera largura e posição');
+  assert(!document.querySelector('#quick-open')&&!window.notebook.quick,'Rascunho removido da interface e da API');
   const header = document.querySelector('.book-header');
   header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
   await wait(100);
   assert((await window.notebook.window('state')).expanded, 'Dois cliques no topo maximizam');
-  document.querySelector('#quick-open').dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
+  document.querySelector('#maximize').dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
   await wait(100);
   assert((await window.notebook.window('state')).expanded, 'Dois cliques em um botão não maximizam');
   header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));

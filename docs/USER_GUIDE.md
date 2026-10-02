@@ -43,6 +43,8 @@ Abaixo do título, clique em **+ Categoria** para usar uma categoria cadastrada 
 
 Digite `#trabalho` ou `#ideias` no texto de uma nota para criar uma pill e associar a categoria à página. Termine a palavra com espaço ou pontuação, ou saia do editor, para registrá-la. Hashtags em itens de tarefas também associam categorias à lista.
 
+Ao digitar `#` e a primeira letra, aparecem sugestões das categorias já cadastradas, com busca sem distinguir acentos ou maiúsculas. Use **↑/↓** para escolher e **Enter** ou **Tab** para completar, ou clique na categoria. **Escape** fecha as sugestões sem mudar o texto. A abertura tem um bounce curto, desativado quando você prefere movimento reduzido.
+
 **Backspace na pill remove a categoria inteira do texto**, mantendo as palavras ao redor. Desfazer recupera a pill e sua associação. O texto guardado mantém a hashtag original, permitindo copiar para outros aplicativos.
 
 O **×** no badge remove uma associação feita pelo seletor. Se a categoria também aparece no texto, ela continua associada até você remover a hashtag. As categorias ficam cadastradas para reutilização.
@@ -77,7 +79,7 @@ Escolha **Tabela** no menu de inserção. A grade mostra uma prévia de **coluna
 
 Escreva diretamente nas células. **Tab** avança; **Shift Tab** volta. Tab na última célula acrescenta uma linha. **Enter** quebra a linha dentro da célula. Os controles da tabela permitem acrescentar linha ou coluna, ativar ou desativar o cabeçalho e remover a tabela.
 
-Tabelas, formatação e blocos são salvos automaticamente no banco local. **Desfazer/refazer** também recupera essas alterações. As notas existentes continuam disponíveis, e adicionar uma mídia ou capturar um rascunho mantém a formatação já guardada.
+Tabelas, formatação e blocos são salvos automaticamente no banco local. **Desfazer/refazer** também recupera essas alterações. As notas existentes continuam disponíveis, e adicionar uma mídia mantém a formatação já guardada.
 
 ## Atalhos dentro da nota
 
@@ -106,13 +108,11 @@ Cartões de links guardam o título, descrição e imagem obtidos das metatags d
 
 As imagens importadas são copiadas para a pasta de dados do aplicativo. Você pode mover ou apagar o arquivo original depois de importá-lo.
 
-## Rascunho instantâneo
+## Exportar para PDF
 
-Com o app aberto, pressione **⌘ Shift Espaço** no Mac ou **Ctrl Shift Espaço** nos demais sistemas para abrir uma pequena janela de captura. Você também pode usar **Rascunho** no topo do app ou o menu **Caderno → Rascunho instantâneo**.
+Abra uma nota, lista de tarefas ou lembrete e use **Exportar PDF** na barra da página. Em janelas menores, procure o ícone de folha com seta para baixo. Escolha o nome e a pasta no diálogo do Mac.
 
-Escreva, escolha **Nova nota** ou uma nota existente e clique em **Guardar no caderno**, ou pressione **⌘/Ctrl Enter**. Uma nova nota vai para o caderno em que o rascunho começou; ao escolher uma nota existente, o conteúdo é acrescentado naquela página.
-
-O rascunho salva automaticamente mesmo antes de virar uma nota. Fechar a janela ou pressionar **Escape** mantém o texto para depois. Se outro aplicativo estiver usando o atalho global, use o botão **Rascunho**.
+O PDF A4 inclui título, caderno, categorias, datas, texto formatado, tabelas, checkboxes, imagens, cartões de links e ações ligadas à página. Páginas longas continuam em outras folhas, com numeração. A exportação salva as últimas alterações antes de gerar o arquivo e funciona localmente, sem internet.
 
 ## Teclado e janela
 
@@ -122,11 +122,9 @@ O rascunho salva automaticamente mesmo antes de virar uma nota. Fechar a janela 
 | Refazer | **Ctrl/⌘ Shift Z** ou **Ctrl Y** |
 | Nova página na seção atual | **Ctrl/⌘ N** |
 | Buscar páginas na seção atual | **Ctrl/⌘ F** |
-| Abrir rascunho | **⌘ Shift Espaço** no Mac; **Ctrl Shift Espaço** nos demais sistemas |
-| Guardar rascunho | **Ctrl/⌘ Enter** |
-| Fechar lista de páginas ou ocultar rascunho | **Escape** |
+| Fechar lista de páginas | **Escape** |
 
-Nas notas, o histórico de desfazer inclui título, texto, pills e checkboxes, separado por página durante a sessão. Ele reinicia quando você fecha o app ou quando um rascunho acrescenta conteúdo à página. Mover mídias e agendar alertas não faz parte desse histórico.
+Nas notas, o histórico de desfazer inclui título, texto, pills e checkboxes, separado por página durante a sessão. Ele reinicia quando você fecha o app. Mover mídias e agendar alertas não faz parte desse histórico.
 
 Arraste uma área não editável do caderno para mover a janela. Use as bordas para redimensionar; a marca na borda direita ajusta a largura. O botão vermelho fecha, o amarelo minimiza e o verde amplia a janela à altura disponível, com largura de até 1.200 pixels. Um clique duplo no topo também amplia ou restaura.
 
@@ -134,7 +132,7 @@ A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fic
 
 ## Datas e lixeira
 
-Páginas mostram quando foram criadas e atualizadas. Tarefas registram marcações e desmarcações; itens removidos mantêm a data de exclusão até serem restaurados. Rascunhos guardam suas próprias datas, e uma nova nota criada a partir deles preserva a data original. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
+Páginas mostram quando foram criadas e atualizadas. Tarefas registram marcações e desmarcações; itens removidos mantêm a data de exclusão até serem restaurados. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
 
 O **ícone de lixeira em vermelho pastel**, no topo da página após o separador, move a página para a lixeira e a mantém recuperável. Itens de tarefas e mídias também podem ser restaurados em **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado novamente.
 
@@ -142,7 +140,7 @@ O **ícone de lixeira em vermelho pastel**, no topo da página após o separador
 
 ## Seus dados ficam no seu computador
 
-O aplicativo usa **SQLite** para guardar notas, cadernos, listas, categorias, lembretes e rascunhos. As imagens ficam em uma pasta local de mídia. Não existe conta, envio de páginas para servidor ou sincronização com a nuvem.
+O aplicativo usa **SQLite** para guardar notas, cadernos, listas, categorias e lembretes. As imagens ficam em uma pasta local de mídia. Não existe conta, envio de páginas para servidor ou sincronização com a nuvem.
 
 No Mac, os dados ficam em:
 

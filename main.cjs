@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Notification, Menu, nativeImage, dialog, shell, screen, globalShortcut, protocol, net } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, Notification, Menu, nativeImage, dialog, shell, screen, protocol, net } = require('electron');
 const { execFile } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -17,28 +17,6 @@ if (smoke) {
 }
 let win, store, reminderInterval, saveFailed = false, alarmCount = 0;
 let media, observedDay, related;
-let quickWin, openingQuick, quitting = false, quickShortcutAvailable = false;
-const QUICK_SHORTCUT = 'CommandOrControl+Shift+Space';
-function quickState() {
-  return { draft: store.draft(), notes: store.snapshot().notes.filter(note => note.type === 'notes' && !note.trashed).map(({ id, title,notebookId }) => ({ id, title,notebookName:store.db.prepare('SELECT name FROM notebooks WHERE id=?').get(notebookId)?.name })), shortcutAvailable: quickShortcutAvailable, shortcut: process.platform === 'darwin' ? '⌘⇧Espaço' : 'Ctrl+Shift+Espaço' };
-}
-async function openQuick() {
-  if (openingQuick) return openingQuick;
-  if (quickWin && !quickWin.isDestroyed()) {
-    quickWin.webContents.send('quick:refresh'); quickWin.show(); quickWin.focus(); return;
-  }
-  openingQuick = (async () => {
-    const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
-    quickWin = new BrowserWindow({ width: 440, height: Math.min(500, area.height), minWidth: 380, minHeight: 380, x: Math.round(area.x + (area.width - 440) / 2), y: Math.round(area.y + (area.height - Math.min(500, area.height)) / 2), title: 'Rascunho · Caderninho', frame: false, show: false, alwaysOnTop: true, backgroundColor: '#fbf0d5', webPreferences: { preload: path.join(__dirname, 'quick-preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false } });
-    quickWin.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-    quickWin.webContents.on('will-navigate', event => event.preventDefault());
-    quickWin.on('close', event => { if (!quitting) { event.preventDefault(); quickWin.hide(); } });
-    quickWin.on('closed', () => { quickWin = null; });
-    await quickWin.loadFile('quick.html');
-    quickWin.show(); quickWin.focus();
-  })();
-  try { await openingQuick; } finally { openingQuick = null; }
-}
 let restoreBounds = null, resizeSession = null, moveSession = null;
 const MIN_WIDTH = 620, MIN_HEIGHT = 520, MAX_EXPANDED_WIDTH = 1200;
 function windowState() {
@@ -92,11 +70,10 @@ else {
       return file ? net.fetch(pathToFileURL(file).href) : new Response('Arquivo não encontrado', { status: 404 });
     });
     createWindow();
-    if (!smoke) quickShortcutAvailable = globalShortcut.register(QUICK_SHORTCUT, () => openQuick().catch(reportSaveError));
   });
   app.on('activate', () => { if (store && !BrowserWindow.getAllWindows().length) createWindow(); });
-  app.on('before-quit', event => { if (!flush()) event.preventDefault(); else quitting = true; });
-  app.on('will-quit', () => { globalShortcut.unregisterAll(); related?.close(); store?.close(); });
+  app.on('before-quit', event => { if (!flush()) event.preventDefault(); });
+  app.on('will-quit', () => { related?.close(); store?.close(); });
   app.on('window-all-closed', () => app.quit());
 }
 function dispatchHistory(direction, targetWindow) {
@@ -114,13 +91,12 @@ async function createWindow() {
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     ...(process.platform === 'darwin' ? [{ label: 'Caderninho', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'hide' }, { role: 'quit' }] }] : []),
     { label: 'Editar', submenu: [{ label: 'Desfazer', accelerator: 'CommandOrControl+Z', click: (_item, targetWindow) => dispatchHistory('undo', targetWindow) }, { label: 'Refazer', accelerator: 'CommandOrControl+Shift+Z', click: (_item, targetWindow) => dispatchHistory('redo', targetWindow) }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] }
-    ,{ label: 'Caderno', submenu: [{ label: 'Rascunho instantâneo', click: () => openQuick().catch(reportSaveError) }] }
   ]));
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
   win.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   win.on('close', event => { if (!flush()) event.preventDefault(); });
-  win.on('closed', () => { win = null; clearInterval(reminderInterval); quickWin?.destroy(); });
+  win.on('closed', () => { win = null; clearInterval(reminderInterval); });
   await win.loadFile('index.html');
   windowState();
   clearInterval(reminderInterval);
@@ -156,24 +132,20 @@ function checkReminders() {
 }
 ipcMain.handle('related:query', (_event,id) => related.query(id));
 ipcMain.handle('related:retry', () => { if(!smoke)related.schedule(); });
-ipcMain.handle('notebook:state', () => ({ ...store.snapshot(), quickShortcutAvailable, ...(smoke ? { alarmCount } : {}) }));
-ipcMain.handle('quick:open', () => openQuick());
-ipcMain.handle('quick:state', () => quickState());
-ipcMain.handle('quick:write', (_event, input) => {
-  try { store.dispatch('draft:update', input); saveFailed = false; return store.draft(); }
-  catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
-});
-ipcMain.handle('quick:commit', () => {
-  try {
-    const state = store.dispatch('draft:commit'); saveFailed = false; if(!smoke)related.schedule();
-    win?.webContents.send('notebook:navigate', state);
-    return { id: store.getSetting('quick_saved_note') };
-  } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
-});
-ipcMain.handle('quick:hide', () => { quickWin?.hide(); });
-ipcMain.handle('quick:reveal', (_event, id) => {
-  win?.webContents.send('notebook:navigate', store.dispatch('note:select', { id }));
-  if (win?.isMinimized()) win.restore(); win?.show(); win?.focus(); quickWin?.hide();
+ipcMain.handle('notebook:state', () => ({ ...store.snapshot(), ...(smoke ? { alarmCount } : {}) }));
+ipcMain.handle('notebook:export-pdf', async (_event,id) => {
+  if(!flush())throw Error('Salve a última alteração antes de exportar.');
+  const snapshot=store.snapshot(),note=snapshot.notes.find(note=>note.id===id&&!note.trashed);
+  if(!note)throw Error('Página não encontrada.');
+  const {buildPDFHTML,createPDF,filename}=require('./pdf-export.cjs');
+  const destination=smoke?{filePath:path.join(__dirname,'artifacts','pdf',filename(note.title))}:await dialog.showSaveDialog(win,{title:'Exportar página para PDF',defaultPath:path.join(app.getPath('documents'),filename(note.title)),filters:[{name:'Documento PDF',extensions:['pdf']}],buttonLabel:'Exportar'});
+  if(destination.canceled||!destination.filePath)return {canceled:true};
+  const filePath=/\.pdf$/i.test(destination.filePath)?destination.filePath:destination.filePath+'.pdf';
+  const buffer=await createPDF(WebContentsView,buildPDFHTML(note,snapshot,media));
+  if(smoke)fs.mkdirSync(path.dirname(filePath),{recursive:true});
+  const temporary=filePath+'.'+randomUUID()+'.tmp';
+  try{await fs.promises.writeFile(temporary,buffer,{flag:'wx'});await fs.promises.rename(temporary,filePath);}finally{await fs.promises.rm(temporary,{force:true});}
+  return {canceled:false,filePath};
 });
 ipcMain.handle('notebook:action', (_event, action, input) => {
   if (['source:purge','note:purge','item:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
@@ -329,6 +301,23 @@ async function runSmoke() {
       fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true}); fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
       console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
+    if(process.argv.includes('--pdf-only')) {
+      const pixels=Buffer.alloc(1200*900*4);require('node:crypto').randomFillSync(pixels);for(let i=3;i<pixels.length;i+=4)pixels[i]=255;
+      const largeImage=nativeImage.createFromBitmap(pixels,{width:1200,height:900}).toPNG();
+      await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...largeImage])}`);
+      media.fetch=async url=>url.endsWith('no-cover')?{bytes:Buffer.from('<meta property="og:title" content="Referência sem capa">'),type:'text/html',url}:url.endsWith('cover.png')?{bytes:largeImage,type:'image/png',url}:{bytes:Buffer.from('<meta property="og:title" content="Referência para o projeto"><meta property="og:description" content="Cartão de link com capa local"><meta property="og:image" content="https://example.test/cover.png">'),type:'text/html',url};
+      let exportWindows=0;const countExportWindow=()=>{exportWindows++;};app.on('browser-window-created',countExportWindow);
+      const result=await win.webContents.executeJavaScript(smokeScript('pdf-smoke.js'));
+      app.off('browser-window-created',countExportWindow);if(exportWindows)throw Error('Exportação abriu uma janela de prévia.');
+      if(result.errors.length)throw Error(result.errors.join('\n'));
+      console.log('PDF_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
+    if(process.argv.includes('--category-autocomplete-only')) {
+      const result=await win.webContents.executeJavaScript(smokeScript('category-autocomplete-smoke.js'));
+      if(result.errors.length)throw Error(result.errors.join('\n'));
+      fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});fs.writeFileSync(path.join(__dirname,'artifacts','categorias-autocomplete.png'),(await win.webContents.capturePage()).toPNG());
+      console.log('CATEGORY_AUTOCOMPLETE_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     if(process.argv.includes('--categories-only')) {
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname,'assets','icon.png'))])}`);
       const result=await win.webContents.executeJavaScript(smokeScript('category-smoke.js'));
@@ -356,15 +345,6 @@ async function runSmoke() {
     await win.webContents.executeJavaScript("document.querySelector('#toast').hidden = true; document.querySelector('#sidebar-toggle').click();");
     await new Promise(resolve => setTimeout(resolve, 350));
     fs.writeFileSync(path.join(__dirname, 'artifacts', 'menu-recolhido.png'), (await win.webContents.capturePage()).toPNG());
-    await openQuick();
-    const quickResult = await quickWin.webContents.executeJavaScript(smokeScript('quick-smoke.js'));
-    if (quickResult.errors.length) throw new Error(quickResult.errors.join('\n'));
-    const quickNote = store.note(store.getSetting('quick_saved_note'));
-    if (quickNote.body !== 'Uma ideia capturada.\n\nMais um detalhe.') throw new Error('Rascunho não foi acrescentado corretamente.');
-    quickWin.show();
-    await new Promise(resolve => setTimeout(resolve, 150));
-    fs.writeFileSync(path.join(__dirname, 'artifacts', 'rascunho-instantaneo.png'), (await quickWin.webContents.capturePage()).toPNG());
-    quickWin.hide(); win.show();
     const bytes = fs.readFileSync(path.join(__dirname, 'assets', 'icon.png'));
     media.fetch = async url => { await new Promise(resolve => setTimeout(resolve, 50)); return url.endsWith('.png') ? { bytes, type: 'image/png', url } : { bytes: Buffer.from('<meta property="og:title" content="Uma ideia em papel"><meta property="og:description" content="Uma prévia guardada pelas metatags, mesmo sem internet."><meta property="og:image" content="/cover.png">'), type: 'text/html', url }; };
     await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(__dirname, 'assets', 'icon.png'))])}`);
@@ -434,7 +414,7 @@ async function runSmoke() {
     console.log('UNDO_SMOKE_OK', JSON.stringify(undo));
     console.log('MARGIN_SMOKE_OK', JSON.stringify(margin));
     console.log('CUTS_SMOKE_OK', JSON.stringify(cuts));
-    console.log('APP_SMOKE_OK', JSON.stringify({ ...result, alarmCount, quick: quickResult }));
+    console.log('APP_SMOKE_OK', JSON.stringify({ ...result, alarmCount }));
     app.quit();
   } catch (error) { console.error(error); app.exit(1); }
 }
