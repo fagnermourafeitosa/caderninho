@@ -1,78 +1,78 @@
 <p align="center">
-  <img src="assets/icon.png" width="112" alt="Logo do Caderninho">
+  <img src="assets/icon.png" width="112" alt="Caderninho logo">
 </p>
 
 <h1 align="center">Caderninho</h1>
 
 <p align="center">
-  <strong>Um lugar para suas ideias — e para o que nasce delas.</strong>
+  <strong>A place for your ideas — and for what grows out of them.</strong>
 </p>
 
 <p align="center">
-  Escreva, reúna referências e transforme trechos da página em próximos passos.<br>
-  Tudo no seu computador, sem criar uma conta.
+  Write, gather references and turn passages on the page into next steps.<br>
+  Everything stays on your computer, no account required.
 </p>
 
 <p align="center">
-  <a href="#da-anotação-ao-próximo-passo">Conheça o Caderninho</a> ·
-  <a href="docs/INSTALLATION.md">Instalação no Mac</a> ·
-  <a href="docs/USER_GUIDE.md">Guia de uso</a>
+  <a href="#from-note-to-next-step">Meet Caderninho</a> ·
+  <a href="docs/INSTALLATION.md">Installing on Mac</a> ·
+  <a href="docs/USER_GUIDE.md">User guide</a>
 </p>
 
-![Uma nota com tarefas e lembrete na margem, ligados aos trechos que deram origem a cada ação](docs/images/acoes-na-nota.png)
+![A note with tasks and a reminder in the margin, linked to the passages that gave rise to each action](docs/images/acoes-na-nota.png)
 
-## Da anotação ao próximo passo
+## From note to next step
 
-Uma ideia vira tarefa sem precisar sair da nota. Selecione um trecho e crie uma tarefa ou um lembrete na margem. Uma imagem ou referência também pode dar origem a uma ação.
+An idea becomes a task without leaving the note. Select a passage and create a task or a reminder in the margin. An image or a reference can also give rise to an action.
 
-O trecho fica marcado na página, e a ação guarda o caminho de volta à origem. Você sabe **o que fazer e por que aquilo importa**, mesmo quando retoma o assunto dias depois.
+The passage stays highlighted on the page, and the action keeps the way back to its origin. You know **what to do and why it matters**, even when you pick the subject up again days later.
 
-As tarefas entram na Página do dia e os lembretes no calendário. Conclua, reagende ou volte à anotação que começou tudo.
+Tasks go to the Daily page and reminders to the calendar. Complete them, reschedule them or go back to the note that started it all.
 
-## Ideias que encontram outras ideias
+## Ideas that find other ideas
 
-O Caderninho aproxima páginas que falam de assuntos parecidos, mesmo quando você usa palavras diferentes. Notas, listas e lembretes do mesmo caderno podem se conectar; o texto das imagens também ajuda a encontrar essas relações.
+Caderninho brings together pages about similar subjects, even when you use different words. Notes, lists and reminders in the same notebook can connect; text inside images also helps find these relationships.
 
-![Conexões entre a nota da viagem, referências de trilhas, uma lista de preparativos e um lembrete](docs/images/relacionados.png)
+![Connections between the trip note, trail references, a packing list and a reminder](docs/images/relacionados.png)
 
-No rodapé, as páginas mais próximas vêm primeiro. No grafo, ficam mais perto do centro. Clique em uma delas e continue de onde aquela ideia te levou.
+In the footer, the closest pages come first. In the graph, they sit closer to the center. Click one of them and continue wherever that idea takes you.
 
-As conexões acompanham suas mudanças e são encontradas no seu computador, sem enviar o conteúdo das páginas para a nuvem.
+Connections follow your changes and are found on your computer, without sending page content to the cloud.
 
-## Referências com lugar na página
+## References with a place on the page
 
-Uma paisagem, um roteiro, uma inspiração: cole ou arraste imagens e links para perto do que está escrevendo. Posicione os recortes e escreva ao redor, como num caderno de papel.
+A landscape, an itinerary, an inspiration: paste or drag images and links next to what you are writing. Position the clippings and write around them, as in a paper notebook.
 
-![Paisagem e cartão de referência organizados junto às anotações de uma viagem](docs/images/colagem.png)
+![Landscape and reference card arranged alongside notes about a trip](docs/images/colagem.png)
 
-A referência fica junto da ideia que ela despertou. E, quando surgir algo para fazer a partir dela, a ação pode ficar ali também.
+The reference stays with the idea it sparked. And when something to do comes up from it, the action can live there too.
 
-## O dia tem uma página própria
+## The day has its own page
 
-No topo, retome a última nota do caderno e explore as ideias ligadas a ela em um grafo. Logo abaixo, tarefas das suas listas e das margens das notas se encontram com os lembretes e as páginas recentes. Você acompanha o dia sem precisar abrir cada projeto para descobrir o que ficou pendente.
+At the top, pick up the latest note in the notebook and explore the ideas linked to it in a graph. Right below, tasks from your lists and from note margins meet reminders and recent pages. You follow your day without opening each project to find out what is still pending.
 
-![Página do dia com a última nota e seu grafo de conexões no topo, seguido das tarefas e lembretes](docs/images/pagina-do-dia.png)
+![Daily page with the latest note and its connection graph at the top, followed by tasks and reminders](docs/images/pagina-do-dia.png)
 
-Amanhã, a página de hoje continua disponível para consulta. O retrato das tarefas, lembretes e notas daquele momento fica guardado.
+Tomorrow, today's page remains available for reference. The snapshot of that moment's tasks, reminders and notes is kept.
 
-## Um caderno para cada assunto
+## A notebook for each subject
 
-Separe projetos, estudos e vida pessoal em cadernos, com abas coloridas para trocar entre eles. Categorias atravessam as páginas de cada caderno: comece a escrever uma hashtag e encontre as que você já usa.
+Separate projects, studies and personal life into notebooks, with colored tabs to switch between them. Categories run across the pages of each notebook: start typing a hashtag and find the ones you already use.
 
-A lupa no topo encontra páginas pelo título ou pelo conteúdo em todos os cadernos, de qualquer seção. Cada resultado mostra um trecho e o caderno de origem; clique para retomar a página.
+The magnifying glass at the top finds pages by title or content across all notebooks, from any section. Each result shows an excerpt and its source notebook; click to resume the page.
 
-![Busca por serra reunindo notas, lista de preparativos e lembrete, com trechos e caderno de origem](docs/images/busca.png)
+![Search for "serra" gathering notes, a packing list and a reminder, with excerpts and source notebook](docs/images/busca.png)
 
-Quer levar uma página com você? Exporte para PDF e guarde ou compartilhe suas anotações, referências e ações com o mesmo fundo de papel.
+Want to take a page with you? Export it to PDF and keep or share your notes, references and actions on the same paper background.
 
-## Seu caderninho fica com você
+## Your notebook stays with you
 
-Sem conta e sem sincronização com a nuvem. Suas páginas e imagens ficam no seu computador; você pode escrever e consultar o que guardou sem internet.
+No account and no cloud sync. Your pages and images stay on your computer; you can write and look up what you saved without internet.
 
-A prévia de um link consulta o site indicado. As conexões entre páginas precisam de um download inicial para começar a funcionar; depois, também estão disponíveis sem internet.
+A link preview queries the site you point to. Connections between pages need an initial download to start working; after that, they are also available offline.
 
-Veja como instalar no [guia para Mac](docs/INSTALLATION.md) e conheça os detalhes no [guia de uso](docs/USER_GUIDE.md).
+See how to install it in the [Mac guide](docs/INSTALLATION.md) and learn the details in the [user guide](docs/USER_GUIDE.md).
 
 ---
 
-As imagens mostram o aplicativo real com exemplos fictícios.
+The images show the real app with fictional examples.

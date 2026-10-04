@@ -1,13 +1,13 @@
-# Ideias planejadas
+# Planned ideas
 
-## Diagramas Mermaid
+## Mermaid diagrams
 
-Pedido registrado em 01/10/2026. Implementação futura solicitada pelo usuário; ainda não implementado.
+Requested on 2026-10-01. Future implementation requested by the user; not yet implemented.
 
-- Usar a biblioteca oficial `mermaid`, empacotada junto ao aplicativo.
-- Adicionar uma ação **Adicionar diagrama** nas notas.
-- Oferecer editor do código com prévia e validação de sintaxe.
-- Inserir o diagrama na página com possibilidade de editar novamente.
-- Guardar o código no SQLite e renderizar em SVG localmente.
-- Funcionar offline, sem CDN ou envio do conteúdo para a nuvem.
-- Preservar o estilo do caderno na apresentação e nos controles.
+- Use the official `mermaid` library, bundled with the app.
+- Add an **Adicionar diagrama** (Add diagram) action to notes.
+- Provide a code editor with preview and syntax validation.
+- Insert the diagram into the page with the option to edit it again.
+- Store the code in SQLite and render it to SVG locally.
+- Work offline, without a CDN or sending content to the cloud.
+- Preserve the notebook style in the presentation and controls.

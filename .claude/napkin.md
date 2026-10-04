@@ -13,6 +13,10 @@
 5. **[2026-10-02] Export PDF from saved page data**
    Do instead: flush current edits, build escaped HTML from the SQLite snapshot with embedded local media, and print in an unattached WebContentsView from a private temporary HTML file, then remove it; do not put HTML with embedded images in a data URL, which fails for large media. Keep page controls out, preserve rich text/list numbering, repeat table headers and set the paper color on @page as well as html/body so margins are colored; check long-page pagination and page corners with rendered PDFs.
 
+## Shell & Command Reliability
+1. **[2026-10-04] Default shell node is v10 (nvm)**
+   Do instead: run tests with `PATH=~/.nvm/versions/node/v22.23.1/bin:$PATH npm test`; v10 fails with `node: bad option: --test`.
+
 ## Editor
 1. **[2026-10-01] One continuous editing host**
    Do instead: keep ordinary writing blocks in the shared contenteditable page; native input targets the host, so resolve the caret block from Selection. Slice rich runs across the complete DOM range for deletion/formatting, including reverse ranges and line-boundary endpoints. Preserve prefix/suffix, SQLite structure and one-step replacement undo; guard caret offsets for detached nodes while constructing checkboxes. Normalize native nodes and route page-boundary carets into writing spans before editing, so plain text never escapes persistence. Validate native sendInputEvent keyboard/mouse selection plus Backspace/Delete, not only synthetic events.
@@ -31,8 +35,8 @@
    Do instead: do not rebuild the formatting toolbar for an unchanged DOM range; opening a color palette restores Selection and queues selectionchange. Test separate clicks with an event-loop delay and native mouse input, including link dialog focus. Use sized stroke-only SVG icons for formatting controls.
 
 ## Documentation
-1. **[2026-10-01] User-facing Portuguese README**
-   Do instead: focus README on distinctive benefits (source-linked actions, related ideas, collage and daily history), use real screenshots with fictional data, and omit technical implementation details and obvious editing features. Keep setup/technical instructions in linked guides; explain external link-preview requests accurately.
+1. **[2026-10-04] User-facing English README**
+   Do instead: write README in English (AGENTS.md rules govern workflow); focus README on distinctive benefits (source-linked actions, related ideas, collage and daily history), use real screenshots with fictional data, and omit technical implementation details and obvious editing features. Keep setup/technical instructions in linked guides; explain external link-preview requests accurately.
 
 ## User Directives
 1. **[2026-10-01] Daily overview and temporal records**

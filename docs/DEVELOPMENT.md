@@ -1,99 +1,99 @@
-# Desenvolvimento
+# Development
 
-[← Voltar ao Caderninho](../README.md)
+[← Back to Caderninho](../README.md)
 
-O Caderninho usa Electron, HTML, CSS e JavaScript. O processo principal mantém o banco SQLite e o armazenamento local de mídia; o renderer apresenta os cadernos e o editor.
+Caderninho uses Electron, HTML, CSS and JavaScript. The main process owns the SQLite database and local media storage; the renderer presents the notebooks and the editor.
 
-## Executar o projeto
+## Run the project
 
-Com Node.js e npm instalados:
+With Node.js 22 or newer and npm installed:
 
 ```sh
 npm ci
 npm start
 ```
 
-## Validar alterações
+## Validate changes
 
 ```sh
 npm test
 npm run test:app
 ```
 
-Os testes do aplicativo usam uma pasta temporária de dados, separada dos cadernos pessoais. Eles incluem persistência, editor, seleção, mídia, categorias, calendário, lembretes e desfazer/refazer.
+The app tests use a temporary data folder, separate from personal notebooks. They cover persistence, editor, selection, media, categories, calendar, reminders and undo/redo.
 
-Para executar apenas os cenários com teclado e mouse nativos:
+To run only the native keyboard and mouse scenarios:
 
 ```sh
 npm run test:app -- --native-only
 ```
 
-Para validar apenas ações ligadas a trechos e mídias:
+To validate only actions linked to passages and media:
 
 ```sh
 npm run test:app -- --source-only
 ```
 
-## Gerar o pacote
+## Build the package
 
 ```sh
 npm run package
 ```
 
-Veja [Instalação no macOS](INSTALLATION.md) para copiar e abrir o aplicativo gerado.
+See [Installing on macOS](INSTALLATION.md) to copy and open the generated app.
 
-## Atualizar as imagens do README
+## Update the README images
 
-Para regenerar o logo PNG e o ícone do aplicativo a partir de `assets/icon.svg`:
+To regenerate the PNG logo and the app icon from `assets/icon.svg`:
 
 ```sh
 npm run icon
 ```
 
-No macOS, esse comando também gera `assets/icon.icns` para o pacote instalado.
+On macOS, this command also generates `assets/icon.icns` for the installed package.
 
-Para atualizar as capturas:
+To update the screenshots:
 
 ```sh
 npx electron scripts/capture-readme.cjs
 ```
 
-Para gerar somente as capturas de ações vinculadas e colagem:
+To generate only the linked actions and collage screenshots:
 
 ```sh
 npx electron scripts/capture-readme.cjs --features-only
 ```
 
-O script usa o renderer real com dados fictícios em um banco temporário. As capturas são gravadas em `docs/images/`; a pasta temporária é removida ao terminar. Nenhuma nota pessoal é acessada.
+The script uses the real renderer with fictional data in a temporary database. Screenshots are written to `docs/images/`; the temporary folder is removed when it finishes. No personal note is accessed.
 
-As funcionalidades ainda não implementadas ficam registradas em [ROADMAP.md](../ROADMAP.md).
+Features not yet implemented are recorded in [ROADMAP.md](../ROADMAP.md).
 
-## Conexões locais
+## Local connections
 
-O cálculo é separado da apresentação:
+Computation is separate from presentation:
 
-- `related-config.cjs`: pesos de categorias/léxico/semântica, limiar, quantidade máxima e versão fixa do modelo. Os pesos são normalizados; os valores iniciais ainda precisam de calibração com exemplos reais.
-- `related-engine.cjs`: documentos pesquisáveis, comparação dos sinais e ranking restrito ao mesmo caderno. A distância no grafo representa a afinidade combinada.
-- `related-service.cjs`: fila após o salvamento, cache por conteúdo/modelo no SQLite, descarte de vetores antigos e extração de texto de imagens.
-- `related-worker.cjs`: EmbeddingGemma Q4 em CPU fora da thread da interface. Notas longas são divididas e seus vetores combinados. Usa o prompt simétrico de similaridade.
-- `related-ui.js`: rodapé e modal, sem exibir pontuações. O grafo mostra até oito conexões diretas à página atual; clicar abre a página de origem.
-- `native/ocr.swift`: OCR do Apple Vision em português/inglês. `prestart` e `prepackage` compilam o helper; o aplicativo distribuído inclui o executável e não exige Swift instalado.
+- `related-config.cjs`: category/lexical/semantic weights, threshold, maximum count and pinned model version. Weights are normalized; the initial values still need calibration with real examples.
+- `related-engine.cjs`: searchable documents, signal comparison and ranking restricted to the same notebook. Distance in the graph represents the combined affinity.
+- `related-service.cjs`: queue after saving, SQLite cache by content/model, disposal of old vectors and text extraction from images.
+- `related-worker.cjs`: EmbeddingGemma Q4 on CPU, off the UI thread. Long notes are split and their vectors combined. Uses the symmetric similarity prompt.
+- `related-ui.js`: footer and modal, without showing scores. The graph shows up to eight direct connections to the current page; clicking opens the source page.
+- `native/ocr.swift`: Apple Vision OCR in Portuguese/English and PDFKit title/excerpt extraction. `prestart` and `prepackage` compile the helper; the distributed app includes the executable and does not require Swift.
 
-O primeiro processamento baixa os arquivos do modelo para `userData/models`. Nenhum texto ou imagem é enviado para inferência remota. Depois do download, o processamento funciona offline. As tabelas `related_vectors` e `related_ocr` são caches derivados; o conteúdo original permanece nas tabelas existentes.
+The first run downloads the model files to `userData/models`. No text or image is sent for remote inference. After the download, processing works offline. The `related_vectors` and `related_ocr` tables are derived caches; the original content remains in the existing tables.
 
-Validação opcional com o modelo real, incluindo um par português/inglês e um assunto diferente:
+Optional validation with the real model, including a Portuguese/English pair and an unrelated subject:
 
 ```sh
 node scripts/check-embedding.cjs
 npx electron . --smoke-test --related-only
 ```
 
-O segundo comando valida o grafo com vetores determinísticos em um banco temporário; não mede a qualidade semântica. Para gerar o aplicativo no macOS, a máquina de desenvolvimento precisa das ferramentas de linha de comando da Apple (`swiftc`).
+The second command validates the graph with deterministic vectors in a temporary database; it does not measure semantic quality. To build the app on macOS, the development machine needs the Apple command line tools (`swiftc`).
 
-Para validar a exportação de notas, listas e lembretes em PDF com dados fictícios:
+To validate PDF export of notes, lists and reminders with fictional data:
 
 ```sh
 npx electron . --smoke-test --pdf-only
 ```
 
-Os PDFs de teste ficam em `artifacts/pdf/`; incluem imagens grandes e cartões de links com e sem capa. A exportação usa um WebContentsView isolado sem janela visível e um arquivo HTML temporário com mídias locais incorporadas, sem carregar recursos da rede.
+Test PDFs are written to `artifacts/pdf/`; they include large images and link cards with and without a cover. Export uses an isolated WebContentsView with no visible window and a temporary HTML file with embedded local media, without loading network resources.

@@ -1,27 +1,27 @@
-# Instalação no macOS
+# Installing on macOS
 
-[← Voltar ao Caderninho](../README.md)
+[← Back to Caderninho](../README.md)
 
-O aplicativo é distribuído aqui como código-fonte. Para gerar o pacote localmente, você precisa de Node.js e npm instalados.
+The app is distributed here as source code. To build the package locally, you need Node.js and npm installed.
 
-## Gerar o aplicativo
+## Build the app
 
-Baixe ou clone este projeto e, na pasta do Caderninho, execute:
+Download or clone this project and, in the Caderninho folder, run:
 
 ```sh
 npm ci
 npm run package
 ```
 
-O pacote é gerado para a arquitetura do Mac utilizado. Em um Mac com Apple Silicon, o resultado fica em:
+The package is built for the architecture of the Mac in use. On an Apple Silicon Mac, the result is at:
 
 ```text
 dist/Caderninho-darwin-arm64/Caderninho.app
 ```
 
-## Instalar e abrir
+## Install and open
 
-Feche a versão anterior antes de substituí-la. Em um Mac com Apple Silicon:
+Close the previous version before replacing it. On an Apple Silicon Mac:
 
 ```sh
 mkdir -p ~/Applications
@@ -29,15 +29,17 @@ ditto dist/Caderninho-darwin-arm64/Caderninho.app ~/Applications/Caderninho.app
 open ~/Applications/Caderninho.app
 ```
 
-Em um Mac Intel, use a pasta `Caderninho-darwin-x64` no lugar de `Caderninho-darwin-arm64`.
+On an Intel Mac, use the `Caderninho-darwin-x64` folder instead of `Caderninho-darwin-arm64`.
 
-Atualizar o aplicativo preserva a pasta local de dados. A instalação não precisa de conta ou cadastro.
+Updating the app preserves the local data folder. Installation requires no account or sign-up.
 
-## Primeiros passos
+## First steps
 
-1. Abra o Caderninho para consultar a Página do dia.
-2. Crie seus cadernos em **Cadernos**.
-3. Abra **Notas**, **Tarefas** ou **Lembretes** para criar uma página.
-4. Aguarde a confirmação de salvamento antes de fechar o aplicativo.
+The app interface is in Portuguese; labels are shown as they appear in the app, followed by their English meaning.
 
-Consulte o [guia de uso](USER_GUIDE.md) para aprender os atalhos e configurar lembretes.
+1. Open Caderninho to see the Daily page.
+2. Create your notebooks in **Cadernos** (Notebooks).
+3. Open **Notas** (Notes), **Tarefas** (Tasks) or **Lembretes** (Reminders) to create a page.
+4. Wait for the save confirmation before closing the app.
+
+See the [user guide](USER_GUIDE.md) to learn the shortcuts and set up reminders.
