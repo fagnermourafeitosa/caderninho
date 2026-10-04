@@ -1,5 +1,5 @@
 const { randomUUID } = require('node:crypto');
-const { checkbox } = require('./smart-text.js');
+const { checkbox } = require('../shared/smart-text.js');
 function installTemporal(store) {
   const columns = (table, definitions) => {
     const present = new Set(store.db.prepare(`PRAGMA table_info(${table})`).all().map(column => column.name));

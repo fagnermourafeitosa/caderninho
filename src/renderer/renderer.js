@@ -9,9 +9,6 @@ const labels = {
 };
 let state, view = 'home', trashType = 'notes', animationGeneration = 0, toastTimer, pending = 0;
 let reminderEditor = false;
-window.smokeErrors = [];
-window.addEventListener('error', event => window.smokeErrors.push(event.message));
-window.addEventListener('unhandledrejection', event => window.smokeErrors.push(String(event.reason)));
 const visibleNotes = () => state.notes.filter(note => note.type === view && !note.trashed && note.notebookId===state.activeNotebook);
 const currentNote = () => state.notes.find(note => note.id === state.selected[view] && !note.trashed);
 const prettyDate = date => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(date));
@@ -254,10 +251,10 @@ document.querySelectorAll('[data-resize]').forEach(handle => {
   handle.onpointerdown = event => {
     if (event.button !== 0) return;
     event.preventDefault(); active = true; handle.setPointerCapture(event.pointerId);
-    window.notebook.resize('start', { edge: handle.dataset.resize, x: event.screenX, y: event.screenY });
+    window.notebook.resize('start', { edge: handle.dataset.resize });
   };
   handle.onpointermove = event => {
-    if (active) window.notebook.resize('move', { x: event.screenX, y: event.screenY });
+    if (active) window.notebook.resize('move');
   };
   const end = () => { if (active) window.notebook.resize('end'); active = false; };
   handle.onpointerup = end; handle.onpointercancel = end; handle.onlostpointercapture = end;

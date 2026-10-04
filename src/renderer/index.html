@@ -7,9 +7,9 @@
   <title>Caderninho</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="controls.css">
-  <script defer src="smart-text.js"></script>
-  <script defer src="category-text.js"></script>
-  <script defer src="editor-document.js"></script>
+  <script defer src="../shared/smart-text.js"></script>
+  <script defer src="../shared/category-text.js"></script>
+  <script defer src="../shared/editor-document.js"></script>
   <script defer src="edit-history.js"></script>
   <script defer src="renderer.js"></script>
   <script defer src="cuts.js"></script>
@@ -80,6 +80,8 @@
         <footer class="book-footer"><span id="footer-label">Uma coisa de cada vez.</span><span id="page-number">01</span></footer>
       </div>
       <div class="resize-handle resize-mark" data-resize="e" role="separator" aria-label="Arraste para redimensionar a largura" title="Arraste para ajustar a largura"><span></span></div>
+      <div class="resize-handle resize-mark resize-mark-s" data-resize="s" role="separator" aria-label="Arraste para redimensionar a altura" title="Arraste para ajustar a altura"><span></span></div>
+      <div class="resize-handle resize-corner" data-resize="se" role="separator" aria-label="Arraste para redimensionar a janela" title="Arraste para ajustar largura e altura"><span></span></div>
       <div id="flip-layer" aria-hidden="true"></div>
       <aside class="notes-drawer" id="notes-drawer" hidden aria-label="Todas as notas">
         <div class="drawer-heading"><h2 id="drawer-title">Suas notas</h2><button id="drawer-close" aria-label="Fechar lista"><svg class="small-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
@@ -87,6 +89,10 @@
         <div id="notes-list"></div>
       </aside>
     </section>
+    <div class="book-edges" aria-hidden="true">
+      <div data-resize="n"></div><div data-resize="s"></div><div data-resize="e"></div><div data-resize="w"></div>
+      <div data-resize="ne"></div><div data-resize="nw"></div><div data-resize="se"></div><div data-resize="sw"></div>
+    </div>
   </main>
   <div class="window-edges" aria-hidden="true">
     <div data-resize="n"></div><div data-resize="s"></div><div data-resize="e"></div><div data-resize="w"></div>

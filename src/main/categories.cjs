@@ -1,5 +1,5 @@
 const {randomUUID}=require('node:crypto');
-const {normalize,tokens}=require('./category-text.js');
+const {normalize,tokens}=require('../shared/category-text.js');
 const {event}=require('./temporal.cjs');
 function installCategories(store) {
   store.db.exec(`CREATE TABLE IF NOT EXISTS categories(id TEXT PRIMARY KEY,name TEXT NOT NULL,key TEXT NOT NULL UNIQUE,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
@@ -28,7 +28,7 @@ function detach(store,noteId,categoryId,source,stamp) {
 }
 function syncCategories(store,noteId,stamp,pendingOffset=null) {
   const note=store.note(noteId);
-  const source=note.editor_document?require('./editor-document.js').text(JSON.parse(note.editor_document).map(block=>({...block,runs:block.runs?.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run),rows:block.rows?.map(row=>row.map(cell=>cell.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run)))}))):note.body;
+  const source=note.editor_document?require('../shared/editor-document.js').text(JSON.parse(note.editor_document).map(block=>({...block,runs:block.runs?.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run),rows:block.rows?.map(row=>row.map(cell=>cell.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run)))}))):note.body;
   const text=source+(note.type==='tasks'?'\n'+store.db.prepare('SELECT title FROM task_items WHERE note_id=? AND trashed=0 ORDER BY position').all(noteId).map(item=>item.title).join('\n'):'');
   const keys=new Set(), ids=new Set();
   for(const token of tokens(text,pendingOffset)) if(!keys.has(token.key)) { keys.add(token.key); const row=category(store,token.name,stamp); ids.add(row.id); associate(store,noteId,row.id,'inline',stamp); }

@@ -12,7 +12,7 @@ Caderninho is a local-first Electron desktop app (macOS) for notes, checklists, 
 - **Development Data vs. Production**: test fixtures, seed notes, smoke-test data and screenshot examples are placeholder data, not product decisions. Never report a development value as a product defect or propose a specification to rename it; check first whether it lives only in development data.
 - **Skill Location**: Project skills are located in `.agents/skills/`. Before declaring a required skill unavailable, inspect that directory (including hidden paths) and read its `SKILL.md` or `SKILLS.md`. This includes `to-spec`, `grilling`, `tdd`.
 - **Planning & Stress-Testing**: Any code creation must follow and apply the `/grilling` skill to challenge assumptions and thoroughly refine the plan and requirements.
-- **TDD Implementation**: Always use the `/tdd` skill during implementation. UI tests are allowed and run as Electron smoke tests (`tests/*-smoke.js`, `npm run test:app`).
+- **TDD Implementation**: Always use the `/tdd` skill during implementation. UI tests are allowed and run as Electron smoke tests (scenarios in `tests/*-smoke.js`, runner in `tests/smoke/`, `npm run test:app`).
   - Strictly follow the Red-Green-Refactor cycle sequentially without skipping steps or running them in parallel.
   - Enforce each Red-Green cycle sequentially: write and run the failing test before changing the corresponding implementation. Multiple complete Red-Green cycles may run consecutively in the same agent turn. Never alter implementation files before or concurrently with their failing test.
 - **Defect & Bug Resolution Policy**: Whenever a bug, edge case, regression, or implementation defect is identified, the agent MUST ALWAYS write a failing unit/integration test demonstrating the problem first (Red phase) before altering any implementation code or applying a fix.
@@ -94,9 +94,9 @@ The coding agent must proactively consult and read specific documentation and sp
 - **Do Not Prioritize Open Files in IDE**: The agent MUST NOT prioritize or assume relevance of files merely because they are open or active in the user's IDE / editor tabs. Context and authoritative scope must be derived strictly from the project's explicit specifications, approved tasks, and workspace files.
 - **Project References**:
   - `README.md`: user-facing product description.
-  - `PRODUCT.md`: product register, users, personality and anti-references.
-  - `DESIGN.md`: design tokens, typography, components and interaction rules.
-  - `ROADMAP.md`: planned ideas that are NOT approved for implementation.
+  - `docs/PRODUCT.md`: product register, users, personality and anti-references.
+  - `docs/DESIGN.md`: design tokens, typography, components and interaction rules.
+  - `docs/ROADMAP.md`: planned ideas that are NOT approved for implementation.
   - `docs/DEVELOPMENT.md`: how to run, test, package and capture screenshots.
   - `docs/USER_GUIDE.md`: user-facing behavior of every feature.
 
@@ -110,12 +110,21 @@ The coding agent must proactively consult and read specific documentation and sp
 
 - When finishing each task, mark `[x]` in the active feature specification (`specs/<ID>-YYYY-MM-DD-<slug>.md`) to indicate that the task is completed. Never modify the template file itself for task progress.
 
+## Project Structure
+- `src/main/`: Electron main process, preload, persistence and related-content modules.
+- `src/shared/`: pure modules loaded by both processes (no Electron, Node or DOM APIs).
+- `src/renderer/`: `index.html`, styles and renderer scripts (ordered global `<script defer>` files).
+- `tests/`: unit/integration tests (`*.test.cjs`), smoke scenarios (`*-smoke.js`) and the smoke runner (`tests/smoke/`).
+- `scripts/`: build and maintenance tooling. `native/`: Swift OCR/PDF helper. `assets/`: icons and sounds.
+- `docs/`, `specs/`: documentation and specifications.
+- The repository root holds only configuration and entry documents. Do not add source files to the root.
+
 ## Code Quality & Validation
 - **Node Version**: Run all npm/node commands with Node 22 or newer. The default shell may resolve an older Node through nvm, which fails with `node: bad option: --test`.
 - **Mandatory Quality Check**: Before concluding ANY task that changes code, ALWAYS execute:
   - `npm test` (unit/integration tests in `tests/*.test.cjs`).
   - `node --check <file>` for every changed `.js`/`.cjs` file.
-  - When the change touches the renderer, `preload.cjs` or IPC handlers, run the affected Electron smoke tests (`npm run test:app`, or its scoped flags). Run smoke processes sequentially; they share the test data directory and desktop focus.
+  - When the change touches the renderer, `src/main/preload.cjs` or IPC handlers, run the affected Electron smoke tests (`npm run test:app`, or its scoped flags). Run smoke processes sequentially; they share the test data directory and desktop focus.
   - When the change touches `native/`, run `node scripts/build-ocr.cjs` and confirm the helper builds.
   - When the change touches packaging, resource paths, `native/`, `assets/` or dependencies, run `npm run package` and confirm the packaged app starts.
 - **Isolated Test Data**: Tests MUST use a temporary data directory. Never read, write or delete the user's real notebooks, SQLite database or media.
@@ -125,7 +134,7 @@ The coding agent must proactively consult and read specific documentation and sp
 ### Process Model & Security
 - **Hardened BrowserWindow**: every window keeps `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false` and default `webSecurity`. Never enable `nodeIntegrationInWorker`, `nodeIntegrationInSubFrames`, `allowRunningInsecureContent` or `experimentalFeatures`.
 - **Untrusted Renderer**: treat the renderer as untrusted input. Business rules, persistence, filesystem access, network access and child processes live only in the main process (or its workers).
-- **Minimal Preload Surface**: `preload.cjs` exposes one purpose-specific function per capability through `contextBridge`. Never expose `ipcRenderer`, a generic `invoke(channel, ...)`, `require`, `process` or Node modules to the page.
+- **Minimal Preload Surface**: `src/main/preload.cjs` exposes one purpose-specific function per capability through `contextBridge`. Never expose `ipcRenderer`, a generic `invoke(channel, ...)`, `require`, `process` or Node modules to the page.
 - **IPC Contracts**: use `ipcMain.handle` / `ipcRenderer.invoke` only; never synchronous IPC (`sendSync`). Every handler validates its payload in the main process (types, required fields, identifier format, enum values, size limits) before acting, and rejects with a clear error. Every new or changed channel is documented in the feature specification.
 - **Content Security Policy**: the app page keeps a restrictive CSP. No `eval`, `new Function`, inline event handler attributes or remote scripts/styles. All assets ship with the app.
 - **Navigation & New Windows**: block unexpected navigation (`will-navigate`) and deny `window.open` through `setWindowOpenHandler`. External links open only via `shell.openExternal` after validating an `http:`/`https:` URL in the main process.

@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const {buildPDFHTML,filename}=require('../pdf-export.cjs');
+const {buildPDFHTML,filename}=require('../src/main/pdf-export.cjs');
 test('PDF export keeps rich content and linked actions, escaping user text and rejecting unsafe links',()=>{
  const note={id:'a',type:'notes',notebookId:'book',title:'<script>teste</script>',body:'',categories:[],cuts:[],items:[],editorDoc:[{id:'x',type:'paragraph',runs:[{text:'Texto <img src=x>',marks:{bold:true,link:'javascript:alert(1)'}}]},{id:'t',type:'table',header:true,rows:[[[{text:'Coluna',marks:{}}]],[[{text:'Valor',marks:{italic:true}}]]]}]};
  const html=buildPDFHTML(note,{notebooks:[{id:'book',name:'Pessoal'}],sourceActions:[{noteId:'a',kind:'task',done:true,title:'Revisar',origin:{quote:'Texto'}}]},{file:()=>null});

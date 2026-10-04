@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { movePosition } = require('../window-move.cjs');
+const { movePosition } = require('../src/main/window-move.cjs');
 
 test('desktop cursor moves the window by the total drag distance without accumulating movement', () => {
   const bounds = { x: 100, y: 80 }, origin = { x: 200, y: 150 };

@@ -1,8 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path');
-const { metadata, publicAddress, webUrl, MediaStore, download } = require('../media.cjs');
-const { Store } = require('../store.cjs');
+const { metadata, publicAddress, webUrl, MediaStore, download } = require('../src/main/media.cjs');
+const { Store } = require('../src/main/store.cjs');
 test('metadata uses Open Graph with attribute order, entities and relative images', () => {
   assert.deepEqual(metadata(`<title>Fallback</title><meta content='Papel &amp; tinta' property='og:title'><meta name="description" content="Descrição"><meta property="og:image" content="/cover.png">`, 'https://example.com/page'), { title: 'Papel & tinta', description: 'Descrição', image: 'https://example.com/cover.png' });
   assert.equal(metadata('<title>Título básico</title>', 'https://example.com').title, 'Título básico');

@@ -5,7 +5,7 @@ const { DatabaseSync } = require('node:sqlite');
 const { installTemporal, event, syncInline, taskDTO } = require('./temporal.cjs');
 const {installCategories,category,associate,detach,syncCategories,categoryState}=require('./categories.cjs');
 const {COLORS,installNotebooks,getNotebook,activeNotebook,notebookCommand,notebookState}=require('./notebooks.cjs');
-const pageDocument=require('./editor-document.js');
+const pageDocument=require('../shared/editor-document.js');
 const {installSourceActions,sourceActions,sourceCommand,dueSourceActions}=require('./source-actions.cjs');
 const TYPES = ['notes', 'tasks', 'reminders'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
@@ -221,7 +221,7 @@ class Store {
           const item = this.db.prepare('SELECT * FROM inline_tasks WHERE id=? AND deleted_at IS NULL').get(input.id);
           if (!item) throw new Error('Item não encontrado.');
           const note = this.note(item.note_id,'notes'); if (note.trashed) throw new Error('Restaure a nota primeiro.');
-          const lines = note.body.split('\n'), match = require('./smart-text.js').checkbox(lines[item.line_index]);
+          const lines = note.body.split('\n'), match = require('../shared/smart-text.js').checkbox(lines[item.line_index]);
           if (!match) throw new Error('Item não encontrado na nota.');
           lines[item.line_index] = `[${item.done ? ' ' : 'x'}] ` + lines[item.line_index].slice(match[0].length);
           this.db.prepare('UPDATE notes SET body=?,updated=? WHERE id=?').run(lines.join('\n'),stamp,note.id);

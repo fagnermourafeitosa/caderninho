@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { EditHistory } = require('../edit-history.js');
+const { EditHistory } = require('../src/renderer/edit-history.js');
 const value = body => ({ title: 'Note', body });
 test('typing groups undo while checkbox changes remain separate', () => {
   let clock = 0; const history = new EditHistory(value(''), { now: () => clock });

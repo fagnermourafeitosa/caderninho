@@ -1,8 +1,8 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
-const {Store}=require('../store.cjs');
-const {tokens,normalize}=require('../category-text.js');
+const {Store}=require('../src/main/store.cjs');
+const {tokens,normalize}=require('../src/shared/category-text.js');
 function fixture(t) {
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'caderninho-categories-'));
   const stores=[]; const open=()=>{const store=new Store(directory);stores.push(store);return store;};

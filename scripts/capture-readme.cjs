@@ -1,17 +1,17 @@
 // Capture the real renderer with fictional data in an isolated temporary database.
 const {app,BrowserWindow,ipcMain,nativeImage,protocol,net}=require('electron');
 const {pathToFileURL}=require('node:url');
-const {MediaStore}=require('../media.cjs');
-const {RelatedService}=require('../related-service.cjs');
+const {MediaStore}=require('../src/main/media.cjs');
+const {RelatedService}=require('../src/main/related-service.cjs');
 protocol.registerSchemesAsPrivileged([{scheme:'caderno-media',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 const fs=require('node:fs');
-const os=require('node:os');
 const path=require('node:path');
-const {Store}=require('../store.cjs');
-const doc=require('../editor-document.js');
+const {Store}=require('../src/main/store.cjs');
+const doc=require('../src/shared/editor-document.js');
 const root=path.resolve(__dirname,'..');
-const directory=fs.mkdtempSync(path.join(os.tmpdir(),'caderninho-readme-'));
-app.setPath('userData',directory);
+const {isolateUserData,trackRendererErrors}=require('../tests/smoke/sandbox.cjs');
+const directory=isolateUserData('caderninho-readme-');
+const installRendererErrors=trackRendererErrors();
 let store,win,media,related;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 app.whenReady().then(async()=>{
@@ -56,8 +56,8 @@ app.whenReady().then(async()=>{
   ipcMain.handle('notebook:state',()=>store.snapshot());
   ipcMain.handle('notebook:action',(_event,name,input)=>command(name,input));
   ipcMain.handle('notebook:window',()=>null);
-  win=new BrowserWindow({width:1080,height:900,frame:false,transparent:true,backgroundColor:'#00000000',show:false,webPreferences:{preload:path.join(root,'preload.cjs'),contextIsolation:true,sandbox:true,backgroundThrottling:false}});
-  await win.loadFile(path.join(root,'index.html'));await pause(900);
+  win=new BrowserWindow({width:1080,height:900,frame:false,transparent:true,backgroundColor:'#00000000',show:false,webPreferences:{preload:path.join(root,'src','main','preload.cjs'),contextIsolation:true,sandbox:true,backgroundThrottling:false}});
+  await win.loadFile(path.join(root,'src','renderer','index.html'));await installRendererErrors(win.webContents);await pause(900);
   const capture=async(name,code,outputDirectory=path.join(root,'docs','images'))=>{
     if(code)await win.webContents.executeJavaScript(code);
     await pause(500);

@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { suggestions, checkbox } = require('../smart-text.js');
+const { suggestions, checkbox } = require('../src/shared/smart-text.js');
 const now = new Date(2026, 9, 1, 12, 0);
 test('Portuguese day and time produces precise local future dates', () => {
   for (const [text, day, hour, minute] of [['amanhã às 14h', 2, 14, 0], ['amanha as 14:30', 2, 14, 30], ['hoje às 13h05', 1, 13, 5], ['depois de amanhã às 9h', 3, 9, 0], ['05/10 às 14h30', 5, 14, 30]]) {

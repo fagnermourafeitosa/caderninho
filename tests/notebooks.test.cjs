@@ -1,6 +1,6 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
-const {Store}=require('../store.cjs');const {COLORS}=require('../notebooks.cjs');
+const {Store}=require('../src/main/store.cjs');const {COLORS}=require('../src/main/notebooks.cjs');
 function fixture(t) {const directory=fs.mkdtempSync(path.join(os.tmpdir(),'caderninho-notebooks-'));const stores=[];const open=()=>{const store=new Store(directory);stores.push(store);return store;};t.after(()=>{stores.reverse().forEach(store=>store.close());fs.rmSync(directory,{recursive:true,force:true});});return {store:open(),open};}
 function createBook(store,name) {return store.dispatch('notebook:create',{name,description:'Um projeto',color:COLORS[1]}).activeNotebook;}
 test('every page has a notebook and changing notebooks scopes selected pages',t=>{

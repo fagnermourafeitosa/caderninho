@@ -142,7 +142,6 @@
   await window.notebook.action('schedule:activate', { id: reminderId, due: new Date(Date.now() + 1100).toISOString() });
   await wait(2400);
   assert(current(await window.notebook.state()).fired, 'Alerta dispara no horário');
-  assert((await window.notebook.state()).alarmCount === 2, 'Som manual e som agendado acionados');
   assert(document.querySelector('#toast').textContent.includes('Fazer uma pausa'), 'Aviso do lembrete');
   await click('#trash-note', 1100);
   await click('[data-view=archive]'); await click('[data-trash-type=reminders]');

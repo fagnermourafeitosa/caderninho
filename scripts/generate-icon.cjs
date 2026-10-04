@@ -6,11 +6,11 @@ const { execFileSync } = require('node:child_process');
 app.disableHardwareAcceleration();
 app.whenReady().then(async () => {
   const window = new BrowserWindow({ width: 1024, height: 1024, frame: false, transparent: true, show: false, webPreferences: { contextIsolation: true, sandbox: true } });
-  const svg = fs.readFileSync(path.join(__dirname, 'assets', 'icon.svg'), 'utf8');
+  const svg = fs.readFileSync(path.join(__dirname, '..', 'assets', 'icon.svg'), 'utf8');
   await window.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent('<html><head><style>html,body{margin:0;width:100%;height:100%;background:transparent}svg{display:block;width:100%;height:100%}</style></head><body>' + svg + '</body></html>'));
   await new Promise(resolve => setTimeout(resolve, 350));
   const image = await window.webContents.capturePage();
-  fs.writeFileSync(path.join(__dirname, 'assets', 'icon.png'), image.toPNG());
+  fs.writeFileSync(path.join(__dirname, '..', 'assets', 'icon.png'), image.toPNG());
   if (process.platform === 'darwin') {
     const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'caderninho-icon-'));
     try {
@@ -22,7 +22,7 @@ app.whenReady().then(async () => {
           fs.writeFileSync(path.join(iconset, name), image.resize({ width: size * scale, height: size * scale }).toPNG());
         }
       }
-      execFileSync('/usr/bin/iconutil', ['-c', 'icns', iconset, '-o', path.join(__dirname, 'assets', 'icon.icns')]);
+      execFileSync('/usr/bin/iconutil', ['-c', 'icns', iconset, '-o', path.join(__dirname, '..', 'assets', 'icon.icns')]);
     } finally {
       fs.rmSync(temporary, { recursive: true, force: true });
     }

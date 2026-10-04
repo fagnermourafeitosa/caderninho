@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const {documents,rank,cosine}=require('../related-engine.cjs');const config=require('../related-config.cjs');
+const {documents,rank,cosine}=require('../src/main/related-engine.cjs');const config=require('../src/main/related-config.cjs');
 const page=(id,book,text,type='notes')=>({id,notebookId:book,type,title:text,body:'',categories:[],items:[],cuts:[]});
 test('only active content in the same notebook is related, including tasks and linked reminders',()=>{
  const state={notes:[page('a','one','viagem serra'),page('b','one','trilha serra'),page('c','two','viagem serra'),{...page('d','one','viagem serra'),trashed:true}],sourceActions:[{id:'r',noteId:'b',notebookId:'one',kind:'reminder',title:'reservar viagem',origin:{quote:'serra'}}]};
@@ -22,7 +22,7 @@ test('OCR and metadata enter the document, content hash changes without changing
 });
 
 test('SQLite cache survives reopening, invalidates edits, and immediately excludes trash',async()=>{
- const fs=require('node:fs'),os=require('node:os'),path=require('node:path');const {Store}=require('../store.cjs');const {RelatedService}=require('../related-service.cjs');
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');const {Store}=require('../src/main/store.cjs');const {RelatedService}=require('../src/main/related-service.cjs');
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'related-cache-'));let store,service;
  try {
   store=new Store(dir);store.dispatch('note:trash',{id:'welcome'});

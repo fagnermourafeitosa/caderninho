@@ -1,6 +1,6 @@
 // Manual integration check with the real pinned local model. Downloads only model files.
-const {Worker}=require('node:worker_threads');const path=require('node:path');const {cosine}=require('../related-engine.cjs');
-const worker=new Worker(path.join(__dirname,'..','related-worker.cjs'),{workerData:{cacheDir:path.join(__dirname,'..','artifacts','embedding-cache')}});
+const {Worker}=require('node:worker_threads');const path=require('node:path');const {cosine}=require('../src/main/related-engine.cjs');
+const worker=new Worker(path.join(__dirname,'..','src','main','related-worker.cjs'),{workerData:{cacheDir:path.join(__dirname,'..','artifacts','embedding-cache')}});
 let serial=0;const pending=new Map();
 worker.on('message',m=>{if(m.status)return;const job=pending.get(m.id);if(job){pending.delete(m.id);m.error?job.reject(Error(m.error)):job.resolve(m.result);}});
 worker.on('error',e=>{for(const job of pending.values())job.reject(e);pending.clear();});

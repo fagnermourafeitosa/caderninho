@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { Store } = require('../store.cjs');
+const { Store } = require('../src/main/store.cjs');
 function fixture(t, legacy) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'caderninho-sqlite-test-'));
   let clock = new Date('2026-10-01T15:00:00Z').getTime();

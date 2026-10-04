@@ -2,14 +2,14 @@
   "name": "caderninho",
   "version": "1.11.3",
   "description": "Um bloco de notas animado, com tarefas e lembretes.",
-  "main": "main.cjs",
+  "main": "src/main/main.cjs",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
-    "test:app": "electron . --smoke-test",
-    "package": "electron-packager . Caderninho --asar.unpack-dir=node_modules --icon=assets/icon.icns --extra-resource=assets/alarm.wav --extra-resource=native/caderninho-ocr --out=dist --overwrite --ignore='^/(tests|artifacts|\\.claude|README\\.md|generate-icon\\.cjs)'",
-    "icon": "electron generate-icon.cjs",
+    "test:app": "electron tests/smoke/run.cjs",
+    "package": "electron-packager . Caderninho --asar.unpack-dir=node_modules --icon=assets/icon.icns --extra-resource=assets/alarm.wav --extra-resource=native/caderninho-ocr --out=dist --overwrite --ignore='^/(?!(src|assets|node_modules)(/|$)|package\\.json$)'",
+    "icon": "electron scripts/generate-icon.cjs",
     "prestart": "node scripts/build-ocr.cjs",
     "prepackage": "node scripts/build-ocr.cjs"
   },

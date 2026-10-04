@@ -1,6 +1,6 @@
 const fs=require('node:fs');
 const path=require('node:path');const os=require('node:os');
-const document=require('./editor-document.js');
+const document=require('../shared/editor-document.js');
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function rich(runs){return (runs||[]).map(run=>{const marks=run.marks||{};let text=escape(run.text).replace(/\n/g,'<br>');for(const [mark,tag] of [['code','code'],['bold','strong'],['italic','em'],['underline','u'],['strike','s']])if(marks[mark])text=`<${tag}>${text}</${tag}>`;if(document.COLORS.includes(marks.highlight))text=`<mark style="background:${marks.highlight}">${text}</mark>`;const href=document.link(marks.link);if(href)text=`<a href="${escape(href)}">${text}</a>`;return text;}).join('');}
 function check(done){return `<span class="checkbox ${done?'done':''}" aria-label="${done?'Concluída':'Pendente'}">${done?'✓':''}</span>`;}
