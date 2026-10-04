@@ -57,7 +57,7 @@
    Do instead: keep the app without a quick draft button, window, global shortcut or menu; retain legacy settings in SQLite without exposing the removed feature.
 
 8. **[2026-10-01] Adicionar mídia uses local media and metadata-only previews**
-   Do instead: retain images in userData/media, deduplicate by SHA-256, reference from SQLite cuts, preserve media for trashed cuts, and collect only unreferenced blobs. Link cards read metatags without executing page scripts and cache metadata/images offline. Text excerpt cards are deferred.
+   Do instead: retain images and PDFs in userData/media, deduplicate by SHA-256, reference from SQLite cuts, preserve media for trashed cuts, and collect only unreferenced blobs. Link cards read metatags without executing page scripts and cache metadata/images offline. PDF cards use the native PDFKit reader in caderninho-ocr for title/excerpt and open the retained copy with shell.openPath; rebuild the helper before testing or packaging. Text excerpt cards are deferred.
 
 9. **[2026-10-01] Smart margin stays in the note**
    Do instead: offer an explicit date/time stamp without auto-scheduling; keep one absolute alarm on the original note with cancel/re-schedule controls. Render line-start [] as inline checkboxes, preserve [ ]/[x] in SQLite body, and support Enter continuation/exit without affecting task lists or cuts.

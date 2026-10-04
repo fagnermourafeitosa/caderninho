@@ -21,9 +21,9 @@ function buildPDFHTML(note,snapshot,media){
  const cuts=note.cuts||[];let line=0,number=0;const content=[];
  function mediaHTML(cut){
   let image='';const file=cut.blobId&&media.file(cut.blobId);
-  if(file&&fs.existsSync(file))image=`<img src="data:image/png;base64,${fs.readFileSync(file).toString('base64')}" alt="${escape(cut.title)}" style="max-width:${Math.max(.25,Math.min(.85,cut.width||.6))*100}%">`;
+  if(cut.kind!=='pdf'&&file&&fs.existsSync(file))image=`<img src="data:image/png;base64,${fs.readFileSync(file).toString('base64')}" alt="${escape(cut.title)}" style="max-width:${Math.max(.25,Math.min(.85,cut.width||.6))*100}%">`;
   const url=document.link(cut.url);
-  return `<figure>${image}${cut.title?`<figcaption>${escape(cut.title)}</figcaption>`:''}${cut.description?`<p>${escape(cut.description)}</p>`:''}${url?`<a class="url" href="${escape(url)}">${escape(url)}</a>`:''}${!image&&cut.kind==='image'?'<p class="muted">Imagem indisponível</p>':''}</figure>`;
+  return `<figure>${cut.kind==='pdf'?'<small>PDF · documento anexado</small>':''}${image}${cut.title?`<figcaption>${escape(cut.title)}</figcaption>`:''}${cut.description?`<p>${escape(cut.description)}</p>`:''}${url?`<a class="url" href="${escape(url)}">${escape(url)}</a>`:''}${!image&&cut.kind==='image'?'<p class="muted">Imagem indisponível</p>':''}</figure>`;
  }
  const emitted=new Set();
  for(const block of blocks){const end=line+document.blockText(block).split('\n').length;for(const cut of cuts)if(cut.anchor>=line&&cut.anchor<end){content.push(mediaHTML(cut));emitted.add(cut.id);}number=block.type==='number'?number+1:0;content.push(blockHTML(block,number));line=end;}

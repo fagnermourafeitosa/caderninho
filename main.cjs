@@ -165,6 +165,13 @@ ipcMain.handle('cuts:image', (_event, input) => {
   const blobId = media.image(input.bytes);
   const state=store.dispatch('cut:create', { noteId: note.id, kind: 'image', blobId, title: input.name || 'Imagem' }); if(!smoke)related.schedule(); return state;
 });
+ipcMain.handle('cuts:pdf', async (_event, input) => {
+  const note = store.note(input.noteId, 'notes'); if (note.trashed) throw new Error('Restaure a nota primeiro.');
+  const readerPath = app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(__dirname,'native','caderninho-ocr');
+  const data = await media.pdf(input.bytes, input.name, readerPath);
+  const state = store.dispatch('cut:create', { noteId: note.id, kind: 'pdf', ...data });
+  if(!smoke)related.schedule(); return state;
+});
 ipcMain.handle('cuts:link', (_event, input) => {
   const url = webUrl(input.url).href;
   const id = randomUUID();
@@ -175,7 +182,14 @@ ipcMain.handle('cuts:link', (_event, input) => {
   if(!smoke)related.schedule(); return state;
 });
 ipcMain.handle('notebook:open-link', (_event,value)=>{const url=require('./editor-document.js').link(value);if(!url)throw new Error('Link inválido.');return shell.openExternal(url);});
-ipcMain.handle('cuts:open', (_event, id) => { const cut = store.cut(id); if (cut.kind !== 'link') throw new Error('Este recorte não é um link.'); return shell.openExternal(webUrl(cut.url).href); });
+ipcMain.handle('cuts:open', async (_event, id) => { const cut = store.cut(id);
+  if (cut.kind === 'pdf') {
+    const file = media.file(cut.blob_id);
+    if (!file || !fs.existsSync(file)) throw new Error('PDF não encontrado.');
+    const error = await shell.openPath(file); if (error) throw new Error('Não foi possível abrir o PDF: ' + error);
+    return;
+  }
+ if (cut.kind !== 'link') throw new Error('Este recorte não é um link.'); return shell.openExternal(webUrl(cut.url).href); });
 ipcMain.handle('notebook:sound', () => { playSound(); return true; });
 ipcMain.handle('notebook:window', (_event, action) => {
   if (action === 'close') win.close();
@@ -324,6 +338,23 @@ async function runSmoke() {
       if(result.errors.length) throw new Error(result.errors.join('\n'));
       fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true}); fs.writeFileSync(path.join(__dirname,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());
       console.log('NOTEBOOK_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
+    if(process.argv.includes('--pdf-cuts-only')) {
+      const bytes = require('./tests/pdf-fixture.cjs')();
+      await win.webContents.executeJavaScript(`window.pdfTestBytes = ${JSON.stringify([...bytes])}`);
+      let opened;
+      const originalOpen = shell.openPath;
+      shell.openPath = async file => { opened = file; return ''; };
+      try {
+        const result = await win.webContents.executeJavaScript(smokeScript('pdf-cuts-smoke.js'));
+        if (!opened || !fs.readFileSync(opened).equals(bytes)) throw new Error('PDF local não abriu corretamente');
+        if (result.errors.length) throw new Error(result.errors.join('\n'));
+        fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});
+        await new Promise(resolve => setTimeout(resolve, 500));
+        fs.writeFileSync(path.join(__dirname,'artifacts','pdf-colagem.png'),(await win.webContents.capturePage()).toPNG());
+        console.log('PDF_CUTS_SMOKE_OK',JSON.stringify(result));
+      } finally { shell.openPath = originalOpen; }
+      app.quit(); return;
     }
     if(process.argv.includes('--pdf-only')) {
       const pixels=Buffer.alloc(1200*900*4);require('node:crypto').randomFillSync(pixels);for(let i=3;i<pixels.length;i+=4)pixels[i]=255;

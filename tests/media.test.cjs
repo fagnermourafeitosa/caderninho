@@ -29,3 +29,55 @@ test('media deduplicates bytes and garbage collection retains trashed references
   store.dispatch('cut:trash', { id: 'image' }); media.collect(); assert.ok(fs.existsSync(media.file(id)));
   store.dispatch('cut:purge', { id: 'image' }); media.collect(); assert.equal(media.file(id), null); assert.equal(fs.readdirSync(media.directory).length, 0);
 });
+
+test('PDF copy, metadata, deduplication, persistence and trash lifecycle', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pdf-cut-test-'));
+  let store = new Store(directory);
+  t.after(() => { store.close(); fs.rmSync(directory, { recursive: true, force: true }); });
+  const media = new MediaStore(store, null);
+  const bytes = require('./pdf-fixture.cjs')();
+  const reader = path.join(__dirname, '../native/caderninho-ocr');
+  const data = await media.pdf(bytes, 'referencia.pdf', reader);
+  if (process.platform === 'darwin' && fs.existsSync(reader)) {
+    assert.equal(data.title, 'Meu documento PDF');
+    assert.match(data.description, /Trecho inicial/);
+  }
+  assert.deepEqual(fs.readFileSync(media.file(data.blobId)), bytes);
+  assert.equal((await media.pdf(bytes, 'outra-copia.pdf', reader)).blobId, data.blobId);
+  assert.equal(fs.readdirSync(media.directory).length, 1);
+  const noteId = store.snapshot().selected.notes;
+  store.dispatch('cut:create', { id:'pdf', noteId, kind:'pdf', ...data });
+  store.dispatch('cut:layout', { id:'pdf', side:'left', anchor:1, width:.42 });
+  store.close(); store = new Store(directory); media.store = store;
+  const cut = store.snapshot().notes.find(note => note.id === noteId).cuts[0];
+  assert.equal(cut.kind, 'pdf'); assert.equal(cut.title, data.title); assert.equal(cut.description, data.description); assert.equal(cut.side, 'left');
+  store.dispatch('cut:trash', { id:'pdf' }); media.collect(); assert.ok(fs.existsSync(media.file(data.blobId)));
+  store.dispatch('cut:restore', { id:'pdf' }); assert.equal(store.cut('pdf').blob_id, data.blobId);
+  store.dispatch('cut:trash', { id:'pdf' }); store.dispatch('cut:purge', { id:'pdf' }); media.collect(); assert.equal(media.file(data.blobId), null);
+  await assert.rejects(media.pdf(Buffer.from('not a PDF'), 'wrong.pdf'), /inválido/);
+  const fallback = await media.pdf(bytes, 'nome-original.pdf'); assert.equal(fallback.title, 'nome-original.pdf'); assert.equal(fallback.description, '');
+});
+
+test('legacy cuts constraint migration preserves existing cards and temporal columns', t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pdf-migration-'));
+  let store = new Store(directory);
+  t.after(() => { store.close(); fs.rmSync(directory, { recursive:true, force:true }); });
+  const noteId = store.snapshot().selected.notes;
+  store.dispatch('cut:create', { id:'old-link', noteId, kind:'link', title:'Minha referencia', url:'https://example.com', description:'Texto preservado' });
+  store.dispatch('cut:trash', { id:'old-link' });
+  const original = { ...store.cut('old-link') };
+  const schema = store.db.prepare("SELECT sql FROM sqlite_master WHERE name='cuts'").get().sql;
+  store.db.exec('PRAGMA foreign_keys=OFF');
+  store.transaction(() => {
+    store.db.exec(schema.replace(/CREATE TABLE "?cuts"?/i, 'CREATE TABLE legacy_cuts').replace("'image','link','pdf'", "'image','link'"));
+    store.db.exec('INSERT INTO legacy_cuts SELECT * FROM cuts; DROP TABLE cuts; ALTER TABLE legacy_cuts RENAME TO cuts');
+  });
+  store.close(); store = new Store(directory);
+  assert.deepEqual({ ...store.cut('old-link') }, original);
+  assert.deepEqual(store.db.prepare('PRAGMA foreign_key_check').all(), []);
+  const media = new MediaStore(store, null);
+  return media.pdf(require('./pdf-fixture.cjs')(), 'documento.pdf').then(data => {
+    store.dispatch('cut:create', { id:'new-pdf', noteId, kind:'pdf', ...data });
+    assert.equal(store.cut('new-pdf').kind, 'pdf');
+  });
+});

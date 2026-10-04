@@ -104,21 +104,23 @@ Comece uma linha com `[]` ou `[ ]` para criar um checkbox dentro da nota:
 
 Esses itens pertencem à nota e não criam uma lista separada em **Tarefas**.
 
-## Imagens e links
+## Imagens, PDFs e links
 
-Em **Notas**, use **Adicionar mídia**, cole uma imagem ou um link no texto, ou arraste arquivos de imagem e links para a página. São aceitas imagens **PNG, JPEG e WebP**, de até **20 MB** cada.
+Em **Notas**, use **Adicionar mídia**, cole uma imagem ou um link no texto, ou arraste imagens, PDFs e links para a página. São aceitas imagens **PNG, JPEG e WebP**, de até **20 MB** cada, e documentos **PDF**, de até **50 MB**.
 
 Use a alça **Arraste** para posicionar a mídia junto a um parágrafo, à esquerda ou à direita. Os botões **− / +** ajustam a largura; o texto acompanha a posição da mídia.
 
 Cartões de links guardam o título, descrição e imagem obtidos das metatags do site. Depois de criada, a prévia fica disponível offline. Clicar no cartão abre o endereço no navegador. Sites sem metadados ou que exigem login podem aparecer sem prévia. Os cartões não se atualizam automaticamente.
 
-As imagens importadas são copiadas para a pasta de dados do aplicativo. Você pode mover ou apagar o arquivo original depois de importá-lo.
+PDFs aparecem como cartões com título e trecho inicial, quando disponíveis. Sem texto extraível, o cartão usa o nome do arquivo. Clique em **Abrir PDF** para abrir a cópia salva no leitor de PDF do computador.
+
+As imagens e os PDFs importados são copiados para a pasta de dados do aplicativo. Você pode mover ou apagar o arquivo original depois de importá-lo.
 
 ## Exportar para PDF
 
 Abra uma nota, lista de tarefas ou lembrete e use **Exportar PDF** na barra da página. Em janelas menores, procure o ícone de folha com seta para baixo. Escolha o nome e a pasta no diálogo do Mac.
 
-O PDF A4 inclui título, caderno, categorias, datas, texto formatado, tabelas, checkboxes, imagens, cartões de links e ações ligadas à página. Páginas longas continuam em outras folhas, com numeração. A exportação salva as últimas alterações antes de gerar o arquivo e funciona localmente, sem internet.
+O PDF A4 inclui título, caderno, categorias, datas, texto formatado, tabelas, checkboxes, imagens, cartões de links e PDFs anexados e ações ligadas à página. Páginas longas continuam em outras folhas, com numeração. A exportação salva as últimas alterações antes de gerar o arquivo e funciona localmente, sem internet.
 
 ## Teclado e janela
 
@@ -142,11 +144,11 @@ Páginas mostram quando foram criadas e atualizadas. Tarefas registram marcaçõ
 
 O **ícone de lixeira em vermelho pastel**, no topo da página após o separador, move a página para a lixeira e a mantém recuperável. Itens de tarefas e mídias também podem ser restaurados em **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado novamente.
 
-**Excluir definitivamente** pede confirmação e apaga o item permanentemente. Imagens continuam no disco enquanto outra página ou mídia recuperável ainda as utiliza.
+**Excluir definitivamente** pede confirmação e apaga o item permanentemente. Imagens e PDFs continuam no disco enquanto outra página ou mídia recuperável ainda as utiliza.
 
 ## Seus dados ficam no seu computador
 
-O aplicativo usa **SQLite** para guardar notas, cadernos, listas, categorias e lembretes. As imagens ficam em uma pasta local de mídia. Não existe conta, envio de páginas para servidor ou sincronização com a nuvem.
+O aplicativo usa **SQLite** para guardar notas, cadernos, listas, categorias e lembretes. As imagens e os PDFs ficam em uma pasta local de mídia. Não existe conta, envio de páginas para servidor ou sincronização com a nuvem.
 
 No Mac, os dados ficam em:
 

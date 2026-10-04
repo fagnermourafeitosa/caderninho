@@ -30,7 +30,7 @@ function cutCard(cut) {
 }
 function fillCutPreview(card, cut) {
   const preview = card.querySelector('.cut-preview');
-  preview.innerHTML = `${cut.blobId ? `<img src="caderno-media://blob/${cut.blobId}" alt="${escape(cut.title || 'Mídia')}" draggable="false">` : ''}${cut.kind === 'link' ? `<button class="cut-open" title="Abrir no navegador"><small>${escape(new URL(cut.url).hostname)}</small><strong>${escape(cut.title)}</strong>${cut.description ? `<p>${escape(cut.description)}</p>` : ''}<span>${cut.status === 'loading' ? 'Buscando metatags…' : cut.status === 'unavailable' ? 'Sem prévia · Abrir link ↗' : 'Abrir link ↗'}</span></button>` : ''}`;
+  preview.innerHTML = `${cut.blobId && cut.kind !== 'pdf' ? `<img src="caderno-media://blob/${cut.blobId}" alt="${escape(cut.title || 'Mídia')}" draggable="false">` : ''}${cut.kind === 'pdf' ? `<button class="cut-open" title="Abrir PDF"><small>PDF · salvo no Caderninho</small><strong>${escape(cut.title)}</strong>${cut.description ? `<p>${escape(cut.description)}</p>` : '<p>Documento PDF</p>'}<span>Abrir PDF ↗</span></button>` : ''}${cut.kind === 'link' ? `<button class="cut-open" title="Abrir no navegador"><small>${escape(new URL(cut.url).hostname)}</small><strong>${escape(cut.title)}</strong>${cut.description ? `<p>${escape(cut.description)}</p>` : ''}<span>${cut.status === 'loading' ? 'Buscando metatags…' : cut.status === 'unavailable' ? 'Sem prévia · Abrir link ↗' : 'Abrir link ↗'}</span></button>` : ''}`;
   const open = preview.querySelector('.cut-open'); if (open) open.onclick = () => window.notebook.openCut(cut.id).catch(error => toast(error.message));
 }
 function mountCollage(note) {
@@ -51,9 +51,10 @@ async function importCuts(files, url, noteId = currentNote()?.id) {
   if (!noteId) return;
   try {
     for (const file of files) {
-      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error('Use imagens PNG, JPEG ou WebP.');
-      if (file.size > 20 * 1024 * 1024) throw new Error('Use uma imagem de até 20 MB.');
-      state = await window.notebook.image({ noteId, name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) });
+      const pdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+      if (!pdf && !/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error('Use PDF ou imagens PNG, JPEG ou WebP.');
+      if (file.size > (pdf ? 50 : 20) * 1024 * 1024) throw new Error(pdf ? 'Use um PDF de até 50 MB.' : 'Use uma imagem de até 20 MB.');
+      state = await window.notebook[pdf ? 'pdf' : 'image']({ noteId, name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) });
     }
     if (url) state = await window.notebook.link({ noteId, url });
     if (view === 'notes' && currentNote()?.id === noteId) renderPage();

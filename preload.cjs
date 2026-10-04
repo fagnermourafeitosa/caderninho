@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('notebook', {
   purge: (kind, id) => ipcRenderer.invoke('notebook:purge', kind, id),
   exportPDF: id => ipcRenderer.invoke('notebook:export-pdf',id),
   sound: () => ipcRenderer.invoke('notebook:sound'),
+  pdf: input => ipcRenderer.invoke('cuts:pdf', input),
   image: input => ipcRenderer.invoke('cuts:image', input),
   link: input => ipcRenderer.invoke('cuts:link', input),
   openLink: url => ipcRenderer.invoke('notebook:open-link',url),

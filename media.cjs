@@ -6,6 +6,7 @@ const dns = require('node:dns/promises');
 const http = require('node:http');
 const https = require('node:https');
 const net = require('node:net');
+const { execFile } = require('node:child_process');
 function publicAddress(address) {
   if (net.isIP(address) === 6) return /^[23][0-9a-f]{3}:/i.test(address);
   if (net.isIP(address) !== 4) return false;
@@ -76,6 +77,27 @@ class MediaStore {
     const inserted = this.store.db.prepare('INSERT OR IGNORE INTO media_blobs(id,file,mime,bytes,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id, file, 'image/png', png.length,new Date(this.store.now()).toISOString(),new Date(this.store.now()).toISOString());
     if (inserted.changes) event(this.store,'media',id,'create',new Date(this.store.now()).toISOString());
     return id;
+  }
+  async pdf(input, name, readerPath) {
+    const bytes = Buffer.from(input);
+    if (!bytes.length || bytes.length > 50 * 1024 * 1024) throw new Error('Use um PDF de até 50 MB.');
+    if (!bytes.subarray(0, 1024).includes(Buffer.from('%PDF-'))) throw new Error('Arquivo PDF inválido.');
+    const id = createHash('sha256').update(bytes).digest('hex'), file = id + '.pdf';
+    const target = path.join(this.directory, file);
+    if (!fs.existsSync(target)) fs.writeFileSync(target, bytes, { mode: 0o600, flag: 'wx' });
+    let data = {};
+    if (process.platform === 'darwin' && readerPath && fs.existsSync(readerPath)) {
+      try {
+        data = await new Promise((resolve, reject) => execFile(readerPath, [target], { timeout: 15000, maxBuffer: 1024 * 1024 }, (error, out) => {
+          if (error) { reject(error); return; }
+          try { resolve(JSON.parse(out)); } catch (error) { reject(error); }
+        }));
+      } catch { /* Keep the attachment available even without extractable metadata. */ }
+    }
+    const stamp = new Date(this.store.now()).toISOString();
+    const inserted = this.store.db.prepare('INSERT OR IGNORE INTO media_blobs(id,file,mime,bytes,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id, file, 'application/pdf', bytes.length, stamp, stamp);
+    if (inserted.changes) event(this.store,'media',id,'create',stamp);
+    return { blobId: id, title: String(data.title || path.basename(String(name || 'Documento.pdf'))).trim().slice(0,300), description: String(data.text || '').replace(/\s+/g,' ').trim().slice(0,800) };
   }
   file(id) { if (!/^[a-f0-9]{64}$/.test(id)) return null; const row = this.store.db.prepare('SELECT file FROM media_blobs WHERE id=?').get(id); return row ? path.join(this.directory, row.file) : null; }
   async preview(url) {

@@ -49,7 +49,7 @@ class Store {
       CREATE TABLE IF NOT EXISTS media_blobs (id TEXT PRIMARY KEY, file TEXT NOT NULL, mime TEXT NOT NULL, bytes INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS cuts (
         id TEXT PRIMARY KEY, note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
-        kind TEXT NOT NULL CHECK(kind IN ('image','link')), blob_id TEXT REFERENCES media_blobs(id),
+        kind TEXT NOT NULL CHECK(kind IN ('image','link','pdf')), blob_id TEXT REFERENCES media_blobs(id),
         url TEXT NOT NULL DEFAULT '', title TEXT NOT NULL DEFAULT '', description TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL DEFAULT 'ready', side TEXT NOT NULL DEFAULT 'right', anchor INTEGER NOT NULL DEFAULT 0,
         width REAL NOT NULL DEFAULT 0.5, trashed INTEGER NOT NULL DEFAULT 0, created TEXT NOT NULL
@@ -60,6 +60,17 @@ class Store {
     `);
     if (!this.db.prepare('PRAGMA table_info(task_items)').all().some(column => column.name === 'completed_at')) this.db.exec('ALTER TABLE task_items ADD COLUMN completed_at TEXT');
     if(!this.db.prepare('PRAGMA table_info(notes)').all().some(column=>column.name==='editor_document')) this.db.exec('ALTER TABLE notes ADD COLUMN editor_document TEXT');
+    // Rebuild the legacy CHECK constraint without changing existing columns or references.
+    const cutsSchema = this.db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='cuts'").get().sql;
+    if (!cutsSchema.includes("'pdf'")) {
+      this.db.exec('PRAGMA foreign_keys = OFF');
+      try {
+        this.transaction(() => {
+          this.db.exec(cutsSchema.replace(/CREATE TABLE "?cuts"?/i, 'CREATE TABLE cuts_pdf_migration').replace("'image','link'", "'image','link','pdf'"));
+          this.db.exec('INSERT INTO cuts_pdf_migration SELECT * FROM cuts; DROP TABLE cuts; ALTER TABLE cuts_pdf_migration RENAME TO cuts');
+        });
+      } finally { this.db.exec('PRAGMA foreign_keys = ON'); }
+    }
     installTemporal(this);
     installCategories(this);
     installNotebooks(this);
@@ -224,11 +235,11 @@ class Store {
         case 'cut:create': {
           const note = this.note(input.noteId, 'notes');
           if (note.trashed) throw new Error('Restaure a nota antes de colar recortes.');
-          if (!['image', 'link'].includes(input.kind)) throw new Error('Tipo de recorte inválido.');
+          if (!['image', 'link', 'pdf'].includes(input.kind)) throw new Error('Tipo de recorte inválido.');
           if (this.db.prepare('SELECT count(*) AS total FROM cuts WHERE note_id=?').get(note.id).total >= 100) throw new Error('Limite de 100 recortes por página atingido.');
-          if (input.kind === 'image' && !input.blobId) throw new Error('Imagem ausente.');
+          if (['image','pdf'].includes(input.kind) && !input.blobId) throw new Error('Arquivo ausente.');
           const id = input.id || randomUUID();
-          this.db.prepare('INSERT INTO cuts(id,note_id,kind,blob_id,url,title,status,created) VALUES(?,?,?,?,?,?,?,?)').run(id, note.id, input.kind, input.blobId || null, text(input.url, 4000), text(input.title, 300), input.status || 'ready', stamp);
+          this.db.prepare('INSERT INTO cuts(id,note_id,kind,blob_id,url,title,description,status,created) VALUES(?,?,?,?,?,?,?,?,?)').run(id, note.id, input.kind, input.blobId || null, text(input.url, 4000), text(input.title, 300), text(input.description, 800), input.status || 'ready', stamp);
           this.db.prepare('UPDATE cuts SET updated_at=? WHERE id=?').run(stamp,id); event(this,'cut',id,'create',stamp);
           this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp, note.id); break;
         }

@@ -8,3 +8,8 @@ test('PDF export keeps rich content and linked actions, escaping user text and r
 test('PDF filenames cannot escape the chosen directory and have a sensible fallback',()=>{
  assert.equal(filename('../../Meu: arquivo/novo'),'..-..-Meu- arquivo-novo.pdf');assert.equal(filename('...'),'Página.pdf');assert.ok(filename('A'.repeat(200)).length<=104);
 });
+test('export shows an attached PDF title and excerpt without embedding its bytes as an image',()=>{
+ const note={id:'pdf-note',type:'notes',notebookId:'book',title:'Referencias',body:'Texto',categories:[],cuts:[{id:'pdf',kind:'pdf',blobId:'blob',title:'Meu PDF',description:'Trecho inicial',anchor:0,width:.5}],items:[]};
+ const html=buildPDFHTML(note,{notebooks:[],sourceActions:[]},{file:()=>__filename});
+ assert.ok(html.includes('PDF · documento anexado'));assert.ok(html.includes('Meu PDF'));assert.ok(html.includes('Trecho inicial'));assert.ok(!html.includes('data:image/png'));
+});
