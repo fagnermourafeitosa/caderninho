@@ -51,7 +51,7 @@ function smartNoteInput(noteId, event) {
   } else if (editor.classList.contains('collage-editor')) {
     const line = event?.target.closest('.writing-line');
     const lines=line?[line]:[...editor.querySelectorAll('.writing-line')];
-    for(const item of lines) { if(item.classList.contains('table-block')) {if(!event?.isComposing) item.querySelectorAll('.table-cell-text').forEach(highlightCategoryTokens);} else if(item.dataset.blockType!=='code'&&item.dataset.blockType!=='divider'){convertInlineCheckbox(item);if(!event?.isComposing)highlightCategoryTokens(editableText(item));} }
+    for(const item of lines) { if(item.classList.contains('table-block')) {if(!event?.isComposing) item.querySelectorAll('.table-cell-text').forEach(highlightCategoryTokens);} else if(!['code','divider','diagram'].includes(item.dataset.blockType)){convertInlineCheckbox(item);if(!event?.isComposing)highlightCategoryTokens(editableText(item));} }
   }
   updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor,...(editor.dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) });
 }
@@ -79,7 +79,7 @@ function handleWritingKey(event) {
     const lines = [...$('#note-body').querySelectorAll('.writing-line')], index = lines.indexOf(line);
     const previous = event.key === 'Backspace', neighbor = lines[index + (previous ? -1 : 1)];
     if (!neighbor) return; event.preventDefault();
-    if(['table','divider'].includes(neighbor.dataset.blockType)) {neighbor.remove();putCaret(span,start);saveDocument();return;}
+    if(['table','divider','diagram'].includes(neighbor.dataset.blockType)) {neighbor.remove();putCaret(span,start);saveDocument();return;}
     const keep = previous ? neighbor : line, remove = previous ? line : neighbor;
     const keepSpan = editableText(keep), offset = keepSpan.innerText.replace(/\n$/, '').length;
     renderInlineRuns(keepSpan,[...readInlineRuns(keepSpan),...readInlineRuns(editableText(remove))]); remove.remove(); putCaret(keepSpan, offset);

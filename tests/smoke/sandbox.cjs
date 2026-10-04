@@ -41,4 +41,15 @@ function scriptedCursor() {
   return () => point;
 }
 
-module.exports = { isolateUserData, trackRendererErrors, scriptedCursor };
+// Windows stay hidden and the app never becomes the active one, so a run does not take the user's keyboard.
+// Chromium's focus emulation keeps pages behaving as focused (focus events, selection, document.hasFocus()).
+function runInBackground() {
+  if (process.platform === 'darwin') app.whenReady().then(() => { app.setActivationPolicy('accessory'); app.dock?.hide(); });
+  app.on('browser-window-created', (_event, window) => {
+    window.hide();
+    window.webContents.debugger.attach();
+    window.webContents.debugger.sendCommand('Emulation.setFocusEmulationEnabled', { enabled: true });
+  });
+}
+
+module.exports = { isolateUserData, trackRendererErrors, scriptedCursor, runInBackground };

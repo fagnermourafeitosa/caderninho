@@ -51,3 +51,10 @@ test('Portuguese election notes remain related with moderate semantic affinity a
  const results=rank(docs[0],docs,vectors);
  assert.deepEqual(new Set(results.map(d=>d.id)),new Set(['page:tagged','page:mention']));
 });
+test('related text keeps the words around a diagram and ignores the diagram code',()=>{
+ const editorDoc=[{id:'p',type:'paragraph',runs:[{text:'Processo de compras',marks:{}}]},{id:'d',type:'diagram',code:'flowchart TD\n  A[Pedido] --> B{Aprovação}\n  classDef ink stroke:#303025'},{id:'q',type:'paragraph',runs:[{text:'Prazo de entrega',marks:{}}]}];
+ const note={...page('a','b','Compras'),editorDoc,body:require('../src/shared/editor-document.js').text(editorDoc)};
+ const [doc]=documents({notes:[note]});
+ assert.match(doc.text,/Processo de compras/);assert.match(doc.text,/Prazo de entrega/);
+ assert.doesNotMatch(doc.text,/flowchart|classDef|mermaid|Pedido/);
+});

@@ -1,9 +1,11 @@
 // Smoke-test entry: electron tests/smoke/run.cjs [scoped flag]
-const { app, shell, nativeImage } = require('electron');
+const { app, shell, nativeImage, clipboard } = require('electron');
+const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
-const { isolateUserData, trackRendererErrors, scriptedCursor } = require('./sandbox.cjs');
+const { isolateUserData, trackRendererErrors, scriptedCursor, runInBackground } = require('./sandbox.cjs');
 isolateUserData('caderninho-smoke-');
+runInBackground();
 const installRendererErrors = trackRendererErrors();
 const { testHook } = require('../../src/main/main.cjs');
 const { Store } = require('../../src/main/store.cjs');
@@ -18,6 +20,47 @@ testHook.configure({
   cursor: scriptedCursor(),
 });
 function smokeScript(file){const source=fs.readFileSync(path.join(ROOT,'tests',file),'utf8').trim().replace(/;$/, '');return `Promise.resolve(${source}).catch(error=>{throw new Error(${JSON.stringify(file)}+': '+(error.stack||error.message||String(error)));})`;}
+// Diagram blocks end to end: editor, clipboard, SQLite and the text printed in the PDF.
+async function runDiagramSmoke(win) {
+  const result = await win.webContents.executeJavaScript(smokeScript('diagram-smoke.js'));
+  if (result.errors.length) throw new Error(result.errors.join('\n'));
+  // Copying uses the real system clipboard: keep the user's content and restore it afterwards.
+  const previousClipboard = await clipboard.readText();
+  try {
+    await clipboard.writeText('');
+    const toast = await win.webContents.executeJavaScript("document.querySelector('#note-body .diagram-block [data-diagram-action=copy]').click();document.querySelector('#toast').textContent", true);
+    let copied = '';
+    for (let attempt = 0; attempt < 20 && !copied.includes('Guardar nota fiscal'); attempt++) { copied = await clipboard.readText(); if (!copied.includes('Guardar nota fiscal')) await new Promise(resolve => setTimeout(resolve, 50)); }
+    if (toast !== 'Código do diagrama copiado.' || !copied.includes('Guardar nota fiscal')) throw new Error('Copiar código não levou o diagrama para a área de transferência: ' + toast);
+  } finally { await clipboard.writeText(previousClipboard); }
+  const reopened = new Store(app.getPath('userData'));
+  const saved = reopened.snapshot().notes.find(note => note.id === result.noteId).editorDoc.filter(block => block.type === 'diagram');
+  reopened.close();
+  if (saved.length !== 2 || !saved[0].code.includes('Guardar nota fiscal')) throw new Error('Diagramas não persistiram no SQLite');
+  const reader = path.join(ROOT, 'native', 'caderninho-ocr');
+  if (process.platform === 'darwin' && fs.existsSync(reader)) {
+    const text = JSON.parse(execFileSync(reader, [result.pdf], { encoding: 'utf8' })).text.replace(/\s+/g, ' ');
+    if (!text.replace(/ /g, '').includes('Guardarnotafiscal')) throw new Error('PDF não contém o diagrama desenhado');
+    if (!text.includes('Não foi possível desenhar este diagrama')) throw new Error('PDF não explica o diagrama inválido');
+    if (!fs.readFileSync(result.pdf).includes('Excalifont')) throw new Error('PDF não embutiu a Excalifont nos diagramas');
+  }
+  // A drawing that never finishes must not hang the export: it prints as code within the time limit.
+  const { buildPDFHTML, createPDF } = require('../../src/main/pdf-export.cjs');
+  const stuck = path.join(app.getPath('userData'), 'mermaid-stuck.js');
+  fs.writeFileSync(stuck, 'window.mermaid={initialize(){},render(){return new Promise(()=>{});}};');
+  const note = { id: 'stuck', type: 'notes', title: 'Diagrama lento', body: '', categories: [], cuts: [], items: [], editorDoc: [{ id: 'd', type: 'diagram', code: 'flowchart TD\n  A[Muito lento] --> B' }] };
+  const started = Date.now();
+  const buffer = await createPDF(require('electron').WebContentsView, buildPDFHTML(note, { notebooks: [], sourceActions: [] }, { file: () => null }), { mermaidPath: stuck, diagramTimeout: 1500 });
+  if (Date.now() - started > 8000) throw new Error('Exportação esperou demais por um diagrama travado');
+  if (process.platform === 'darwin' && fs.existsSync(reader)) {
+    const file = path.join(app.getPath('userData'), 'stuck.pdf'); fs.writeFileSync(file, buffer);
+    const text = JSON.parse(execFileSync(reader, [file], { encoding: 'utf8' })).text;
+    if (!text.includes('Não foi possível desenhar este diagrama') || !text.includes('Muito lento')) throw new Error('Diagrama travado não saiu como código no PDF');
+  }
+  fs.mkdirSync(path.join(ROOT, 'artifacts'), { recursive: true });
+  fs.writeFileSync(path.join(ROOT, 'artifacts', 'diagrama.png'), (await win.webContents.capturePage()).toPNG());
+  console.log('DIAGRAM_SMOKE_OK', JSON.stringify({ noteId: result.noteId, errors: result.errors }));
+}
 async function runSmoke() {
   const { win, store, media, related } = testHook.context();
   try {
@@ -36,6 +79,7 @@ async function runSmoke() {
       }
       console.log('RELATED_RUNTIME_OK');app.quit();return;
     }
+    if(process.argv.includes('--diagram-only')){await runDiagramSmoke(win);app.quit();return;}
     if(process.argv.includes('--native-only')){await runNativeEditorSmoke(win);app.quit();return;}
     if(process.argv.includes('--editor-only')) {
       await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);
@@ -174,7 +218,6 @@ async function runSmoke() {
     fs.writeFileSync(path.join(ROOT, 'artifacts', 'margem-inteligente.png'), (await win.webContents.capturePage()).toPNG());
     const undo = await win.webContents.executeJavaScript(smokeScript('undo-smoke.js'));
     if (undo.errors.length) throw new Error(undo.errors.join('\n'));
-    win.focus();
     await win.webContents.executeJavaScript("(async () => { window.menuHistoryReceipt=0; window.notebook.onHistory(() => window.menuHistoryReceipt++); putCaret(document.querySelector('.line-text')); document.execCommand('insertText', false, 'Menu undo '); while(pending) await new Promise(resolve=>setTimeout(resolve,20)); if(!document.querySelector('#note-body').value.includes('Menu undo ')) throw new Error('Texto do teste de menu não foi inserido'); })()");
     testHook.dispatchHistory('undo', win);
     await win.webContents.executeJavaScript("(async () => { const deadline=Date.now()+3000; while(window.menuHistoryReceipt<1 && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,20)); if(window.menuHistoryReceipt<1) throw new Error('Menu Desfazer não foi recebido'); await undoQueue; })()");
@@ -210,6 +253,7 @@ async function runSmoke() {
     const editorResult=await win.webContents.executeJavaScript(smokeScript('editor-smoke.js'));
     if(editorResult.errors.length)throw new Error(editorResult.errors.join('\n'));
     fs.writeFileSync(path.join(ROOT,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
+    await runDiagramSmoke(win);
     console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'))));
     console.log('EDITOR_SMOKE_OK',JSON.stringify(editorResult));
     await runNativeEditorSmoke(win);

@@ -1,14 +1,17 @@
 const { createHash } = require('node:crypto');
 const defaults = require('./related-config.cjs');
+const pageDocument = require('../shared/editor-document.js');
 const STOP = new Set('a o as os de da do das dos e em um uma para por com que no na nos nas se ao the and to of in on for is it a an'.split(' '));
 function tokens(text) { return new Set(String(text).normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().match(/[\p{L}\p{N}]{2,}/gu)?.filter(t=>!STOP.has(t)) || []); }
 function overlap(a,b) { if(!a.size || !b.size) return 0; return [...a].filter(v=>b.has(v)).length / Math.sqrt(a.size*b.size); }
 function cosine(a,b) { if(!a || !b || a.length!==b.length || !a.length) return 0; let dot=0,x=0,y=0; for(let i=0;i<a.length;i++){dot+=a[i]*b[i];x+=a[i]*a[i];y+=b[i]*b[i];} return x&&y?Math.max(-1,Math.min(1,dot/Math.sqrt(x*y))):0; }
+// Diagram code is Mermaid syntax, not prose: it would relate pages by keywords like "flowchart".
+const prose = note => note.editorDoc ? pageDocument.text(note.editorDoc.filter(block => block.type !== 'diagram')) : note.body;
 function documents(state,ocr={}) {
   const out=[];
   for(const n of state.notes.filter(n=>!n.trashed)) {
     const categories=(n.categories||[]).map(c=>c.id);
-    const text=[n.title,n.body,...n.items.map(i=>i.title),...(n.cuts||[]).map(c=>[c.title,c.description,c.kind==='image'?ocr[c.blobId]||'':''].join('\n'))].filter(Boolean).join('\n');
+    const text=[n.title,prose(n),...n.items.map(i=>i.title),...(n.cuts||[]).map(c=>[c.title,c.description,c.kind==='image'?ocr[c.blobId]||'':''].join('\n'))].filter(Boolean).join('\n');
     out.push({id:'page:'+n.id,noteId:n.id,notebookId:n.notebookId,type:n.type,title:n.title||'Sem título',text,categories});
     for(const i of n.items) out.push({id:'item:'+i.id,noteId:n.id,notebookId:n.notebookId,type:'tasks',title:i.title||'Tarefa sem título',text:i.title,categories});
     for(const i of n.inlineTasks||[]) out.push({id:'inline:'+i.id,noteId:n.id,notebookId:n.notebookId,type:'tasks',title:i.title||'Tarefa sem título',text:i.title,categories});

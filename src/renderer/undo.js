@@ -46,11 +46,14 @@ function restoreEditorSelection(selection) {
 }
 function isPageHistoryTarget(target = document.activeElement) {
   if (!currentNote() || view === 'archive' || !$('#note-title')) return false;
+  // The diagram code field keeps its native undo while editing; the session becomes one page step on close.
+  if (target?.closest('.diagram-code')) return false;
   if (target?.closest('#note-body, #note-title')) return true;
   return ['notes', 'reminders'].includes(view) && !target?.closest('input, textarea, select, [contenteditable="true"], dialog');
 }
 function editPageHistory(direction) {
   const noteId = currentNote()?.id; if (!noteId) return;
+  finishDiagramSession();
   undoQueue = undoQueue.then(async () => {
     const history = pageHistories.get(noteId); if (!history) return;
     const selection = editorSelection();

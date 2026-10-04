@@ -28,7 +28,7 @@ npm test
 npm run test:app
 ```
 
-The app tests drive the real app from an external sandbox (`tests/smoke/sandbox.cjs`): a temporary data folder, separate from personal notebooks, plus replacements for sound, notifications, the related-pages model, the PDF save dialog and the desktop cursor, set through `testHook.configure`. The app itself has no test mode; `tests/production-boundary.test.cjs` keeps it that way. They cover persistence, editor, selection, media, categories, calendar, reminders and undo/redo.
+The app tests drive the real app from an external sandbox (`tests/smoke/sandbox.cjs`): a temporary data folder, separate from personal notebooks, plus replacements for sound, notifications, the related-pages model, the PDF save dialog and the desktop cursor, set through `testHook.configure`. Windows stay hidden and the app never becomes the active one (Chromium focus emulation keeps pages behaving as focused), so a run does not take your keyboard; the copy check still uses the system clipboard and restores it. The app itself has no test mode; `tests/production-boundary.test.cjs` keeps it that way. They cover persistence, editor, selection, media, categories, calendar, reminders and undo/redo.
 
 To run only the native keyboard and mouse scenarios:
 
@@ -41,6 +41,18 @@ To validate only actions linked to passages and media:
 ```sh
 npm run test:app -- --source-only
 ```
+
+To validate only Mermaid diagram blocks (editor, undo, home preview, clipboard and PDF):
+
+```sh
+npm run test:app -- --diagram-only
+```
+
+## Mermaid diagrams
+
+`mermaid` is a pinned dev dependency. `scripts/vendor-mermaid.cjs` copies only its self-contained browser build to `src/renderer/vendor/` (git-ignored); it runs automatically before `npm start`, `npm run test:app` and `npm run package`, so the full npm package never enters the app. The drawing style (hand-drawn strokes, notebook palette and handwriting font) lives in `src/shared/diagram-style.js` and is shared by the editor and the PDF print view.
+
+Diagrams use **Excalifont**, Excalidraw's handwriting font, bundled in `src/renderer/fonts/excalifont/` (SIL Open Font License 1.1, see `OFL.txt` there; copied unmodified from `@excalidraw/excalidraw` 0.18.1). `src/renderer/excalifont.css` declares the seven upstream Unicode-range subsets; PDF export copies the same files next to the print page.
 
 ## Build the package
 

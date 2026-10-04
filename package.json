@@ -10,12 +10,14 @@
     "test:app": "electron tests/smoke/run.cjs",
     "package": "electron-packager . Caderninho --asar.unpack-dir=node_modules --icon=assets/icon.icns --extra-resource=assets/alarm.wav --extra-resource=native/caderninho-ocr --out=dist --overwrite --ignore='^/(?!(src|assets|node_modules)(/|$)|package\\.json$)'",
     "icon": "electron scripts/generate-icon.cjs",
-    "prestart": "node scripts/build-ocr.cjs",
-    "prepackage": "node scripts/build-ocr.cjs"
+    "prestart": "node scripts/build-ocr.cjs && node scripts/vendor-mermaid.cjs",
+    "prepackage": "node scripts/build-ocr.cjs && node scripts/vendor-mermaid.cjs",
+    "pretest:app": "node scripts/vendor-mermaid.cjs"
   },
   "devDependencies": {
     "@electron/packager": "20.3.0",
-    "electron": "44.5.1"
+    "electron": "44.5.1",
+    "mermaid": "12.1.0"
   },
   "dependencies": {
     "@huggingface/transformers": "4.3.0"

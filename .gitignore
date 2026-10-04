@@ -42,3 +42,6 @@ Thumbs.db
 
 # Native OCR binary rebuilt for the target Mac
 /native/caderninho-ocr
+
+# Vendored browser builds copied from node_modules by scripts/vendor-mermaid.cjs
+/src/renderer/vendor/

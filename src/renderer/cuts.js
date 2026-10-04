@@ -34,6 +34,7 @@ function fillCutPreview(card, cut) {
   const open = preview.querySelector('.cut-open'); if (open) open.onclick = () => window.notebook.openCut(cut.id).catch(error => toast(error.message));
 }
 function mountCollage(note) {
+  finishDiagramSession();
   const old = $('#note-body'), editor = document.createElement('div');
   editor.id = 'note-body'; editor.className = 'note-body collage-editor'; editor.contentEditable = 'true'; editor.setAttribute('aria-label', 'Página com texto e mídia');
   Object.defineProperty(editor, 'value', { get: () => [...editor.querySelectorAll('.writing-line')].map(readWritingLine).join('\n') });

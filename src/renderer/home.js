@@ -14,11 +14,12 @@ function renderHomeNotePreview(){
   const page=document.createElement('div');
   renderDocumentBlocks(page,{...note,editorDoc:note.editorDoc||pageDocument.fromPlain(note.body||''),cuts:note.cuts||[]});
   const preview=page.cloneNode(true);
-  preview.querySelectorAll('.cut-controls,.table-tools').forEach(element=>element.remove());
+  preview.querySelectorAll('.cut-controls,.table-tools,.diagram-tools').forEach(element=>element.remove());
   preview.querySelectorAll('[contenteditable]').forEach(element=>element.removeAttribute('contenteditable'));
   preview.querySelectorAll('[role="textbox"],[tabindex]').forEach(element=>{element.removeAttribute('role');element.removeAttribute('tabindex');});
   preview.querySelectorAll('input').forEach(input=>{input.disabled=true;});
   host.replaceChildren(...preview.childNodes);
+  drawDiagrams(host);
   host.scrollTop=scroll;
   host.dataset.noteId=note.id;
   renderSourceAnchors(host,(state.sourceActions||[]).filter(item=>item.noteId===note.id));

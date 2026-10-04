@@ -16,6 +16,8 @@
 ## Shell & Command Reliability
 1. **[2026-10-04] Default shell node is v10 (nvm)**
    Do instead: run tests with `PATH=~/.nvm/versions/node/v22.23.1/bin:$PATH npm test`; v10 fails with `node: bad option: --test`.
+2. **[2026-10-04] Electron 44 clipboard is async**
+   Do instead: `await clipboard.readText()/writeText()` in main/tests; restore the user's clipboard after smoke checks.
 
 ## Editor
 1. **[2026-10-01] One continuous editing host**
@@ -34,6 +36,9 @@
 5. **[2026-10-02] Selection changes must preserve contextual submenus**
    Do instead: do not rebuild the formatting toolbar for an unchanged DOM range; opening a color palette restores Selection and queues selectionchange. Test separate clicks with an event-loop delay and native mouse input, including link dialog focus. Use sized stroke-only SVG icons for formatting controls.
 
+6. **[2026-10-04] Form fields inside #note-body leak events to the page editor**
+   Do instead: stop propagation of input/beforeinput/paste/cut/drop/plain keydown on textareas inside blocks (see diagrams.js) and exclude them from isPageHistoryTarget; otherwise saves record undo steps and paste is hijacked. Compare Mermaid labels without whitespace (long labels wrap into tspans). Smoke runs hidden in the background (sandbox `runInBackground`: hidden windows, accessory activation policy, CDP focus emulation); never call `win.focus()`/`win.show()` in the runner.
+
 ## Documentation
 1. **[2026-10-04] User-facing English README**
    Do instead: write README in English (AGENTS.md rules govern workflow); focus README on distinctive benefits (source-linked actions, related ideas, collage and daily history), use real screenshots with fictional data, and omit technical implementation details and obvious editing features. Keep setup/technical instructions in linked guides; explain external link-preview requests accurately.
@@ -42,29 +47,28 @@
 1. **[2026-10-01] Daily overview and temporal records**
    Do instead: open on Caderninho with the latest updated note from the active notebook and its clickable related graph above the daily panels; show this live section only for today. Render the latest note with the shared editor blocks/media and source highlights in a read-only preview, preserving line breaks and complete content; omit the graph caption and daily writing field from home. Keep note and graph side by side at every window size; scale the square graph, its icons and labels proportionally using graph container units and cap its width by viewport height. Never stack it below the note. Verify icons and labels do not overlap at small widths/heights. Keep pending tasks, today's completions/reminders and recent notes; preserve previous snapshots read-only. Store creation/update/check/uncheck/deletion events, clear deleted_at on restore, keep unknown legacy dates null and omit routine save status from the header; show failures only.
 
-2. **[2026-10-01] Reference style and motion**
+2. **[2026-10-04] Design refresh pending in specs/003 (native Mac paper)**
+   Do instead: when 003 is approved it supersedes the rings, drawn traffic lights, grips, Chalkboard labels and illustrated sidebar below; design critique must think macOS-native and avoid generic "AI-looking" UI (glass cards, bento, gradients). Electron 44 cannot reach New York via ui-serif/name; load /System/Library/Fonts/NewYork.ttf through a protocol.
+3. **[2026-10-01] Reference style and motion**
    Do instead: use illustrated vintage stationery with unruled writing pages, a narrow vertical icon menu, paper tabs instead of a face/arms (no top ribbon), and an upward page flip when changing notes. Maximize to the available screen height, centered at up to 1200px wide; restore size/position and support top double-click. Resize from the drawn book border (all edges/corners via .book-edges in the .app grid), not only the transparent window edge, plus visible right/bottom/corner grips; resize reads screen.getCursorScreenPoint in main.
 
-3. **[2026-10-01] Three note types and typed trash**
+4. **[2026-10-01] Three note types and typed trash**
    Do instead: open Lembretes on a navigable month calendar with day bullets and original-page links; keep plain notes, checklist pages, and scheduled note pages separate; each checklist retains its own title, dates, items and checked states. Every page belongs to a notebook; provide Cadernos CRUD below the overview, pastel name/description modal, vertical hover tabs with the active tab held open, and a final + tab. Removing a notebook transfers all pages including trash; retain at least one. Categories are reusable badges below page titles; hashtags in note text become atomic Backspace pills and create associations after the token is finished, with separate manual and inline sources; suggest existing categories after # plus a letter at the caret, with accent-insensitive prefixes, arrows/Enter/Tab/Escape, formatting preservation and a brief bounce respecting reduced motion; remove Themes and Pin; save to SQLite with a one-time JSON migration.
 
-4. **[2026-10-01] Notices follow the stationery design**
+5. **[2026-10-01] Notices follow the stationery design**
    Do instead: use cream paper, dark ink, illustrated borders and readable 16px text for callouts; avoid black banners with white tiny text.
 
-5. **[2026-10-01] Make window dragging discoverable**
+6. **[2026-10-01] Make window dragging discoverable**
    Do instead: allow moving from noninteractive stationery areas without a drag label or header title; preserve inputs, buttons, scrollbars and resize handles.
 
-6. **[2026-10-01] Collapsible sidebar uses the paper design**
+7. **[2026-10-01] Collapsible sidebar uses the paper design**
    Do instead: attach a folded paper tab to the left book edge, keep window controls on the book, persist collapse in SQLite, and omit the top ribbon until favorites are requested.
 
-7. **[2026-10-02] Quick capture removed at user request**
+8. **[2026-10-02] Quick capture removed at user request**
    Do instead: keep the app without a quick draft button, window, global shortcut or menu; retain legacy settings in SQLite without exposing the removed feature.
 
-8. **[2026-10-01] Adicionar mídia uses local media and metadata-only previews**
+9. **[2026-10-01] Adicionar mídia uses local media and metadata-only previews**
    Do instead: retain images and PDFs in userData/media, deduplicate by SHA-256, reference from SQLite cuts, preserve media for trashed cuts, and collect only unreferenced blobs. Link cards read metatags without executing page scripts and cache metadata/images offline. PDF cards use the native PDFKit reader in caderninho-ocr for title/excerpt and open the retained copy with shell.openPath; rebuild the helper before testing or packaging. Text excerpt cards are deferred.
 
-9. **[2026-10-01] Smart margin stays in the note**
+10. **[2026-10-01] Smart margin stays in the note**
    Do instead: offer an explicit date/time stamp without auto-scheduling; keep one absolute alarm on the original note with cancel/re-schedule controls. Render line-start [] as inline checkboxes, preserve [ ]/[x] in SQLite body, and support Enter continuation/exit without affecting task lists or cuts.
-
-10. **[2026-10-02] Local related content stays modular**
-   Do instead: keep ranking weights/thresholds in related-config.cjs, inference/OCR in a worker and the graph in related-ui.js. Cache by content hash and pinned model version, restrict results to the same notebook, omit scores in the UI, order footer links by descending affinity and use equal graph axis scales so radial distance preserves that order, and keep the compact toolbar usable. Validate real embeddings separately from deterministic graph smoke fixtures.

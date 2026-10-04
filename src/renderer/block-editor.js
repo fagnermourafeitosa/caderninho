@@ -1,10 +1,10 @@
-const blockLabels={paragraph:'Texto',h1:'Título',h2:'Subtítulo',h3:'Título pequeno',quote:'Citação',check:'Tarefa',bullet:'Lista',number:'Lista numerada',divider:'Divisor',code:'Código',table:'Tabela',media:'Imagem ou link'};
+const blockLabels={paragraph:'Texto',h1:'Título',h2:'Subtítulo',h3:'Título pequeno',quote:'Citação',check:'Tarefa',bullet:'Lista',number:'Lista numerada',divider:'Divisor',code:'Código',table:'Tabela',diagram:'Diagrama',media:'Imagem ou link'};
 const blockCommands=[
   ['paragraph','Texto','¶','parágrafo texto normal'],['h1','Texto','H1','título grande titulo 1'],['h2','Texto','H2','título médio titulo 2 subtítulo'],['h3','Texto','H3','título pequeno titulo 3'],['quote','Texto','quote','citação frase'],
   ['check','Listas','check','checkbox tarefa checklist'],['bullet','Listas','bullet','lista marcadores bullets'],['number','Listas','1.','lista numerada números'],
-  ['divider','Estrutura','divider','divisor linha separador'],['code','Estrutura','code','código programação'],['table','Estrutura','table','tabela colunas linhas'],['media','Mídia','media','imagem link mídia adicionar recorte']
+  ['divider','Estrutura','divider','divisor linha separador'],['code','Estrutura','code','código programação'],['table','Estrutura','table','tabela colunas linhas'],['diagram','Estrutura','diagram','diagrama mermaid fluxograma fluxo sequência mapa mental linha do tempo gráfico'],['media','Mídia','media','imagem link mídia adicionar recorte']
 ];
-const commandPaths={link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',highlight:'M9 11l6-7 5 5-7 6z M9 11l4 4-3 3H6v-4z M4 21h16',quote:'M5 6h5v6H5z M14 6h5v6h-5z M10 12c0 4-2 6-5 6 M19 12c0 4-2 6-5 6',check:'M4 4h16v16H4z M8 12l3 3 6-7',bullet:'M9 6h11 M9 12h11 M9 18h11 M4 6h.1 M4 12h.1 M4 18h.1',divider:'M3 12h18',code:'M8 7l-5 5 5 5 M16 7l5 5-5 5 M14 4l-4 16',table:'M3 4h18v16H3z M3 10h18 M3 15h18 M9 4v16 M15 4v16',media:'M3 4h18v16H3z M3 17l6-6 4 4 3-3 5 5 M15 8h.1'};
+const commandPaths={link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',highlight:'M9 11l6-7 5 5-7 6z M9 11l4 4-3 3H6v-4z M4 21h16',quote:'M5 6h5v6H5z M14 6h5v6h-5z M10 12c0 4-2 6-5 6 M19 12c0 4-2 6-5 6',check:'M4 4h16v16H4z M8 12l3 3 6-7',bullet:'M9 6h11 M9 12h11 M9 18h11 M4 6h.1 M4 12h.1 M4 18h.1',divider:'M3 12h18',code:'M8 7l-5 5 5 5 M16 7l5 5-5 5 M14 4l-4 16',table:'M3 4h18v16H3z M3 10h18 M3 15h18 M9 4v16 M15 4v16',diagram:'M3 4h7v5H3z M14 15h7v5h-7z M6.5 9v4.5h11V15 M14 6.5h4',media:'M3 4h18v16H3z M3 17l6-6 4 4 3-3 5 5 M15 8h.1'};
 function commandIcon(icon){return commandPaths[icon]?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${commandPaths[icon]}"/></svg>`:icon;}
 function commandSearch(text){return text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();}
 let insertionContext=null,formatRange=null;
@@ -37,11 +37,13 @@ function renderInlineRuns(span,runs){
 }
 function readEditorBlock(line){
   const type=line.dataset.checkbox?'check':line.dataset.blockType||'paragraph',id=line.dataset.blockId||(line.dataset.blockId=pageDocument.id());
+  if(type==='diagram')return {id,type,code:line.querySelector('.diagram-code').value};
   if(type==='table')return {id,type,header:line.dataset.header!=='false',rows:[...line.querySelectorAll('tr')].map(row=>[...row.querySelectorAll('.table-cell-text')].map(readInlineRuns))};
   return {id,type,checked:line.dataset.checked==='true',runs:type==='divider'?[]:readInlineRuns(editableText(line))};
 }
 function readEditorDocument(){normalizePageDOM();return [...$('#note-body').querySelectorAll('.writing-line')].map(readEditorBlock);}
 function renderDocumentBlock(block,index){
+  if(block.type==='diagram')return renderDiagramBlock(block,index);
   if(block.type==='table'){
     const outer=document.createElement('div');outer.className='writing-line table-block';outer.contentEditable='false';outer.dataset.blockType='table';outer.dataset.blockId=block.id;outer.dataset.lineIndex=index;outer.dataset.header=block.header;
     const table=document.createElement('table');table.className='paper-table';table.style.minWidth=Math.max(320,block.rows[0].length*90)+'px';const tbody=document.createElement('tbody');
@@ -66,7 +68,7 @@ function ensureRichEditor(){
   try{mountCollage({...currentNote(),body:old.value,editorDoc:doc});const lines=$('#note-body').querySelectorAll('.writing-line'),span=editableText(lines[Math.max(0,line)]);putCaret(span,start);if(endLine!==line||end>start){const range=getSelection().getRangeAt(0),point=editorTextPoint(editableText(lines[Math.max(0,endLine)]),end);range.setEnd(point.node,point.offset);}if(previousSelection)restoreEditorSelection(previousSelection);}finally{transformingCategoryEditor=false;}
   return $('#note-body');
 }
-function saveDocument(group=false){normalizePageDOM();const editor=$('#note-body');reindexDocument();updateDetail();renderSmartMargin();const doc=readEditorDocument();const noteId=currentNote().id;return action('note:update',{id:noteId,body:pageDocument.text(doc),editorDoc:doc},{group}).then(ok=>{if(ok&&view==='notes'&&currentNote()?.id===noteId&&!sourceDraft&&actionsForNote().length)renderSourceMargin();return ok;});}
+function saveDocument(group=false,history=true){normalizePageDOM();const editor=$('#note-body');reindexDocument();updateDetail();renderSmartMargin();const doc=readEditorDocument();const noteId=currentNote().id;return action('note:update',{id:noteId,body:pageDocument.text(doc),editorDoc:doc},{group,history}).then(ok=>{if(ok&&view==='notes'&&currentNote()?.id===noteId&&!sourceDraft&&actionsForNote().length)renderSourceMargin();return ok;});}
 function reindexDocument(){let at=0;$('#note-body')?.querySelectorAll('.writing-line').forEach(line=>{line.dataset.lineIndex=at;at+=readWritingLine(line).split('\n').length;});}
 function replaceDocument(doc,focusIndex=0){const note={...currentNote(),editorDoc:doc,body:pageDocument.text(doc)};mountCollage(note);const line=$('#note-body').querySelectorAll('.writing-line')[focusIndex];if(line)putCaret(editableText(line));return saveDocument();}
 function popupPosition(menu,rect){menu.style.left=Math.max(12,Math.min(rect.left,innerWidth-menu.offsetWidth-12))+'px';menu.style.top=Math.max(12,Math.min(rect.bottom+6,innerHeight-menu.offsetHeight-12))+'px';}
@@ -83,7 +85,7 @@ function renderCommands(query=''){
     if(!words.length&&section!==group){const label=document.createElement('div');label.className='command-group';label.textContent=section;label.setAttribute('role','presentation');list.append(label);group=section;}
     const button=document.createElement('button');button.type='button';button.id='command-'+type;button.dataset.insertBlock=type;button.setAttribute('role','option');button.tabIndex=-1;
     button.innerHTML=`<span class="command-icon" aria-hidden="true">${commandIcon(icon)}</span><span>${blockLabels[type]}</span><span class="command-enter" aria-hidden="true">↵</span>`;
-    button.onpointermove=event=>{if(event.movementX||event.movementY)selectCommand(button);};button.onclick=()=>type==='table'?showTablePicker():insertEditorBlock(type);list.append(button);
+    button.onpointermove=event=>{if(event.movementX||event.movementY)selectCommand(button);};button.onclick=()=>type==='table'?showTablePicker():type==='diagram'?showDiagramTemplates():insertEditorBlock(type);list.append(button);
   }
   const first=list.querySelector('button');if(!first){const empty=document.createElement('p');empty.className='command-empty';empty.textContent='Nenhum bloco encontrado.';list.append(empty);}
   selectCommand(first);list.scrollTop=0;popupPosition(menu,insertionContext.line.getBoundingClientRect());
@@ -99,15 +101,16 @@ function openInsertMenu(line=null,slash=null){
   renderCommands(query);if(!slash)search.focus({preventScroll:true});
 }
 function removeSlash(){const ctx=insertionContext;if(!ctx?.slash)return;const span=editableText(ctx.line),runs=readInlineRuns(span);const start=ctx.slash.start,end=ctx.slash.end;let offset=0;const next=[];for(const run of runs){const before=run.text.slice(0,Math.max(0,start-offset)),after=run.text.slice(Math.max(0,end-offset));if(offset+run.text.length<=start||offset>=end)next.push(run);else {if(before)next.push({...run,text:before});if(after)next.push({...run,text:after});}offset+=run.text.length;}renderInlineRuns(span,next);}
-function insertEditorBlock(type,rows=0,columns=0){
+function insertEditorBlock(type,rows=0,columns=0,code=''){
   const context=insertionContext;if(!context)return;capturePageSelection();removeSlash();
   if(type==='media'){hideEditorMenus();saveDocument();openCutDialog();return;}
   const editor=$('#note-body'),lines=[...editor.querySelectorAll('.writing-line')],index=lines.indexOf(context.line),doc=readEditorDocument();
-  const block=type==='table'?{id:pageDocument.id(),type,header:true,rows:Array.from({length:rows},()=>Array.from({length:columns},()=>pageDocument.plainRuns('')))}:{id:pageDocument.id(),type,checked:false,runs:pageDocument.plainRuns('')};
+  const block=type==='table'?{id:pageDocument.id(),type,header:true,rows:Array.from({length:rows},()=>Array.from({length:columns},()=>pageDocument.plainRuns('')))}:type==='diagram'?{id:pageDocument.id(),type,code}:{id:pageDocument.id(),type,checked:false,runs:pageDocument.plainRuns('')};
   const empty=doc[index]?.type==='paragraph'&&!pageDocument.runText(doc[index].runs);
   if(empty)doc.splice(index,1,block);else doc.splice(index+1,0,block);
-  const next=empty?index:index+1;if(['table','divider'].includes(type)&&next===doc.length-1)doc.push({id:pageDocument.id(),type:'paragraph',runs:pageDocument.plainRuns('')});
+  const next=empty?index:index+1;if(['table','divider','diagram'].includes(type)&&next===doc.length-1)doc.push({id:pageDocument.id(),type:'paragraph',runs:pageDocument.plainRuns('')});
   hideEditorMenus();replaceDocument(doc,type==='divider'?Math.min(next+1,doc.length-1):next);
+  return block.id;
 }
 function showTablePicker(){
   const menu=$('#block-menu');menu.classList.remove('command-palette');menu.setAttribute('role','dialog');menu.innerHTML='<small>Tabela</small><strong id="table-size" role="status">Escolha colunas × linhas</strong><div class="table-picker" role="group" aria-label="Escolher tamanho da tabela"></div><small>Passe o mouse ou arraste e solte para inserir.</small>';

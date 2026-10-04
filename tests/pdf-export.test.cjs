@@ -13,3 +13,16 @@ test('export shows an attached PDF title and excerpt without embedding its bytes
  const html=buildPDFHTML(note,{notebooks:[],sourceActions:[]},{file:()=>__filename});
  assert.ok(html.includes('PDF · documento anexado'));assert.ok(html.includes('Meu PDF'));assert.ok(html.includes('Trecho inicial'));assert.ok(!html.includes('data:image/png'));
 });
+test('PDF export carries escaped diagram code for local rendering, without network access',()=>{
+ const base={id:'d',type:'notes',notebookId:'book',title:'Fluxo',body:'',categories:[],cuts:[],items:[]};
+ const code='flowchart TD\n  A["</pre><script>alert(1)</script>"] --> B';
+ const html=buildPDFHTML({...base,editorDoc:[{id:'1',type:'diagram',code},{id:'2',type:'diagram',code:'sequenceDiagram\n  Ana->>Bia: Oi'}]},{notebooks:[],sourceActions:[]},{file:()=>null});
+ assert.equal((html.match(/data-diagram/g)||[]).length,2);
+ assert.ok(!html.includes('<script>alert'),'Código do diagrama é escapado');assert.ok(html.includes('&lt;/pre&gt;&lt;script&gt;'));
+ assert.deepEqual([...html.matchAll(/<script\b[^>]*>/g)].map(match=>match[0]),['<script src="mermaid.min.js">'],'Só o Mermaid local é carregado');
+ const policy=html.match(/Content-Security-Policy" content="([^"]+)"/)[1];
+ assert.match(policy,/default-src 'none'/);assert.match(policy,/script-src 'self'/);assert.doesNotMatch(policy,/https?:|connect-src|\*/);
+ assert.match(policy,/font-src 'self'/);assert.match(html,/@font-face\{font-family:'Excalifont';src:url\('fonts\/excalifont\/Excalifont-Regular-[0-9a-f]+\.woff2'\)/,'Diagramas usam a Excalifont local');
+ const plain=buildPDFHTML({...base,editorDoc:[{id:'1',type:'paragraph',runs:[{text:'Sem diagrama',marks:{}}]}]},{notebooks:[],sourceActions:[]},{file:()=>null});
+ assert.doesNotMatch(plain,/<script|script-src|font-src|Excalifont/,'Páginas sem diagrama não carregam scripts nem fontes');
+});

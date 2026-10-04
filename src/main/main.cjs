@@ -145,7 +145,7 @@ ipcMain.handle('notebook:export-pdf', async (_event,id) => {
   const destination=await services.pdfDestination(filename(note.title));
   if(destination.canceled||!destination.filePath)return {canceled:true};
   const filePath=/\.pdf$/i.test(destination.filePath)?destination.filePath:destination.filePath+'.pdf';
-  const buffer=await createPDF(WebContentsView,buildPDFHTML(note,snapshot,media));
+  const buffer=await createPDF(WebContentsView,buildPDFHTML(note,snapshot,media),{mermaidPath:path.join(__dirname,'..','renderer','vendor','mermaid.min.js')});
   const temporary=filePath+'.'+randomUUID()+'.tmp';
   try{await fs.promises.writeFile(temporary,buffer,{flag:'wx'});await fs.promises.rename(temporary,filePath);}finally{await fs.promises.rm(temporary,{force:true});}
   return {canceled:false,filePath};
