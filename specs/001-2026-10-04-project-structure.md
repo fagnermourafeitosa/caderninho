@@ -3,7 +3,7 @@
 - **Specification ID**: 001
 - **Date**: 2026-10-04
 - **Slug**: project-structure
-- **Status**: In Progress
+- **Status**: Implemented
 - **Owner**: Project tooling (repository layout, packaging, test harness)
 - **Related Specification**: none
 
@@ -82,7 +82,7 @@ flowchart LR
 - [x] 3. As a developer, I want the smoke-test runner outside the production entry point, so that production code never loads test code.
 - [x] 4. As a developer, I want to run the same smoke-test scopes with the same flag names, so that existing workflows keep working.
 - [x] 5. As a maintainer, I want packaging to include only allowlisted paths, so that development files never ship inside the app.
-- [ ] 6. As a user, I want the app to behave exactly as before, so that the reorganization is invisible to me.
+- [x] 6. As a user, I want the app to behave exactly as before, so that the reorganization is invisible to me.
 
 ---
 
@@ -164,7 +164,7 @@ flowchart LR
 - [x] 2. No file under `src/` loads anything from `tests/`, `scripts/` or `artifacts/`.
 - [x] 3. `src/main/main.cjs` has fewer than 350 lines.
 - [x] 4. All unit, integration and smoke tests pass, including every scoped smoke mode.
-- [ ] 5. `npm run package` succeeds with the allowlist and the user confirms the packaged app works.
+- [x] 5. `npm run package` succeeds with the allowlist and the user confirms the packaged app works.
 - [x] 6. `AGENTS.md`, `README.md` and `docs/` reference the new paths and commands.
 - [x] 7. Quality checks (`npm test` on Node 22+, `node --check` on changed files) pass with 0 errors.
 
@@ -183,5 +183,7 @@ flowchart LR
 ## Further Notes
 
 - Verification (2026-10-04): `npm test` 54/54; full `npm run test:app` and all 11 scoped modes passed; `npm run package` produced a bundle containing only `src/`, `assets/`, `node_modules/` and `package.json`. `--related-runtime-only` was not run (requires the model download).
-- In smoke mode, `src/main/main.cjs` still writes exported PDFs to `artifacts/pdf/` (an existing `smoke` branch kept by Implementation Decision 5); it does not load code from there.
+- Superseded in the same delivery: the app no longer has a smoke mode. `tests/smoke/sandbox.cjs` isolates `userData` and the runner replaces sound, notifications, related scheduling, the PDF save dialog and the desktop cursor through `testHook.configure`; `tests/production-boundary.test.cjs` guards `src/`.
+- Behavior change shipped alongside (commit `ec59b68`): the window resizes from the drawn book border on every edge and corner, with visible bottom and corner grips.
+- Approved by the user on 2026-10-04; `npm run package` re-run after the sandbox change with the same allowlisted bundle.
 - Approved exceptions: no Red phase (see Testing Decisions); `store.cjs` above 350 lines until its persistence specification.
