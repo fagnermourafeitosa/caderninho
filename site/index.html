@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caderninho · Notas que viram tarefas sem perder o contexto</title>
+<meta name="description" content="Um caderno para o Mac, feito para quem escreve em português. Selecione um trecho, transforme em tarefa ou lembrete, e a tarefa sempre sabe de onde veio.">
+<link rel="icon" href="img/icon.png">
+<style>
+@font-face{font-family:'Excalifont';src:url('fonts/excalifont-latin.woff2') format('woff2');font-display:swap}
+:root{
+  --paper:#fbf0d5; --shade:#efe0b9; --kraft:#e6d3a8; --sheet:#fffaea; --hover:#f3e5c2;
+  --hairline:#cdb88a; --ink:#303025; --muted:#6b624c; --edge:#36352a; --select:#f8d985;
+  --pending:#c4943a; --pending-bg:#fbe6b2; --done:#6d8a55; --done-bg:#e3ebcc; --blue:#b9d3f2;
+  --serif:"New York", ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --hand:'Excalifont', var(--serif);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--kraft);color:var(--ink);font:17px/1.6 var(--serif);-webkit-font-smoothing:antialiased;overflow-x:clip}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 15px/1 var(--serif);text-decoration:none;padding:12px 18px;border-radius:9px;border:1px solid transparent}
+.btn-ink{background:var(--ink);color:var(--paper)}
+.btn-ink:hover{background:#45453a}
+.btn-quiet{border-color:var(--edge)}
+.btn-quiet:hover{background:var(--hover)}
+
+/* top bar */
+.top{position:fixed;inset:0 0 auto;z-index:20;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;pointer-events:none}
+.top>*{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:9px;font-weight:650;font-size:17px;text-decoration:none}
+.brand img{width:30px}
+.top .btn{padding:9px 14px;font-size:14px}
+
+/* ---------- pinned scene ---------- */
+.scene{position:relative;height:calc(100vh + 9 * 75vh)}
+.stage{position:sticky;top:0;height:100vh;display:grid;grid-template-columns:minmax(240px,320px) minmax(0,980px);justify-content:center;align-items:center;gap:48px;padding:64px 32px 28px}
+
+.captions{position:relative;height:340px}
+.cap{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s;pointer-events:none}
+.cap.on{opacity:1;transform:none;pointer-events:auto}
+.cap p{font-size:23px;line-height:1.4;margin:0 0 .6em}
+.cap p.small{font-size:16px;color:var(--muted);line-height:1.55}
+.cap .when{font:22px var(--hand);color:var(--muted);margin-bottom:10px}
+.cap .meta{font-size:14px;color:var(--muted);margin-top:18px;display:flex;flex-direction:column;gap:4px}
+.cap .scroll{margin-top:26px;font:17px var(--hand);color:var(--muted);display:flex;align-items:center;gap:8px}
+.cap .scroll span{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(5px)}}
+.cap mark{background:linear-gradient(transparent 55%,var(--select) 55%);color:inherit}
+.dots{position:absolute;left:0;bottom:-36px;display:flex;gap:6px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--hairline);transition:background .3s,transform .3s}
+.dots i.on{background:var(--ink);transform:scale(1.3)}
+
+/* book */
+.book{position:relative;height:min(700px,calc(100vh - 110px));display:grid;grid-template-columns:168px minmax(0,1fr);gap:10px}
+.side{background:var(--kraft);border:2px solid var(--edge);border-radius:14px;padding:22px 12px;box-shadow:0 4px 0 -1px #d9c38f,0 4px 0 1px var(--edge)}
+.side .nb{font-size:11px;letter-spacing:.08em;color:var(--muted);font-weight:650;margin:0 0 12px 10px}
+.side div.row{display:flex;align-items:center;gap:10px;font-size:14px;padding:7px 10px;border-radius:8px;margin-bottom:2px;transition:background .3s}
+.side div.row.on{background:var(--select);font-weight:650}
+.side .gap{height:14px}
+.paper{position:relative;border:2px solid var(--edge);border-radius:14px;background:var(--paper);perspective:2200px;box-shadow:0 5px 0 -1px var(--shade),0 5px 0 1px var(--edge),0 10px 0 -1px var(--shade),0 10px 0 1px var(--edge),0 30px 50px -24px rgba(54,53,42,.45)}
+.paper::before{content:"";position:absolute;left:14px;top:0;bottom:0;border-left:1.5px dashed var(--hairline);z-index:4}
+.tabs{position:absolute;right:-26px;top:120px;display:flex;flex-direction:column;gap:8px;z-index:-1}
+.tabs i{display:block;width:26px;border:2px solid var(--edge);border-left:0;border-radius:0 8px 8px 0}
+.tabs i:nth-child(1){height:110px;background:#e2c98f}
+.tabs i:nth-child(2){height:44px;background:#bccfd8}
+.tabs i:nth-child(3){height:44px;background:#c8d6b0}
+.tbar{position:absolute;inset:0 0 auto;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 48px;z-index:5;pointer-events:none}
+.tbar .newnote{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--paper);font-weight:600;font-size:13px;padding:7px 12px;border-radius:8px}
+.tbar .right{display:flex;align-items:center;gap:14px}
+.pgno{position:absolute;right:22px;bottom:14px;font-size:12px;color:var(--muted);z-index:5}
+
+.pg{position:absolute;inset:0;padding:72px 40px 40px 56px;background:var(--paper);border-radius:12px;visibility:hidden;overflow:hidden;backface-visibility:hidden}
+.pg.on{visibility:visible;z-index:2}
+.pg.out{visibility:visible;z-index:3;transform-origin:50% 0;animation:flipup .75s cubic-bezier(.55,.05,.35,1) forwards;box-shadow:0 30px 40px -20px rgba(54,53,42,.4)}
+.pg.in-back{visibility:visible;z-index:3;transform-origin:50% 0;animation:flipup .75s cubic-bezier(.55,.05,.35,1) reverse both}
+@keyframes flipup{0%{transform:none;filter:none}100%{transform:rotateX(-88deg);filter:brightness(.92)}}
+.prov{font-size:13px;color:var(--muted);margin-bottom:4px}
+.pg h2{font-size:30px;font-weight:650;margin:0 0 8px;letter-spacing:-.01em;line-height:1.2}
+.pills{display:flex;gap:6px;margin-bottom:22px}
+.pill{font-size:12px;border:1px solid var(--hairline);border-radius:999px;padding:1px 9px;background:var(--shade)}
+.body p{font-size:18px;line-height:1.95;margin:0 0 .7em}
+
+/* hero page */
+.pg-hero h2{font-size:clamp(34px,4.2vw,50px);line-height:1.08;max-width:15ch;margin:28px 0 22px;min-height:2.2em}
+.pg-hero .lede{font-size:21px;color:var(--muted);max-width:30ch;min-height:3em}
+.caret{display:inline-block;width:2px;height:1em;background:var(--ink);vertical-align:-.12em;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.pg-hero .cta{display:flex;gap:12px;margin-top:30px;opacity:0;transform:translateY(8px);transition:.5s}
+.pg-hero .cta.on{opacity:1;transform:none}
+
+/* reforma page */
+.pg-note{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:28px}
+.margin{border-left:1px solid var(--hairline);padding-left:20px;margin-top:-10px}
+.margin .mh{display:flex;align-items:center;gap:8px;font-size:16px}
+.margin .mc{font-size:12px;color:var(--muted);margin:2px 0 14px}
+.card{background:var(--sheet);border:1px solid var(--hairline);border-radius:8px;padding:11px 13px;font-size:13px;opacity:0;transform:translateY(-16px) scale(.97);transition:opacity .45s,transform .45s cubic-bezier(.3,1.4,.5,1)}
+.card .ct{display:flex;align-items:center;gap:9px;font-weight:650;font-size:14px}
+.box{width:16px;height:16px;border:1.5px solid var(--ink);border-radius:4px;display:grid;place-items:center;flex:none;transition:background .3s,border-color .3s}
+.box svg{width:11px;height:11px;fill:none;stroke:var(--paper);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:14;stroke-dashoffset:14;transition:stroke-dashoffset .35s .15s}
+.box.done{background:var(--done);border-color:var(--done)}
+.box.done svg{stroke-dashoffset:0}
+.card .st{font-size:11px;color:var(--muted);margin:3px 0 8px 25px}
+.card .ex{border-left:2px solid var(--hairline);padding-left:9px;color:var(--muted);margin:0 0 8px}
+.card .vo{display:flex;align-items:center;gap:6px}
+.empty-hint{font-size:13px;color:var(--muted);font-style:italic;transition:opacity .3s}
+
+.src{position:relative;white-space:nowrap}
+.src .hl{position:absolute;left:-2px;right:-2px;top:.2em;bottom:.15em;background:var(--blue);transform-origin:left;transform:scaleX(0);z-index:-1;border-radius:2px}
+.src .ul{position:absolute;left:0;right:0;bottom:.15em;border-bottom:1.5px dashed var(--pending);opacity:0;transition:opacity .3s,border-color .4s}
+.src .bg{position:absolute;left:-2px;right:-2px;top:.2em;bottom:.15em;background:var(--pending-bg);opacity:0;z-index:-1;transition:opacity .3s,background .4s;border-radius:2px}
+.toolbar{position:absolute;left:0;top:calc(100% + 4px);display:flex;gap:3px;padding:4px;background:var(--sheet);border:1px solid var(--hairline);border-radius:10px;box-shadow:0 6px 16px rgba(54,53,42,.18);line-height:1;opacity:0;transform:translateY(-6px);transition:.25s;z-index:3}
+.toolbar span{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:8px 10px;border-radius:7px}
+
+.st-sel .src .hl{transform:scaleX(1);transition:transform .9s cubic-bezier(.6,0,.4,1) .2s}
+.st-sel .toolbar{opacity:1;transform:none;transition-delay:1.1s}
+.st-sel .toolbar span:first-child{animation:press .25s 2.4s both}
+@keyframes press{to{background:var(--select)}}
+.st-linked .src .ul,.st-linked .src .bg{opacity:1}
+.st-linked .card{opacity:1;transform:none}
+.st-linked .empty-hint{opacity:0}
+.st-done .src .ul{border-color:var(--done)}
+.st-done .src .bg{background:var(--done-bg)}
+.st-flash .src .bg{animation:flash 1.6s .6s ease}
+@keyframes flash{0%,55%{background:var(--select);box-shadow:0 0 0 5px var(--select)}100%{box-shadow:0 0 0 5px transparent}}
+
+/* tarefas page */
+.list{margin-top:6px}
+.lr{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--shade)}
+.lr .box{margin-top:4px}
+.lr .t{font-size:16px}
+.lr .s{font-size:12px;color:var(--muted)}
+.lr.focus{background:linear-gradient(90deg,var(--hover),transparent);margin:0 -14px;padding:11px 14px;border-radius:8px;border-bottom-color:transparent}
+.lr .back{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:13px;border-bottom:1px dashed var(--hairline);white-space:nowrap;align-self:center;padding:2px 6px;border-radius:5px;transition:background .2s}
+.lr .back.press{background:var(--select)}
+.weeks{font-size:13px;color:var(--muted);margin:-2px 0 14px}
+
+/* day pages */
+.dayhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:6px}
+.dayhead .date{font:clamp(18px,2vw,24px) var(--hand);color:var(--ink);text-align:right}
+.daysum{font-size:13px;color:var(--muted);margin-bottom:22px}
+.ro{display:inline-flex;align-items:center;font-size:12px;font-weight:400;border:1px dashed var(--muted);color:var(--muted);border-radius:4px;padding:1px 7px;margin-left:10px;vertical-align:5px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+.cols h3{font-size:19px;font-weight:600;display:flex;align-items:center;gap:8px;margin:0 0 6px;padding-bottom:8px;border-bottom:1px solid var(--hairline)}
+.cols h3 svg{width:20px;height:20px}
+.rem{display:flex;gap:12px;padding:9px 0;font-size:15px}
+.rem b{font-weight:400;color:#9a5b3c;border-bottom:1px dashed var(--hairline);height:fit-content}
+.cols .lr{padding:8px 0}
+.cols .lr .t{font-size:15px}
+.ink-stamp{position:absolute;right:46px;bottom:58px;font:20px var(--hand);color:var(--muted);transform:rotate(-4deg)}
+
+/* pt page */
+.typed p{font-size:19px;line-height:2;margin:0 0 .4em;min-height:2em}
+.when-chip{border-bottom:1.5px dashed var(--pending)}
+.agendar{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;background:var(--select);border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:3px;line-height:1.5;animation:pop .45s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.tagpill{display:inline-block;background:var(--shade);border:1px solid var(--hairline);border-radius:999px;padding:0 9px;line-height:1.5;animation:pop .45s cubic-bezier(.3,1.6,.5,1) both}
+.palette{margin-top:22px;width:300px;max-width:100%;background:var(--sheet);border:1px solid var(--hairline);border-radius:10px;box-shadow:0 8px 22px rgba(54,53,42,.16);padding:6px;opacity:0;transform:translateY(8px);transition:.35s}
+.palette.on{opacity:1;transform:none}
+.palette .q{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--shade);font-size:15px;min-height:38px}
+.palette .r{padding:9px 10px;font-size:15px;border-radius:7px;opacity:0;transition:.3s}
+.palette .r.on{opacity:1;background:var(--select)}
+.palette .r b{font-weight:650}
+
+/* cursor */
+.cursor{position:absolute;left:0;top:0;width:22px;height:22px;z-index:30;pointer-events:none;opacity:0;transition:left .9s cubic-bezier(.5,0,.25,1),top .9s cubic-bezier(.5,0,.25,1),opacity .3s}
+.cursor svg{display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.cursor.on{opacity:1}
+.cursor .ring{position:absolute;left:-9px;top:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink);opacity:0}
+.cursor.click .ring{animation:ring .5s ease-out}
+@keyframes ring{from{opacity:.7;transform:scale(.3)}to{opacity:0;transform:scale(1.6)}}
+
+/* ---------- after the scene ---------- */
+.sheet{background:var(--paper);border-top:2px solid var(--edge);position:relative;z-index:2}
+.wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+.real{padding:96px 0 40px}
+.real h2,.fine h2{font-size:clamp(28px,3.4vw,38px);font-weight:650;letter-spacing:-.01em;margin:0 0 12px;line-height:1.15}
+.real p.lead{color:var(--muted);max-width:56ch;margin:0 0 40px}
+.shots{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+.shots figure{margin:0}
+.shots img{filter:drop-shadow(0 16px 26px rgba(54,53,42,.18))}
+.shots figure:nth-child(2){margin-top:80px}
+figcaption{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+.fine{padding:72px 0 40px}
+.fine .cols2{display:grid;grid-template-columns:1fr 1fr;gap:64px}
+.fine h3{font-size:19px;font-weight:650;margin:30px 0 6px}
+.fine p{margin:0 0 .8em}
+.fine .muted{color:var(--muted);font-size:15px}
+.path{font:14px ui-monospace,"SF Mono",Menlo,monospace;background:var(--sheet);border:1px solid var(--hairline);border-radius:8px;padding:12px 14px;margin:6px 0 14px;overflow-x:auto}
+kbd{font:600 13px var(--serif);border:1px solid var(--hairline);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--sheet)}
+code{font:14px ui-monospace,"SF Mono",Menlo,monospace;background:var(--shade);padding:1px 5px;border-radius:4px}
+.limits{list-style:none;padding:0;margin:8px 0 0}
+.limits li{padding:11px 0 11px 24px;border-top:1px solid var(--shade);position:relative}
+.limits li::before{content:"";position:absolute;left:2px;top:23px;width:10px;border-top:1.5px solid var(--muted)}
+.end{text-align:center;padding:96px 0 64px}
+.end img{width:84px;margin:0 auto 20px}
+.end h2{font-size:clamp(30px,4vw,44px);font-weight:650;margin:0 auto 26px;max-width:20ch;line-height:1.12}
+.end .row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--muted);padding:28px 0 36px;border-top:1px solid var(--hairline)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .book{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .stage{gap:32px}
+}
+@media (max-width:860px){
+  .stage{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-items:start;padding:64px 14px 14px;gap:14px}
+  .captions{height:136px}
+  .cap p{font-size:18px}
+  .cap p.small,.cap .meta,.cap .scroll{display:none}
+  .dots{display:none}
+  .book{height:calc(100vh - 230px);min-height:420px}
+  .tabs{display:none}
+  .pg{padding:62px 18px 24px 34px}
+  .paper::before{left:10px}
+  .tbar{padding-left:34px}
+  .pg-note{grid-template-columns:1fr}
+  .margin{border-left:0;border-top:1px solid var(--hairline);padding:12px 0 0;margin:0}
+  .margin .mc,.empty-hint{display:none}
+  .body p{font-size:16px;line-height:1.8}
+  .body p:last-child{display:none}
+  .pg-hero h2{font-size:32px;margin-top:10px}
+  .pg-hero .lede{font-size:18px}
+  .cols{grid-template-columns:1fr;gap:12px}
+  .cols>div:nth-child(2){display:none}
+  .lr .back span{display:none}
+  .ink-stamp{display:none}
+  .shots,.fine .cols2{grid-template-columns:1fr;gap:32px}
+  .shots figure:nth-child(2){margin-top:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .cursor{display:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><rect x="10" y="13" width="4" height="4" rx=".5"/></symbol>
+  <symbol id="i-books" viewBox="0 0 24 24"><path d="M5 4v16M9 4v16M13 5l4 15M19 19l-2-14"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M18 3l3 3-8 8H10v-3z"/></symbol>
+  <symbol id="i-task" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="4" rx="1"/><path d="M6 9v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M10 13h4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-mac" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 12 12"><path d="m2.5 6 2.3 2.3L9.5 3.5"/></symbol>
+</svg>
+
+<div class="top">
+  <a class="brand" href="#"><img src="img/icon.png" alt="">Caderninho</a>
+  <a class="btn btn-ink" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/INSTALLATION.md">Instalar no Mac</a>
+</div>
+
+<main>
+<section class="scene" id="scene">
+  <div class="stage" id="stage">
+
+    <div class="captions">
+      <div class="cap" data-for="0">
+        <h1 class="sr">Caderninho: notas que viram tarefas sem perder o contexto</h1>
+        <p>Um caderno para o Mac que guarda <mark>de onde cada tarefa veio</mark>.</p>
+        <div class="meta"><span>macOS · interface em português</span><span>Sem conta e sem nuvem</span></div>
+        <div class="scroll"><span>↓</span> role para ver funcionando</div>
+      </div>
+      <div class="cap" data-for="1">
+        <p>Você escreve “pedir dois orçamentos” numa nota sobre a reforma da cozinha.</p>
+        <p class="small">Uma nota comum, no meio de outras coisas que você pensou.</p>
+      </div>
+      <div class="cap" data-for="2">
+        <p>Selecione o trecho e transforme em tarefa ou lembrete.</p>
+        <p class="small">Imagens e cartões de link também podem originar ações.</p>
+      </div>
+      <div class="cap" data-for="3">
+        <p>A tarefa vai para a margem, presa à frase que a criou.</p>
+        <p class="small">O trecho ganha um destaque tracejado. Uma nota pode ter várias tarefas e vários alertas.</p>
+      </div>
+      <div class="cap" data-for="4">
+        <div class="when">três semanas depois…</div>
+        <p>A tarefa está numa lista com outras coisas. Na maioria dos apps, ninguém lembraria de qual reforma era.</p>
+      </div>
+      <div class="cap" data-for="5">
+        <p><mark>Voltar à origem</mark> abre a nota e destaca o trecho.</p>
+        <p class="small">Se você reescrever o trecho depois, a ação guarda a cópia e a margem avisa.</p>
+      </div>
+      <div class="cap" data-for="6">
+        <p>Concluída, o destaque fica verde.</p>
+        <p class="small">A nota continua contando o que foi feito, e por quê.</p>
+      </div>
+      <div class="cap" data-for="7">
+        <p>Todo dia começa uma página nova.</p>
+        <p class="small">A nota mais recente, as tarefas pendentes de todas as listas e margens, e os lembretes de hoje.</p>
+      </div>
+      <div class="cap" data-for="8">
+        <p>Os dias anteriores ficam exatamente como estavam.</p>
+        <p class="small">Somente leitura: o que estava pendente, o que foi feito, o que estava agendado. Um diário que você nunca precisou escrever.</p>
+      </div>
+      <div class="cap" data-for="9">
+        <p>Feito em português desde o início, não traduzido.</p>
+        <p class="small">Datas escritas na nota ganham um selo <b>Agendar</b>, e nada é agendado até você clicar. Hashtags viram categorias. A busca ignora acentos.</p>
+      </div>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </div>
+
+    <div class="book" aria-hidden="true">
+      <div class="side">
+        <div class="nb">PESSOAL</div>
+        <div class="row" data-nav="dia"><svg class="i"><use href="#i-cal"/></svg>Caderninho</div>
+        <div class="row"><svg class="i"><use href="#i-books"/></svg>Cadernos</div>
+        <div class="row" data-nav="notas"><svg class="i"><use href="#i-note"/></svg>Notas</div>
+        <div class="row" data-nav="tarefas"><svg class="i"><use href="#i-task"/></svg>Tarefas</div>
+        <div class="row"><svg class="i"><use href="#i-bell"/></svg>Lembretes</div>
+        <div class="gap"></div>
+        <div class="row"><svg class="i"><use href="#i-trash"/></svg>Lixeira</div>
+      </div>
+
+      <div class="paper">
+        <div class="tabs"><i></i><i></i><i></i></div>
+        <div class="tbar"><svg class="i"><use href="#i-back"/></svg><div class="right"><span class="newnote"><svg class="i"><use href="#i-plus"/></svg>Nova nota</span><svg class="i"><use href="#i-search"/></svg></div></div>
+
+        <div class="pg pg-hero on" data-page="hero">
+          <div class="prov">Pessoal · Criada agora</div>
+          <h2 id="heroTitle"></h2>
+          <p class="lede" id="heroLede"></p>
+          <div class="cta" id="heroCta"><span class="btn btn-ink"><svg class="i"><use href="#i-mac"/></svg>Instalar no Mac</span><span class="btn btn-quiet">Guia de uso</span></div>
+        </div>
+
+        <div class="pg pg-note" data-page="reforma">
+          <div>
+            <div class="prov">Pessoal · Atualizada em 10/09, 09:40</div>
+            <h2>Reforma da cozinha</h2>
+            <div class="pills"><span class="pill">#casa</span><span class="pill">#orçamento</span></div>
+            <div class="body">
+              <p>Conversei com a Ana sobre a bancada. A ideia é trocar o granito por madeira e abrir espaço para a geladeira nova.</p>
+              <p>Antes de mexer na parede, <span class="src"><span class="bg"></span><span class="hl"></span>pedir dois orçamentos<span class="ul"></span><span class="toolbar"><span id="tbTask"><svg class="i"><use href="#i-task"/></svg>Tarefa</span><span><svg class="i"><use href="#i-bell"/></svg>Lembrete</span></span></span> de marcenaria, um com gaveteiro e outro sem.</p>
+              <p>O eletricista disse que a tomada da geladeira precisa de circuito próprio.</p>
+            </div>
+          </div>
+          <aside class="margin">
+            <div class="mh"><svg class="i"><use href="#i-task"/></svg>Ações desta nota</div>
+            <div class="mc" id="mc">nenhuma ação ainda</div>
+            <div class="empty-hint">Selecione um trecho para criar uma tarefa.</div>
+            <div class="card">
+              <div class="ct"><span class="box" id="cardBox"><svg><use href="#i-check"/></svg></span>Pedir dois orçamentos</div>
+              <div class="st" id="cardState">Tarefa pendente</div>
+              <p class="ex">pedir dois orçamentos</p>
+              <div class="vo"><svg class="i"><use href="#i-arrow"/></svg>Ver origem</div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="pg" data-page="tarefas">
+          <h2>Tarefas</h2>
+          <div class="weeks">6 pendentes, de todas as listas e margens</div>
+          <div class="list">
+            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Renovar o seguro do carro</div><div class="s">Lista · Casa</div></div></div>
+            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Mandar as fotos da viagem para a Bia</div><div class="s">Na margem · Um fim de semana na serra</div></div></div>
+            <div class="lr focus"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Pedir dois orçamentos</div><div class="s">Na margem · Reforma da cozinha</div></div><span class="back" id="backBtn"><svg class="i"><use href="#i-arrow"/></svg><span>Voltar à origem</span></span></div>
+            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Agendar a consulta de rotina</div><div class="s">Lista · Saúde</div></div></div>
+            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Trocar a resistência do chuveiro</div><div class="s">Lista · Casa</div></div></div>
+            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Separar os livros para doar</div><div class="s">Na margem · Arrumar o escritório</div></div></div>
+          </div>
+        </div>
+
+        <div class="pg" data-page="hoje">
+          <div class="dayhead"><h2>Página do dia</h2><div class="date">quinta-feira, 1 de outubro</div></div>
+          <div class="daysum">4 tarefas pendentes · 3 lembretes · 2 notas recentes</div>
+          <div class="cols">
+            <div>
+              <h3><svg class="i"><use href="#i-task"/></svg>Tarefas</h3>
+              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Escolher a trilha e ver a previsão</div><div class="s">Preparar a viagem à serra</div></div></div>
+              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Separar água, câmera e mochila</div><div class="s">Preparar a viagem à serra</div></div></div>
+              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Agendar a consulta de rotina</div><div class="s">Lista · Saúde</div></div></div>
+              <div class="lr"><span class="box done"><svg><use href="#i-check"/></svg></span><div><div class="t">Pedir dois orçamentos</div><div class="s">Na margem · Reforma da cozinha · concluída hoje</div></div></div>
+            </div>
+            <div>
+              <h3><svg class="i"><use href="#i-bell"/></svg>Lembretes</h3>
+              <div class="rem"><b>14:00</b>Revisar o planejamento</div>
+              <div class="rem"><b>16:00</b>Ligar para o eletricista</div>
+              <div class="rem"><b>18:00</b>Pausa para caminhar</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pg" data-page="ontem">
+          <div class="dayhead"><h2>Página do dia<span class="ro">somente leitura</span></h2><div class="date">quarta-feira, 30 de setembro</div></div>
+          <div class="daysum">5 tarefas pendentes · 2 feitas · 1 lembrete</div>
+          <div class="cols">
+            <div>
+              <h3><svg class="i"><use href="#i-task"/></svg>Tarefas</h3>
+              <div class="lr"><span class="box done"><svg><use href="#i-check"/></svg></span><div><div class="t">Renovar a carteira de motorista</div><div class="s">Lista · Documentos · feita neste dia</div></div></div>
+              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Pedir dois orçamentos</div><div class="s">Na margem · Reforma da cozinha</div></div></div>
+              <div class="lr"><span class="box done"><svg><use href="#i-check"/></svg></span><div><div class="t">Devolver o livro da biblioteca</div><div class="s">Lista · Casa · feita neste dia</div></div></div>
+              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Agendar a consulta de rotina</div><div class="s">Lista · Saúde</div></div></div>
+            </div>
+            <div>
+              <h3><svg class="i"><use href="#i-bell"/></svg>Lembretes</h3>
+              <div class="rem"><b>10:30</b>Reunião do condomínio</div>
+            </div>
+          </div>
+          <div class="ink-stamp">exatamente como estava</div>
+        </div>
+
+        <div class="pg" data-page="pt">
+          <div class="prov">Pessoal · Criada agora</div>
+          <h2>Semana da obra</h2>
+          <div class="pills"><span class="pill">#casa</span></div>
+          <div class="typed"><p id="t1"></p><p id="t2"></p></div>
+          <div class="palette" id="palette">
+            <div class="q"><svg class="i"><use href="#i-search"/></svg><span id="q"></span></div>
+            <div class="r" id="qr"><b>Reunião</b> do condomínio</div>
+          </div>
+        </div>
+
+        <div class="pgno" id="pgno">01</div>
+      </div>
+    </div>
+
+    <div class="cursor" id="cursor" aria-hidden="true"><span class="ring"></span><svg viewBox="0 0 22 22" width="22" height="22"><path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.4 L10 13 L16 13 Z" fill="#fff" stroke="#303025" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+  </div>
+</section>
+
+<div class="sheet">
+  <section class="real wrap">
+    <h2>Esse é o app de verdade</h2>
+    <p class="lead">A cena acima é uma recriação. Estas são capturas do Caderninho rodando, com exemplos fictícios.</p>
+    <div class="shots">
+      <figure><img src="img/acoes-na-nota.webp" width="1440" height="1333" loading="lazy" alt="Uma nota com três trechos destacados e, na margem, as ações criadas a partir deles: uma tarefa pendente, uma concluída e um alerta."><figcaption>Uma nota com tarefas e um lembrete na margem.</figcaption></figure>
+      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1467" loading="lazy" alt="Página do dia com a nota mais recente ao lado do grafo de páginas relacionadas, seguida das tarefas e dos lembretes."><figcaption>A página do dia, com as páginas relacionadas.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="fine wrap">
+    <div class="cols2">
+      <div>
+        <h2>O que mais ajuda</h2>
+        <h3>Páginas relacionadas, calculadas no seu Mac</h3>
+        <p>A cada salvamento, o Caderninho compara a página com as outras do mesmo caderno, por categorias, palavras e significado, inclusive o texto dentro de imagens. Nenhum texto sai do seu computador. <kbd>⌥⌘R</kbd> abre o grafo.</p>
+        <h3>Referências ao lado da ideia</h3>
+        <p>Imagens, PDFs e cartões de link ficam ao lado do parágrafo a que pertencem, e os links continuam funcionando sem internet.</p>
+        <h3>Diagramas como texto</h3>
+        <p>Digite <code>/diagrama</code> e escreva um fluxograma, uma sequência ou uma linha do tempo em Mermaid. Ele é desenhado com traço de mão dentro da nota.</p>
+      </div>
+      <div>
+        <h2>Seus dados, numa pasta</h2>
+        <p>Notas, listas, lembretes e categorias ficam num banco SQLite, com imagens e PDFs ao lado:</p>
+        <div class="path">~/Library/Application Support/caderninho/</div>
+        <p>Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie a pasta. Qualquer página vira PDF com <kbd>⇧⌘E</kbd>.</p>
+        <p class="muted">As únicas requisições de rede são as que você dispara: a prévia de um link que você colou e o download, uma única vez, do modelo das páginas relacionadas.</p>
+        <h3>Limites</h3>
+        <ul class="limits">
+          <li>Só para macOS, com interface em português.</li>
+          <li>Os lembretes só tocam com o app aberto, mesmo minimizado. Um alerta perdido toca quando o app volta.</li>
+          <li>Sem sincronização entre computadores e sem versão para celular.</li>
+          <li>Ainda não importa notas de outros apps.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="end wrap">
+    <img src="img/icon.png" alt="">
+    <h2>Escreva a nota. A tarefa lembra de onde veio.</h2>
+    <div class="row">
+      <a class="btn btn-ink" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/INSTALLATION.md"><svg class="i"><use href="#i-mac"/></svg>Instalar no Mac</a>
+      <a class="btn btn-quiet" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/USER_GUIDE.md">Guia de uso</a>
+    </div>
+  </section>
+
+  <footer class="wrap"><span>Caderninho · <a href="https://github.com/fagnermourafeitosa/caderninho">código no GitHub</a></span><span>As capturas de tela mostram o app real com exemplos fictícios.</span></footer>
+</div>
+</main>
+
+<script>
+(() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => document.querySelector(s);
+  const scene = $('#scene'), stage = $('#stage'), cursor = $('#cursor');
+  const pages = Object.fromEntries([...document.querySelectorAll('.pg')].map(p => [p.dataset.page, p]));
+  const caps = [...document.querySelectorAll('.cap')];
+  const order = ['hero', 'reforma', 'tarefas', 'hoje', 'ontem', 'pt'];
+
+  // One entry per scroll step: page shown, active sidebar row, note state, scripted cursor.
+  const plan = [
+    { page: 'hero',    nav: 'notas' },
+    { page: 'reforma', nav: 'notas' },
+    { page: 'reforma', nav: 'notas',   note: ['st-sel'],             cursor: '#tbTask', clickAt: 2300 },
+    { page: 'reforma', nav: 'notas',   note: ['st-linked'] },
+    { page: 'tarefas', nav: 'tarefas', cursor: '#backBtn', clickAt: 1000, onClick: () => $('#backBtn').classList.add('press') },
+    { page: 'reforma', nav: 'notas',   note: ['st-linked', 'st-flash'] },
+    { page: 'reforma', nav: 'notas',   note: ['st-linked'],          cursor: '#cardBox', clickAt: 1000, onClick: () => setDone(true) },
+    { page: 'hoje',    nav: 'dia' },
+    { page: 'ontem',   nav: 'dia' },
+    { page: 'pt',      nav: 'notas' },
+  ];
+  const STEPS = plan.length;
+  const dots = $('#dots');
+  for (let i = 0; i < STEPS; i++) dots.appendChild(document.createElement('i'));
+
+  function setDone(done) {
+    pages.reforma.classList.toggle('st-done', done);
+    $('#cardBox').classList.toggle('done', done);
+    $('#cardState').textContent = done ? 'Concluída · hoje' : 'Tarefa pendente';
+  }
+
+  // ---------- typing ----------
+  let typeToken = 0;
+  const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+  async function type(el, text, token, speed = 38) {
+    if (reduced) { el.textContent = text; return token === typeToken; }
+    const caret = document.createElement('span'); caret.className = 'caret';
+    el.textContent = ''; el.append(caret);
+    for (const ch of text) {
+      if (token !== typeToken) return false;
+      caret.before(ch);
+      await sleep(speed + (ch === ' ' ? 30 : 0) + Math.random() * 30);
+    }
+    caret.remove();
+    return token === typeToken;
+  }
+
+  const HERO_T = 'Notas que viram tarefas sem perder o contexto.';
+  const HERO_L = 'Um caderno para o Mac, feito para quem escreve em português.';
+  let heroTyped = false;
+  async function heroIntro() {
+    const t = ++typeToken;
+    await sleep(500);
+    if (!await type($('#heroTitle'), HERO_T, t)) return;
+    await sleep(250);
+    if (!await type($('#heroLede'), HERO_L, t, 26)) return;
+    $('#heroCta').classList.add('on');
+    heroTyped = true;
+  }
+  function heroStatic() {
+    typeToken++;
+    $('#heroTitle').textContent = HERO_T; $('#heroLede').textContent = HERO_L;
+    $('#heroCta').classList.add('on'); heroTyped = true;
+  }
+
+  async function ptScene() {
+    const t = ++typeToken;
+    const t1 = $('#t1'), t2 = $('#t2'), q = $('#q'), pal = $('#palette'), qr = $('#qr');
+    t1.textContent = t2.textContent = q.textContent = '';
+    pal.classList.remove('on'); qr.classList.remove('on');
+    await sleep(800);
+    if (!await type(t1, 'Ligar para o eletricista amanhã às 14h', t)) return;
+    t1.innerHTML = 'Ligar para o eletricista <span class="when-chip">amanhã às 14h</span><span class="agendar"><svg class="i" style="width:13px;height:13px"><use href="#i-bell"/></svg>Agendar</span>';
+    await sleep(900);
+    if (!await type(t2, 'Comparar madeira e granito #orçamento', t)) return;
+    t2.innerHTML = 'Comparar madeira e granito <span class="tagpill">#orçamento</span>';
+    await sleep(900);
+    if (t !== typeToken) return;
+    pal.classList.add('on');
+    await sleep(400);
+    if (!await type(q, 'reuniao', t, 90)) return;
+    qr.classList.add('on');
+  }
+
+  // ---------- scripted cursor ----------
+  let cursorTimers = [];
+  function clearCursor() { cursorTimers.forEach(clearTimeout); cursorTimers = []; cursor.classList.remove('on', 'click'); }
+  function runCursor(s, n) {
+    if (reduced || !s.cursor) return;
+    cursorTimers.push(setTimeout(() => {
+      const st = stage.getBoundingClientRect(), r = $(s.cursor).getBoundingClientRect();
+      const x = r.left - st.left + Math.min(r.width / 2, 28), y = r.top - st.top + r.height / 2;
+      cursor.style.transition = 'none';
+      cursor.style.left = (x + 140) + 'px'; cursor.style.top = (y + 110) + 'px';
+      cursor.getBoundingClientRect();
+      cursor.style.transition = '';
+      cursor.classList.add('on');
+      cursor.style.left = x + 'px'; cursor.style.top = y + 'px';
+      cursorTimers.push(setTimeout(() => {
+        if (step !== n) return;
+        cursor.classList.add('click');
+        s.onClick && s.onClick();
+      }, s.clickAt));
+    }, 800));
+  }
+
+  // ---------- page flip (upward, like the app) ----------
+  let current = 'hero';
+  function showPage(name) {
+    if (name === current) return;
+    const from = pages[current], to = pages[name];
+    const forward = order.indexOf(name) > order.indexOf(current);
+    Object.values(pages).forEach(p => p.classList.remove('out', 'in-back'));
+    current = name;
+    if (reduced) { from.classList.remove('on'); to.classList.add('on'); return; }
+    to.classList.add('on');
+    if (forward) {
+      from.classList.add('out');
+      from.addEventListener('animationend', () => from.classList.remove('out', 'on'), { once: true });
+    } else {
+      from.classList.remove('on');
+      to.classList.add('in-back');
+      to.addEventListener('animationend', () => to.classList.remove('in-back'), { once: true });
+    }
+  }
+
+  // ---------- steps ----------
+  let step = -1;
+  function render(n) {
+    if (n === step) return;
+    const prev = step; step = n;
+    const s = plan[n];
+    caps.forEach(c => c.classList.toggle('on', +c.dataset.for === n));
+    [...dots.children].forEach((d, i) => d.classList.toggle('on', i === n));
+    document.querySelectorAll('.side .row[data-nav]').forEach(r => r.classList.toggle('on', r.dataset.nav === s.nav));
+    $('#pgno').textContent = String(order.indexOf(s.page) + 1).padStart(2, '0');
+
+    const note = pages.reforma;
+    note.classList.remove('st-sel', 'st-linked', 'st-flash');
+    (s.note || []).forEach(c => note.classList.add(c));
+    setDone(n > 6 || (n === 6 && reduced));
+    $('#mc').textContent = n >= 3 ? '1 tarefa' : 'nenhuma ação ainda';
+    $('#backBtn').classList.remove('press');
+
+    showPage(s.page);
+    clearCursor();
+    runCursor(s, n);
+
+    if (n === 0) { prev === -1 && !heroTyped ? heroIntro() : heroTyped || heroStatic(); }
+    else if (n === 9) ptScene();
+    else { if (!heroTyped) heroStatic(); typeToken++; }
+  }
+
+  function onScroll() {
+    const r = scene.getBoundingClientRect();
+    const total = scene.offsetHeight - innerHeight;
+    const p = Math.min(1, Math.max(0, -r.top / total));
+    render(Math.min(STEPS - 1, Math.floor(p * STEPS)));
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>
