@@ -5,74 +5,94 @@
 <h1 align="center">Caderninho</h1>
 
 <p align="center">
-  <strong>A place for your ideas — and for what grows out of them.</strong>
+  A notebook for the Mac where tasks stay attached to the sentence that created them,<br>
+  and related pages are found on your computer, not in the cloud.
 </p>
 
 <p align="center">
-  Write, gather references and turn passages on the page into next steps.<br>
-  Everything stays on your computer, no account required.
-</p>
-
-<p align="center">
-  <a href="#from-note-to-next-step">Meet Caderninho</a> ·
-  <a href="docs/INSTALLATION.md">Installing on Mac</a> ·
+  <a href="docs/INSTALLATION.md">Install on Mac</a> ·
   <a href="docs/USER_GUIDE.md">User guide</a>
 </p>
 
-![A note with tasks and a reminder in the margin, linked to the passages that gave rise to each action](docs/images/acoes-na-nota.png)
+Caderninho keeps notes, task lists and reminders in notebooks, like most note apps. What it does differently:
 
-## From note to next step
+- **Actions anchored to the text.** Select a passage, an image or a link and turn it into a task or a reminder. The passage stays highlighted, and the task always knows where it came from.
+- **Related pages without uploading anything.** A language model and Apple's text recognition run on your Mac and link pages about the same subject, even when they use different words.
+- **References placed on the page.** Images, PDFs and link cards sit beside the paragraph they belong to, and keep working offline.
+- **Diagrams you can edit.** Flowcharts, sequences and mind maps are written as text and drawn in a hand-drawn style inside the note.
+- **A daily page that remembers.** Each day gathers pending tasks, reminders and the latest note; earlier days stay readable as they were.
+- **Your files, in one folder.** No account, no sync, no server. Back up by copying a folder.
 
-An idea becomes a task without leaving the note. Select a passage and create a task or a reminder in the margin. An image or a reference can also give rise to an action.
+The interface is in Portuguese. Caderninho runs on macOS.
 
-The passage stays highlighted on the page, and the action keeps the way back to its origin. You know **what to do and why it matters**, even when you pick the subject up again days later.
+![A note with tasks and a reminder in the margin, each linked to the highlighted passage it came from](docs/images/acoes-na-nota.png)
 
-Tasks go to the Daily page and reminders to the calendar. Complete them, reschedule them or go back to the note that started it all.
+## Tasks that remember why they exist
 
-## Ideas that find other ideas
+In most apps, writing "ask for two quotes" in a note and adding it to a to-do list are two separate things. Copy it over, and the list loses the context.
 
-Caderninho brings together pages about similar subjects, even when you use different words. Notes, lists and reminders in the same notebook can connect; text inside images also helps find these relationships.
+In Caderninho, you select the passage and create a **task** or a **reminder** from it. The action goes to the note's margin with a copy of the passage, and the passage gets a dashed highlight that turns green when the task is done. Images and link cards can also originate actions.
 
-![Connections between the trip note, trail references, a packing list and a reminder](docs/images/relacionados.png)
+- Tasks appear in **Tarefas** and on the daily page; reminders appear in the calendar and play an alert at the scheduled time.
+- **Ver origem** (View origin) opens the note and highlights the passage.
+- A note can have several tasks and several independent alerts.
+- If you rewrite or delete the passage later, the action keeps the copy and the margin tells you it no longer finds the original.
 
-In the footer, the closest pages come first. In the graph, they sit closer to the center. Click one of them and continue wherever that idea takes you.
+Dates written in Portuguese, such as `amanhã às 14h` or `05/10/2027 às 14:30`, get a **Agendar** (Schedule) stamp. Nothing is scheduled until you click it.
 
-Connections follow your changes and are found on your computer, without sending page content to the cloud.
+## Related pages, computed locally
 
-## References with a place on the page
+After each save, Caderninho compares the page with the other notes, lists and reminders in the same notebook. It combines three signals: shared categories, shared words and the meaning of the text, which comes from a multilingual embedding model running on your CPU. Text inside images, read by the macOS Vision framework, also counts.
 
-A landscape, an itinerary, an inspiration: paste or drag images and links next to what you are writing. Position the clippings and write around them, as in a paper notebook.
+![Graph of pages related to a trip note: a packing list, a trail note, a weather reminder and other notes](docs/images/relacionados.png)
 
-![Landscape and reference card arranged alongside notes about a trip](docs/images/colagem.png)
+The two closest pages appear at the bottom of the note. The graph (**⌥⌘R**) puts the current page in the center and closer pages nearer to it; click one to open it. No text or image leaves your computer. The model is downloaded once, on first use; after that, it works offline.
 
-The reference stays with the idea it sparked. And when something to do comes up from it, the action can live there too.
+## References next to the idea
 
-## The day has its own page
+Paste or drag an image, a PDF or a link into a note. Drag it beside the paragraph it belongs to, on the left or right, and resize it; the text flows around it.
 
-At the top, pick up the latest note in the notebook; when it connects to other pages, the linked ideas appear beside it in a graph. Right below, tasks from your lists and from note margins meet reminders and recent pages. You follow your day without opening each project to find out what is still pending.
+![Trip note with a landscape image on the right and a link card on the left, with text flowing around them](docs/images/colagem.png)
 
-![Daily page with the latest note beside its connection graph, followed by tasks and reminders](docs/images/pagina-do-dia.png)
+- Files are copied into the app, so you can delete or move the original.
+- PDFs show their title and first lines, extracted on your Mac; **Abrir PDF** opens the saved copy.
+- Link cards save the page title, description and image once, and keep showing them offline. Caderninho reads the page metadata without running its scripts.
 
-Tomorrow, today's page remains available for reference. The snapshot of that moment's tasks, reminders and notes is kept.
+## Diagrams as text
 
-## A notebook for each subject
+Type `/diagrama` to insert a flowchart, sequence, mind map or timeline. You write the [Mermaid](https://mermaid.js.org) code, the drawing updates as you type, and errors keep the last valid drawing on screen. The diagram is stored as text in the note, so search finds its words and PDF export prints it. Everything renders locally.
 
-Separate projects, studies and personal life into notebooks, with colored tabs to switch between them. Categories run across the pages of each notebook: start typing a hashtag and find the ones you already use.
+![A note with a hand-drawn flowchart of a trip plan](docs/images/diagrama.png)
 
-The magnifying glass at the top finds pages by title or content across all notebooks, from any section. Each result shows an excerpt and its source notebook; click to resume the page.
+## A daily page with history
 
-![Search for "serra" gathering notes, a packing list and a reminder, with excerpts and source notebook](docs/images/busca.png)
+**Caderninho**, the first screen, shows the notebook's most recently edited note, its related pages, pending tasks from every list and note margin, and today's reminders.
 
-Want to take a page with you? Export it to PDF and keep or share your notes, references and actions on the same paper background.
+![Daily page with the latest note beside its related pages graph, followed by tasks and reminders](docs/images/pagina-do-dia.png)
 
-## Your notebook stays with you
+The next day starts a new page. Previous days stay available in the date picker, read-only, as a record of what was pending, done and scheduled on that day.
 
-No account and no cloud sync. Your pages and images stay on your computer; you can write and look up what you saved without internet.
+## Your data, in a folder
 
-A link preview queries the site you point to. Connections between pages need an initial download to start working; after that, they are also available offline.
+Notes, lists, reminders and categories live in a SQLite database; images and PDFs live next to it, in a media folder:
 
-See how to install it in the [Mac guide](docs/INSTALLATION.md) and learn the details in the [user guide](docs/USER_GUIDE.md).
+```text
+~/Library/Application Support/caderninho/
+```
+
+There is no account and no cloud sync. To back up, close the app and copy that folder. Any page can be exported to PDF (**⇧⌘E**) with its formatting, tables, images, diagrams and linked actions.
+
+The only network requests are the ones you trigger: fetching a link preview from the site you pasted, and the one-time model download for related pages.
+
+## Limits to know
+
+- macOS only, interface in Portuguese.
+- Reminders play only while the app is open (it can be minimized). If an alert was missed while the app was closed or the Mac was asleep, it plays when the app comes back.
+- No sync between computers and no mobile version.
+- Related pages are found within the same notebook, not across notebooks.
 
 ---
 
-The images show the real app with fictional examples.
+[Install on Mac](docs/INSTALLATION.md) · [User guide](docs/USER_GUIDE.md)
+
+The screenshots show the real app with fictional examples.

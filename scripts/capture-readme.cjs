@@ -115,8 +115,10 @@ app.whenReady().then(async()=>{
   command('note:update',{id:collage,body:store.snapshot().notes.find(note=>note.id===collage).body});
   await capture('pagina-do-dia.png',"(async()=>{document.querySelector('#related-dialog').close();state=await window.notebook.action('view:select',{view:'home'});view='home';render();})()");
   win.setSize(1080,900);
-  await capture('busca.png',"openGlobalSearch();searchInput.value='serra';renderGlobalSearch();");
-  await win.webContents.executeJavaScript('closeGlobalSearch()');
+  const flow=create('notes','Como a viagem acontece');
+  command('note:update',{id:flow,editorDoc:[block('paragraph','O roteiro em um desenho só, para decidir na hora sem perder o fio.'),{id:doc.id(),type:'diagram',code:'flowchart LR\n  A[Sair cedo] --> B{Tempo bom?}\n  B -- sim --> C[Trilha curta]\n  B -- não --> D[Café na vila]\n  C --> E[Pausa no mirante]\n  D --> E\n  E --> F[Voltar com boas histórias]'},block('paragraph','O código fica salvo na nota; a busca encontra as palavras do desenho.')]});
+  command('category:attach',{noteId:flow,name:'viagem'});
+  await capture('diagrama.png',`(async()=>{state=await window.notebook.action('note:select',{id:${JSON.stringify(flow)}});view='notes';render();getSelection().removeAllRanges();hideEditorMenus();await new Promise(resolve=>setTimeout(resolve,1500));})()`);
   if(process.argv.includes('--review-sections')){
     const output=path.join(root,'artifacts');fs.mkdirSync(output,{recursive:true});
     await capture('controles-cadernos.png',"document.querySelector('#related-dialog').close();view='notebooks';render();",output);
