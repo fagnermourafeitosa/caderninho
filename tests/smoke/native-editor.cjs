@@ -36,6 +36,30 @@ async function runNativeEditorSmoke(win){
   const clickFormat=async selector=>{const point=await js(`(()=>{const button=document.querySelector(${JSON.stringify(selector)});if(!button)throw Error('Botão contextual ausente');const r=button.getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()`);win.webContents.sendInputEvent({type:'mouseDown',button:'left',clickCount:1,...point});win.webContents.sendInputEvent({type:'mouseUp',button:'left',clickCount:1,...point});await pause();};
   await clickFormat('[data-format=highlight]');await pause();await clickFormat('[data-highlight]');
   if(!await js("currentNote().editorDoc[0].runs.some(run=>run.marks.highlight)&&$('#note-body mark')"))throw Error('Marca-texto por clique nativo não persistiu');
+  // Real Backspace/Delete keys edit the Mermaid code field, one character or a multi-line selection.
+  await js("state=await window.notebook.action('note:update',{id:currentNote().id,editorDoc:[{id:'d1',type:'diagram',code:'flowchart TD\\n  A --> B\\n  B --> C'}]});renderPage();hideEditorMenus();openDiagramEditor($('#note-body .diagram-block'));");await pause();
+  const diagramCode="$('#note-body .diagram-code').value";
+  key('Backspace');await pause();
+  if(await js(diagramCode)!=='flowchart TD\n  A --> B\n  B --> ')throw new Error('Native Backspace in diagram code failed: '+JSON.stringify(await js(diagramCode)));
+  await js("{const code=$('#note-body .diagram-code');code.setSelectionRange(0,0)}");key('Delete');await pause();
+  if(await js(diagramCode)!=='lowchart TD\n  A --> B\n  B --> ')throw new Error('Native Delete in diagram code failed: '+JSON.stringify(await js(diagramCode)));
+  await js("{const code=$('#note-body .diagram-code');code.setSelectionRange(code.value.length,code.value.length)}");key('ArrowUp',['shift']);key('ArrowUp',['shift']);await pause();
+  key('Backspace');await pause();
+  if(!(await js(diagramCode)).startsWith('lowchart')||(await js(diagramCode)).includes('B --> '))throw new Error('Native multi-line Backspace in diagram code failed: '+JSON.stringify(await js(diagramCode)));
+  // Select-all and line/document selection shortcuts stay inside the code field instead of selecting the note.
+  const codeSelection="(()=>{const code=$('#note-body .diagram-code');return JSON.stringify({active:document.activeElement===code,start:code.selectionStart,end:code.selectionEnd,length:code.value.length})})()";
+  // The page leaves Cmd/Ctrl shortcuts alone: macOS routes Cmd+A to the Edit menu's selectAll role and Cmd+Shift+arrows to
+  // native text commands, neither reachable through sendInputEvent, so the menu role is invoked directly.
+  const pageKeepsShortcut=async(keyCode,modifiers,label)=>{
+    await js("{const code=$('#note-body .diagram-code');code.setSelectionRange(3,3);window.shortcutPrevented=null;code.addEventListener('keydown',event=>setTimeout(()=>{window.shortcutPrevented=event.defaultPrevented;}),{once:true});}");key(keyCode,modifiers);await pause();
+    const s=JSON.parse(await js(codeSelection));
+    if(await js("window.shortcutPrevented")!==false||!s.active||s.start!==3||s.end!==3)throw new Error('Page editor intercepted '+label+' in diagram code: '+JSON.stringify({prevented:await js("window.shortcutPrevented"),...s}));
+  };
+  await pageKeepsShortcut('a',['meta'],'Cmd+A');await pageKeepsShortcut('a',['control'],'Ctrl+A');await pageKeepsShortcut('ArrowUp',['shift','meta'],'Cmd+Shift+Up');
+  win.webContents.selectAll();await pause();
+  {const s=JSON.parse(await js(codeSelection));if(!s.active||s.start!==0||s.end!==s.length)throw new Error('Select all in diagram code did not select only the code: '+JSON.stringify(s));}
+  await js("closeDiagramEditor($('#note-body .diagram-block'))");await pause();
+  if(!await js("currentNote().editorDoc[0].code===$('#note-body .diagram-code').value"))throw new Error('Diagram deletion was not saved');
   console.log('NATIVE_EDITOR_SMOKE_OK');
 }
 module.exports = { runNativeEditorSmoke };

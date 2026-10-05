@@ -56,6 +56,8 @@ function smartNoteInput(noteId, event) {
   updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor,...(editor.dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) });
 }
 function handleWritingKey(event) {
+  // Form fields inside blocks (diagram code) keep their native shortcuts, such as select-all.
+  if(event.target.closest('#note-body textarea, #note-body input')) return;
   if(handleDocumentKey(event)) return;
   if(tableKey(event)) return;
   if(getSelection().focusNode?.parentElement?.closest('[data-block-type=code]') && event.key==='Enter'&&!event.isComposing){event.preventDefault();document.execCommand('insertLineBreak');return;}
