@@ -252,7 +252,8 @@ function handleDocumentKey(event){
   return false;
 }
 document.addEventListener('beforeinput',event=>{
-  if(!event.target.closest('#note-body')||event.isComposing)return;
+  // Form fields inside blocks (diagram code) edit natively; moving the caret to the page would cancel their deletions.
+  if(!event.target.closest('#note-body')||event.target.closest('#note-body textarea, #note-body input')||event.isComposing)return;
   normalizePageDOM();ensurePageCaret();
   const selection=getSelection(),anchor=selection.anchorNode?.nodeType===1?selection.anchorNode:selection.anchorNode?.parentElement,span=anchor?.closest('.line-text')||anchor?.closest('.writing-line')?.querySelector('.line-text');
   if(span?.closest('[data-block-type=divider]')&&event.inputType.startsWith('insert'))resetBlockAppearance(span.closest('.writing-line'));
