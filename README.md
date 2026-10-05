@@ -94,6 +94,4 @@ Gostou do Caderninho? Você pode apoiar o projeto com um café:
 
 As capturas de tela mostram o app real com exemplos fictícios.
 
-## Open source · MIT License
-
-Caderninho is open source under the [MIT License](https://opensource.org/license/mit). You can use, study, modify, fork, and redistribute it, including commercially. Keep the copyright and license notice in copies or substantial portions of the software, as required by MIT.
+[MIT License](https://opensource.org/license/mit)
