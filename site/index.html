@@ -67,6 +67,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 /* top bar */
 .top{position:fixed;inset:0 0 auto;z-index:20;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;pointer-events:none}
 .top>*{pointer-events:auto}
+.top{transition:background-color .2s,box-shadow .2s}
+.top.solid{background:var(--paper);box-shadow:0 1px 0 var(--hairline)}
 .brand{display:flex;align-items:center;gap:9px;font-weight:650;font-size:17px;text-decoration:none}
 .brand img{width:30px}
 .top .btn{padding:9px 14px;font-size:14px}
@@ -683,6 +685,9 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
     render(Math.min(STEPS - 1, Math.floor(p * STEPS)));
   }
   addEventListener('scroll', onScroll, { passive: true });
+  const topBar = document.querySelector('.top'), firstSheet = document.querySelector('.sheet');
+  const onTopBar = () => topBar.classList.toggle('solid', !!firstSheet && firstSheet.getBoundingClientRect().top < topBar.offsetHeight);
+  addEventListener('scroll', onTopBar, { passive: true }); onTopBar();
   addEventListener('resize', onScroll);
   onScroll();
 })();
