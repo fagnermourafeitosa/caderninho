@@ -28,7 +28,7 @@ npm test
 npm run test:app
 ```
 
-The app tests drive the real app from an external sandbox (`tests/smoke/sandbox.cjs`): a temporary data folder, separate from personal notebooks, plus replacements for sound, notifications, the related-pages model, the PDF save dialog and the desktop cursor, set through `testHook.configure`. Windows stay hidden and the app never becomes the active one (Chromium focus emulation keeps pages behaving as focused), so a run does not take your keyboard; the copy check still uses the system clipboard and restores it. The app itself has no test mode; `tests/production-boundary.test.cjs` keeps it that way. They cover persistence, editor, selection, media, categories, calendar, reminders and undo/redo.
+The app tests drive the real app from an external sandbox (`tests/smoke/sandbox.cjs`): a temporary data folder, separate from personal notebooks, plus replacements for sound, notifications, the related-pages model, the PDF save dialog, the desktop cursor and the editor's native context menu (scripted answers), set through `testHook.configure`. Windows stay hidden and the app never becomes the active one (Chromium focus emulation keeps pages behaving as focused), so a run does not take your keyboard; the copy check still uses the system clipboard and restores it. The app itself has no test mode; `tests/production-boundary.test.cjs` keeps it that way. They cover persistence, editor, selection, media, categories, calendar, reminders and undo/redo.
 
 To run only the native keyboard and mouse scenarios:
 
@@ -36,7 +36,7 @@ To run only the native keyboard and mouse scenarios:
 npm run test:app -- --native-only
 ```
 
-To validate only actions linked to passages and media:
+To validate only actions linked to passages and media, including the editor's right-click menu:
 
 ```sh
 npm run test:app -- --source-only

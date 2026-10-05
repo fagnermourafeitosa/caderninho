@@ -39,12 +39,18 @@
 6. **[2026-10-04] Form fields inside #note-body leak events to the page editor**
    Do instead: stop propagation of input/beforeinput/paste/cut/drop/plain keydown on textareas inside blocks (see diagrams.js) and exclude them from isPageHistoryTarget; otherwise saves record undo steps and paste is hijacked. Compare Mermaid labels without whitespace (long labels wrap into tspans). Smoke runs hidden in the background (sandbox `runInBackground`: hidden windows, accessory activation policy, CDP focus emulation); never call `win.focus()`/`win.show()` in the runner.
 
+7. **[2026-10-04] Native menus block, so smoke tests script them**
+   Do instead: put menu presenters in main `services` and queue answers via `scriptedContextMenu()` in tests/smoke/sandbox.cjs. A native right-click from `sendInputEvent` on an unselected word only places a caret in the hidden smoke window (no macOS word selection); don't assert word selection there.
+
 ## Documentation
 1. **[2026-10-04] User-facing README and landing page speak PT-BR, product voice**
    Do instead: README and any landing page are in Portuguese (specs/docs stay English per AGENTS.md); lead with ONE idea (notes that turn into tasks without losing context, docs/PRODUCT.md Positioning), then daily history and Portuguese-first, with related pages/collage/diagrams grouped as support; state limits plainly; real screenshots with fictional data. A landing page must look like the app (DESIGN.md tokens, New York/serif stack, Excalifont only as accent, margin action cards) and reuse README wording, not a planning doc full of "pending decisions". Approved direction (2026-10-04): no generic LP grid (split hero, card rows, icon+title columns); a pinned app-drawn notebook driven by scroll that performs the product (select passage -> margin card -> upward page flip to Tarefas -> Voltar à origem -> green done -> daily page/yesterday read-only -> live PT typing), then real screenshots and plain-prose fine print. Draft lived in the session scratchpad (lp/index.html).
 
 2. **[2026-10-04] Recapture README screenshots with the script, then look at every image**
    Do instead: `node scripts/vendor-mermaid.cjs && npx electron scripts/capture-readme.cjs` (Node 22); open each PNG before using it and keep screenshots that show a UI bug out of the README (flag the bug instead). Other sessions may commit on main meanwhile; check `git log` before committing.
+
+3. **[2026-10-04] Landing page mockups can show UI the app lacks**
+   Do instead: before treating a site/ illustration as current behavior, grep src/ (e.g. the Tarefa/Lembrete context menu existed only in site/index.html until spec 005).
 
 ## User Directives
 1. **[2026-10-01] Daily overview and temporal records**

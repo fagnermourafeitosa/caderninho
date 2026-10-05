@@ -41,6 +41,14 @@ function scriptedCursor() {
   return () => point;
 }
 
+// The native context menu blocks until the user picks an item; scenarios queue the answers instead.
+// An Error answer makes the menu fail, as a destroyed window would.
+function scriptedContextMenu() {
+  const menu = { calls: [], answers: [] };
+  menu.present = async items => { menu.calls.push(items); const answer = menu.answers.shift() ?? null; if (answer instanceof Error) throw answer; return answer; };
+  return menu;
+}
+
 // Windows stay hidden and the app never becomes the active one, so a run does not take the user's keyboard.
 // Chromium's focus emulation keeps pages behaving as focused (focus events, selection, document.hasFocus()).
 function runInBackground() {
@@ -52,4 +60,4 @@ function runInBackground() {
   });
 }
 
-module.exports = { isolateUserData, trackRendererErrors, scriptedCursor, runInBackground };
+module.exports = { isolateUserData, trackRendererErrors, scriptedCursor, scriptedContextMenu, runInBackground };

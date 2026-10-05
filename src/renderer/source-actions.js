@@ -20,12 +20,12 @@ function renderSourceMargin(){
  rail.ondragover=event=>{if(sourceDrag){event.preventDefault();event.dataTransfer.dropEffect='copy';rail.classList.add('source-drag-over');}};
  rail.ondrop=event=>{if(!sourceDrag)return;event.preventDefault();event.stopPropagation();const origin=sourceDrag;sourceDrag=null;rail.classList.remove('source-drag-over');openSourceComposer(origin);};
 }
-async function openSourceComposer(origin){
+async function openSourceComposer(origin,kind='task'){
  if(!origin||!currentNote())return;
  sourceMarginCollapsed=false;sourceReturnSelection=editorSelection();const noteId=currentNote().id;
  if(origin.kind==='text'&&!await saveDocument())return;
  if(currentNote()?.id!==noteId)return;
- sourceDraft={origin,noteId,title:origin.kind==='text'?origin.quote.replace(/\s+/g,' ').slice(0,160):'',kind:'task',due:'',error:''};hideEditorMenus();renderSourceMargin();$('#source-title').focus();$('#source-title').select();
+ sourceDraft={origin,noteId,title:origin.kind==='text'?origin.quote.replace(/\s+/g,' ').slice(0,160):'',kind,due:kind==='reminder'?localDate(Date.now()+3600000):'',error:''};hideEditorMenus();renderSourceMargin();if(kind==='reminder'){$('#source-due').required=true;$('#source-due').focus();return;}$('#source-title').focus();$('#source-title').select();
 }
 function closeSourceComposer(){sourceDraft=null;renderSourceMargin();if(sourceReturnSelection){$('#note-body')?.focus();restoreEditorSelection(sourceReturnSelection);}sourceReturnSelection=null;}
 function renderSourceComposer(rail){

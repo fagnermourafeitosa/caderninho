@@ -176,7 +176,7 @@ Se aparecer **Falha ao salvar**, verifique o espaço livre em disco e as permiss
 
 ## Ações ligadas à página
 
-Selecione um trecho numa nota e clique no **ícone de tarefa** no menu de formatação. Você também pode arrastar esse botão para a margem. Em imagens e cartões de link, use o **ícone de tarefa** na faixa de controles da mídia.
+Selecione um trecho numa nota e clique no **ícone de tarefa** no menu de formatação. Você também pode arrastar esse botão para a margem. Outro caminho é clicar com o botão direito no trecho e escolher **Tarefa** ou **Lembrete**: o formulário já abre com a opção escolhida. Sem texto selecionado, as duas opções aparecem desativadas. O mesmo menu traz **Recortar**, **Copiar**, **Colar** e **Selecionar tudo**. Em imagens e cartões de link, use o **ícone de tarefa** na faixa de controles da mídia.
 
 Escolha **Tarefa** ou **Lembrete**, escreva o próximo passo e, no caso de lembrete, defina dia e horário. Criar a ação não altera o texto original nem cria uma segunda nota. Uma mesma página pode ter várias ações e vários alertas independentes.
 

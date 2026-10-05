@@ -10,6 +10,9 @@ const { randomUUID } = require('node:crypto');
 const { movePosition } = require('./window-move.cjs');
 const { registerFontProtocol, SCHEME: FONT_SCHEME } = require('./system-fonts.cjs');
 const { noteMenu, availableCommands } = require('./note-menu.cjs');
+const { nativeContextMenuPresenter } = require('./editor-context-menu/infrastructure/native-context-menu.cjs');
+const { openEditorContextMenu } = require('./editor-context-menu/application/open-editor-context-menu.cjs');
+const { registerEditorContextMenu } = require('./editor-context-menu/presentation/ipc.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
@@ -26,7 +29,9 @@ const services = {
   notifications: () => Notification.isSupported(),
   pdfDestination: title => dialog.showSaveDialog(win, { title: 'Exportar página para PDF', defaultPath: path.join(app.getPath('documents'), title), filters: [{ name: 'Documento PDF', extensions: ['pdf'] }], buttonLabel: 'Exportar' }),
   cursor: () => screen.getCursorScreenPoint(),
+  contextMenu: nativeContextMenuPresenter(Menu, () => liveWindow()),
 };
+const liveWindow = () => (win && !win.isDestroyed() ? win : null);
 function windowState() {
   const info = { expanded: Boolean(restoreBounds), bounds: win.getBounds(), workArea: screen.getDisplayMatching(win.getBounds()).workArea };
   win.webContents.send('notebook:window-state', info);
@@ -144,6 +149,7 @@ function checkReminders() {
     });
   }
 }
+registerEditorContextMenu(ipcMain, { getWindow: liveWindow, open: request => openEditorContextMenu(services.contextMenu)(request) });
 ipcMain.handle('related:query', (_event,id) => related.query(id));
 ipcMain.handle('related:retry', () => { services.scheduleRelated(); });
 ipcMain.handle('notebook:state', () => store.snapshot());

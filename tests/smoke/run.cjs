@@ -3,7 +3,7 @@ const { app, shell, nativeImage, clipboard } = require('electron');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
-const { isolateUserData, trackRendererErrors, scriptedCursor, runInBackground } = require('./sandbox.cjs');
+const { isolateUserData, trackRendererErrors, scriptedCursor, scriptedContextMenu, runInBackground } = require('./sandbox.cjs');
 isolateUserData('caderninho-smoke-');
 runInBackground();
 const installRendererErrors = trackRendererErrors();
@@ -12,12 +12,14 @@ const { Store } = require('../../src/main/store.cjs');
 const { runNativeEditorSmoke } = require('./native-editor.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 let alarmCount = 0;
+const contextMenu = scriptedContextMenu();
 testHook.configure({
   playSound: () => { alarmCount++; },
   scheduleRelated: () => {},
   notifications: () => false,
   pdfDestination: title => { const directory = path.join(ROOT, 'artifacts', 'pdf'); fs.mkdirSync(directory, { recursive: true }); return { filePath: path.join(directory, title) }; },
   cursor: scriptedCursor(),
+  contextMenu,
 });
 function smokeScript(file){const source=fs.readFileSync(path.join(ROOT,'tests',file),'utf8').trim().replace(/;$/, '');return `Promise.resolve(${source}).catch(error=>{throw new Error(${JSON.stringify(file)}+': '+(error.stack||error.message||String(error)));})`;}
 // Diagram blocks end to end: editor, clipboard, SQLite and the text printed in the PDF.
@@ -61,6 +63,26 @@ async function runDiagramSmoke(win) {
   fs.writeFileSync(path.join(ROOT, 'artifacts', 'diagrama.png'), (await win.webContents.capturePage()).toPNG());
   console.log('DIAGRAM_SMOKE_OK', JSON.stringify({ noteId: result.noteId, errors: result.errors }));
 }
+// Right-click in the note body: native menu answers are scripted, the renderer flow is real.
+async function runEditorContextMenuSmoke(win) {
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  contextMenu.calls.length = 0;
+  contextMenu.answers = ['task', 'reminder', null, null, 'task', new Error('Janela indisponível.'), 'task'];
+  const result = await win.webContents.executeJavaScript(smokeScript('editor-context-menu-smoke.js'));
+  if (result.errors.length) throw new Error(result.errors.join('\n'));
+  const enabled = contextMenu.calls.map(items => items.filter(item => item.id).map(item => item.enabled).join());
+  if (JSON.stringify(enabled) !== JSON.stringify(['true,true', 'true,true', 'true,true', 'false,false', 'true,true', 'true,true', 'true,true'])) throw new Error('Menu de contexto: chamadas inesperadas ' + JSON.stringify(enabled));
+  // A real right-click from the input pipeline reaches the same menu.
+  contextMenu.answers = ['task'];
+  const point = await win.webContents.executeJavaScript("(()=>{const span=document.querySelector('[data-block-id=\"menu-one\"] .line-text'),a=editorTextPoint(span,26),b=editorTextPoint(span,47);getSelection().setBaseAndExtent(a.node,a.offset,b.node,b.offset);const rect=getSelection().getRangeAt(0).getBoundingClientRect();return {x:Math.round(rect.left+rect.width/2),y:Math.round(rect.top+rect.height/2)};})()");
+  win.webContents.sendInputEvent({ type: 'mouseDown', x: point.x, y: point.y, button: 'right', clickCount: 1 });
+  win.webContents.sendInputEvent({ type: 'mouseUp', x: point.x, y: point.y, button: 'right', clickCount: 1 });
+  await wait(300);
+  const native = await win.webContents.executeJavaScript("({form:Boolean(document.querySelector('#source-form')),quote:document.querySelector('#source-form blockquote')?.textContent})");
+  if (contextMenu.calls.length !== 8 || !native.form || native.quote !== 'pedir dois orçamentos') throw new Error('Clique direito nativo não abriu o formulário: ' + JSON.stringify({ calls: contextMenu.calls.length, native }));
+  await win.webContents.executeJavaScript("closeSourceComposer()");
+  console.log('EDITOR_CONTEXT_MENU_SMOKE_OK', JSON.stringify(result));
+}
 async function runPagesSmoke(win) {
   const result = await win.webContents.executeJavaScript(smokeScript('pages-smoke.js'));
   if (result.errors.length) throw new Error(result.errors.join('\n'));
@@ -97,7 +119,7 @@ async function runSmoke() {
   const { win, store, media, related } = testHook.context();
   try {
     await installRendererErrors(win.webContents);
-    if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(ROOT,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript('openSourceComposer(actionsForNote()[0].origin)');await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(ROOT,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());app.quit();return;}
+    if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(ROOT,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript('openSourceComposer(actionsForNote()[0].origin)');await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(ROOT,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());await runEditorContextMenuSmoke(win);app.quit();return;}
     if(process.argv.includes('--related-runtime-only')) {
       related.cacheDir=path.join(process.cwd(),'artifacts','embedding-cache');
       store.dispatch('note:update',{id:'welcome',title:'Custos de nuvem',body:'Reduzir os gastos com infraestrutura e serviços de nuvem.'});
@@ -291,6 +313,7 @@ async function runSmoke() {
     await runMacShellSmoke(win);
     await runPagesSmoke(win);
     console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'))));
+    await runEditorContextMenuSmoke(win);
     console.log('EDITOR_SMOKE_OK',JSON.stringify(editorResult));
     await runNativeEditorSmoke(win);
     console.log('SELECTION_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('selection-smoke.js'))));
