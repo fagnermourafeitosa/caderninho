@@ -1,200 +1,200 @@
-# User guide
+# Guia de uso
 
-[← Back to the Caderninho overview](../README.md)
+[← Voltar à apresentação do Caderninho](../README.md)
 
-The app interface is in Portuguese. Labels are shown in bold exactly as they appear in the app, followed by their English meaning in parentheses.
+Os nomes de botões e menus aparecem em negrito, exatamente como estão no app.
 
-## Start here
+## Comece por aqui
 
-Open **Caderninho.app**. The first screen, **Caderninho**, brings together your pending tasks, today's reminders, latest notes and a preview of the notebook's most recently updated note, with its connection graph.
+Abra o **Caderninho.app**. A primeira tela, **Caderninho**, reúne suas tarefas pendentes, os lembretes de hoje, as últimas notas e uma prévia da nota atualizada mais recentemente no caderno, com o grafo de conexões dela.
 
-To write, open **Notas** (Notes): it opens on the list of your notes. Click a note to open it, or **+ Nova nota** (New note) to start one. Give it a title and start. Changes are saved automatically on your computer. If something fails, the app shows a notice.
+Para escrever, abra **Notas**: a seção abre na lista das suas notas. Clique numa nota para abri-la, ou em **+ Nova nota** para começar uma. Dê um título e comece. As mudanças são salvas automaticamente no seu computador. Se algo falhar, o app mostra um aviso.
 
-## Search across all notebooks
+## Buscar em todos os cadernos
 
-Click the **magnifying glass at the top**, right after the main button, or press **⌘F**. The field opens and searches titles and content of notes, lists and reminders in all notebooks, regardless of the open section. Search ignores differences in accents and letter case; pages in the trash are left out.
+Clique na **lupa no topo**, logo depois do botão principal, ou pressione **⌘F**. O campo abre e busca em títulos e conteúdo de notas, listas e lembretes de todos os cadernos, seja qual for a seção aberta. A busca ignora diferenças de acentos e maiúsculas; páginas na lixeira ficam de fora.
 
-Each result shows the page type, the notebook and an excerpt of the content. Click to open it, or use **↑/↓** and **Enter**. **Escape** collapses the field.
+Cada resultado mostra o tipo de página, o caderno e um trecho do conteúdo. Clique para abrir, ou use **↑/↓** e **Enter**. **Escape** recolhe o campo.
 
-## Notebooks
+## Cadernos
 
-**Cadernos** (Notebooks), the second menu item, is where you create, open, edit and remove notebooks. Each one has a name, an optional description and a color chosen from the palette.
+**Cadernos**, o segundo item do menu, é onde você cria, abre, edita e remove cadernos. Cada um tem um nome, uma descrição opcional e uma cor escolhida na paleta.
 
-There is always at least one notebook. On first launch, **Meu caderno** (My notebook) receives your existing pages. Every note, task list or reminder belongs to a notebook, and new pages are created in the selected notebook.
+Sempre existe pelo menos um caderno. Na primeira abertura, **Meu caderno** recebe as páginas que você já tinha. Toda nota, lista de tarefas ou lembrete pertence a um caderno, e as páginas novas são criadas no caderno selecionado.
 
-The tabs on the right let you switch notebooks. On hover, the tab opens and reveals the name vertically. The selected tab stays open, showing which notebook you are in. The last tab, **+**, opens the creation form.
+As abas à direita trocam de caderno. Ao passar o mouse, a aba se abre e mostra o nome na vertical. A aba selecionada fica aberta, indicando em qual caderno você está. A última aba, **+**, abre o formulário de criação.
 
-On the page itself, the notebook name below the title, next to the dates, lets you move a note, list or reminder to another notebook. When removing a notebook, you choose another one to receive all its pages, including those in the trash. No page is deleted by this operation, and the last notebook cannot be removed.
+Na própria página, o nome do caderno abaixo do título, ao lado das datas, permite mover uma nota, lista ou lembrete para outro caderno. Ao remover um caderno, você escolhe outro para receber todas as páginas dele, inclusive as da lixeira. Nenhuma página é apagada nessa operação, e o último caderno não pode ser removido.
 
-## What you can keep
+## O que você pode guardar
 
-| Section | Purpose |
+| Seção | Para quê |
 | --- | --- |
-| **Caderninho** | Daily overview, bringing together tasks, reminders and latest notes from all notebooks. |
-| **Cadernos** (Notebooks) | Create, edit, open and remove notebooks. |
-| **Notas** (Notes) | Free text, categories, checkboxes, images and link cards. |
-| **Tarefas** (Tasks) | Several independent lists, with title, dates and checked or pending items. |
-| **Lembretes** (Reminders) | Notes scheduled for a day and time to play a sound alert. |
-| **Lixeira** (Trash) | Removed pages, tasks and media, separated by type and recoverable. |
+| **Caderninho** | Visão do dia, reunindo tarefas, lembretes e últimas notas de todos os cadernos. |
+| **Cadernos** | Criar, editar, abrir e remover cadernos. |
+| **Notas** | Texto livre, categorias, caixas de seleção, imagens e cartões de link. |
+| **Tarefas** | Várias listas independentes, com título, datas e itens marcados ou pendentes. |
+| **Lembretes** | Notas agendadas para um dia e horário, que tocam um alerta sonoro. |
+| **Lixeira** | Páginas, tarefas e mídias removidas, separadas por tipo e recuperáveis. |
 
-**Notas**, **Tarefas** and the **Lembretes** calendar show the selected notebook. The daily overview and the trash bring together all notebooks. Alerts keep working even when you are in another notebook.
+**Notas**, **Tarefas** e o calendário de **Lembretes** mostram o caderno selecionado. A visão do dia e a lixeira reúnem todos os cadernos. Os alertas continuam funcionando mesmo quando você está em outro caderno.
 
-### Daily page
+### Página do dia
 
-See pending tasks, items completed today, today's alerts and latest notes. Checking a task here updates its original page. Click a title to open the corresponding page.
+Veja as tarefas pendentes, os itens concluídos hoje, os alertas de hoje e as últimas notas. Marcar uma tarefa aqui atualiza a página original. Clique num título para abrir a página correspondente.
 
-At the top of today's page, the notebook's latest note appears with its formatting and media. When it has connections, **Ideias por perto** (Nearby ideas) shows them beside it as a graph. Use **Continuar nesta nota** (Continue in this note) to edit it, or click a connection to open another page. The next day, the previous page's summary remains available in the date picker. Previous days are read-only; choose **Hoje** (Today) to return to the current day.
+No topo da página de hoje, a nota mais recente do caderno aparece com a formatação e as mídias dela. Quando ela tem conexões, **Ideias por perto** as mostra ao lado, como um grafo. Use **Continuar nesta nota** para editá-la, ou clique numa conexão para abrir outra página. No dia seguinte, o resumo da página anterior continua disponível no seletor de datas. Os dias anteriores são somente leitura; escolha **Hoje** para voltar ao dia atual.
 
-### Categories
+### Categorias
 
-Below the title, click **+ Categoria** (Category) to use an existing category or create a new one. The same category can be used across notebooks and page types.
+Abaixo do título, clique em **+ Categoria** para usar uma categoria existente ou criar uma nova. A mesma categoria pode ser usada em vários cadernos e tipos de página.
 
-Type `#trabalho` or `#ideias` in a note's text to create a pill and associate the category with the page. Finish the word with a space or punctuation, or leave the editor, to register it. Hashtags in task items also associate categories with the list.
+Digite `#trabalho` ou `#ideias` no texto de uma nota para criar uma pílula e associar a categoria à página. Termine a palavra com espaço ou pontuação, ou saia do editor, para registrá-la. Hashtags em itens de tarefa também associam categorias à lista.
 
-When you type `#` and the first letter, suggestions from existing categories appear, matched regardless of accents or letter case. Use **↑/↓** to choose and **Enter** or **Tab** to complete, or click the category. **Escape** closes the suggestions without changing the text. They open with a short bounce, disabled when you prefer reduced motion.
+Quando você digita `#` e a primeira letra, aparecem sugestões das categorias existentes, encontradas sem diferenciar acentos ou maiúsculas. Use **↑/↓** para escolher e **Enter** ou **Tab** para completar, ou clique na categoria. **Escape** fecha as sugestões sem alterar o texto. Elas abrem com um pequeno salto, desativado quando você prefere movimento reduzido.
 
-**Backspace on a pill removes the whole category from the text**, keeping the surrounding words. Undo restores the pill and its association. The saved text keeps the original hashtag, so you can copy it to other apps.
+**Backspace numa pílula remove a categoria inteira do texto**, mantendo as palavras em volta. Desfazer restaura a pílula e a associação. O texto salvo guarda a hashtag original, então você pode copiá-lo para outros apps.
 
-The **×** on a badge removes an association made through the picker. If the category also appears in the text, it stays associated until you remove the hashtag. Categories remain registered for reuse.
+O **×** num selo remove uma associação feita pelo seletor. Se a categoria também aparece no texto, ela continua associada até você remover a hashtag. As categorias continuam cadastradas para reutilização.
 
-Names accept letters, accents, numbers, hyphens and underscores; spaces become hyphens. Escaped hashtags, hashtags inside code or inside link addresses do not create categories.
+Os nomes aceitam letras, acentos, números, hífens e sublinhados; espaços viram hífens. Hashtags escapadas, dentro de código ou dentro de endereços de link não criam categorias.
 
-### Task lists
+### Listas de tarefas
 
-In **Tarefas** (Tasks), click **+ Nova lista** (New list). Give it a title, write an item in the bottom field and press **Enter** or **+ Adicionar** (Add). You can edit items and check them as you complete them.
+Em **Tarefas**, clique em **+ Nova lista**. Dê um título, escreva um item no campo de baixo e pressione **Enter** ou **+ Adicionar**. Você pode editar os itens e marcá-los conforme conclui.
 
-**Tarefas** opens on the index of your lists; search there by content and click a list to open it. The arrow at the top left returns to the index. Each list keeps its own items, completion states and dates. The progress indicator shows how many items have been completed.
+**Tarefas** abre no índice das suas listas; busque ali pelo conteúdo e clique numa lista para abri-la. A seta no canto superior esquerdo volta ao índice. Cada lista guarda os próprios itens, estados de conclusão e datas. O indicador de progresso mostra quantos itens foram concluídos.
 
-### Reminders and calendar
+### Lembretes e calendário
 
-**Lembretes** (Reminders) opens the monthly calendar of the selected notebook. The arrows move between months; **Hoje** (Today) returns to the current month. Dots mark days with scheduled alerts, including those attached to regular notes. Select a day and click a reminder to open its original page.
+**Lembretes** abre o calendário mensal do caderno selecionado. As setas passam de um mês para outro; **Hoje** volta ao mês atual. Pontos marcam os dias com alertas agendados, inclusive os presos a notas comuns. Selecione um dia e clique num lembrete para abrir a página original.
 
-Click **+ Novo lembrete** (New reminder), write the note, choose **Dia e horário** (Day and time) and click **Agendar** (Schedule). **Testar som** (Test sound) lets you hear the alert. **Cancelar alerta** (Cancel alert) keeps the page without its schedule.
+Clique em **+ Novo lembrete**, escreva a nota, escolha **Dia e horário** e clique em **Agendar**. **Testar som** deixa você ouvir o alerta. **Cancelar alerta** mantém a página sem o agendamento.
 
-Changing the date or time disables the previous schedule until you click **Agendar** again.
+Mudar a data ou o horário desativa o agendamento anterior até você clicar em **Agendar** de novo.
 
-**The app must be open to play the alert; it can be minimized.** Closing the window quits the app. If the time passes while the app is closed or the computer is asleep, the alert fires when the app opens or the computer wakes up. Each alert plays once, uses the system volume and shows a message in the app and a system notification, when available. Pages in the trash do not fire alerts.
+**O app precisa estar aberto para tocar o alerta; pode estar minimizado.** Fechar a janela encerra o app. Se o horário passar com o app fechado ou o computador em repouso, o alerta toca quando o app abrir ou o computador acordar. Cada alerta toca uma vez, usa o volume do sistema e mostra uma mensagem no app e uma notificação do sistema, quando disponível. Páginas na lixeira não disparam alertas.
 
-## Note editor
+## Editor de notas
 
-Type **`/`** in the text to insert text, **Título** (Title), **Subtítulo** (Subtitle), **Título pequeno** (Small title), checkbox tasks, bulleted or numbered lists, quote, divider, code, media or table. The palette groups blocks under **Texto** (Text), **Listas** (Lists), **Estrutura** (Structure) and **Mídia** (Media), with search. Keep typing after the slash to filter: **`/tit`** shows the three title levels. Search accepts words without accents. Use the arrows and **Enter** to choose; **Escape** closes the menu.
+Digite **`/`** no texto para inserir texto, **Título**, **Subtítulo**, **Título pequeno**, tarefas com caixa de seleção, listas com marcadores ou numeradas, citação, divisória, código, mídia ou tabela. A paleta agrupa os blocos em **Texto**, **Listas**, **Estrutura** e **Mídia**, com busca. Continue digitando depois da barra para filtrar: **`/tit`** mostra os três níveis de título. A busca aceita palavras sem acento. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
 
-Select a passage to open the formatting bar: **bold, italic, underline, strikethrough, inline code, link and highlighter**. Selecting with **Shift + arrows** crosses paragraphs. Formatting applies to all selected text, including across several lines or cells. **Backspace/Delete** erase the whole selection; next to a divider, they remove the block. At the start of a title, quote or list, Backspace returns to normal text without losing content. The highlighter uses a six-color palette. To open a link in the text, use **⌘/Ctrl + click**.
+Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código no texto, link e marca-texto**. Selecionar com **Shift + setas** atravessa parágrafos. A formatação vale para todo o texto selecionado, inclusive em várias linhas ou células. **Backspace/Delete** apagam toda a seleção; ao lado de uma divisória, removem o bloco. No início de um título, citação ou lista, Backspace volta para texto normal sem perder o conteúdo. O marca-texto tem uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
 
-### Tables
+### Tabelas
 
-Choose **Tabela** (Table) in the insert menu. The grid previews **columns × rows** as you hover. Click the desired size, or press, drag and release to create the table. The initial picker allows up to 8 × 8; afterwards you can add rows and columns, up to 20 × 20.
+Escolha **Tabela** no menu de inserção. A grade mostra a prévia de **colunas × linhas** enquanto você passa o mouse. Clique no tamanho desejado, ou pressione, arraste e solte para criar a tabela. O seletor inicial vai até 8 × 8; depois você pode adicionar linhas e colunas, até 20 × 20.
 
-Write directly in the cells. **Tab** moves forward; **Shift Tab** moves back. Tab in the last cell adds a row. **Enter** breaks the line inside the cell. The table controls let you add a row or column, toggle the header and remove the table.
+Escreva direto nas células. **Tab** avança; **Shift Tab** volta. Tab na última célula adiciona uma linha. **Enter** quebra a linha dentro da célula. Os controles da tabela permitem adicionar linha ou coluna, ligar ou desligar o cabeçalho e remover a tabela.
 
-Tables, formatting and blocks are saved automatically to the local database. **Undo/redo** also recovers these changes. Existing notes remain available, and adding media keeps the formatting already saved.
+Tabelas, formatação e blocos são salvos automaticamente no banco local. **Desfazer/refazer** também recupera essas mudanças. As notas existentes continuam disponíveis, e adicionar mídia mantém a formatação já salva.
 
-## Shortcuts inside the note
+## Atalhos dentro da nota
 
-Write a date such as `amanhã às 14h` (tomorrow at 2 pm), `hoje às 18h30` (today at 6:30 pm), `depois de amanhã às 9h` (the day after tomorrow at 9 am) or `05/10/2027 às 14:30`. An **Agendar** (Schedule) stamp offers the interpreted time. Check the date before clicking: writing the phrase alone does not activate the alert.
+Escreva uma data como `amanhã às 14h`, `hoje às 18h30`, `depois de amanhã às 9h` ou `05/10/2027 às 14:30`. Um selo **Agendar** oferece o horário interpretado. Confira a data antes de clicar: só escrever a frase não ativa o alerta.
 
-Each note can have one alert. **Reagendar** (Reschedule) replaces the time; the **×** next to the schedule cancels it. Dates follow the computer's time zone and, once scheduled, stay fixed.
+Cada nota pode ter um alerta. **Reagendar** troca o horário; o **×** ao lado do agendamento o cancela. As datas seguem o fuso horário do computador e, depois de agendadas, ficam fixas.
 
-Start a line with `[]` or `[ ]` to create a checkbox inside the note:
+Comece uma linha com `[]` ou `[ ]` para criar uma caixa de seleção dentro da nota:
 
-- Click to check or uncheck.
-- **Enter** creates the next checkbox.
-- **Enter** on an empty item returns to normal text.
-- **Backspace** at the start of the item removes the checkbox and keeps the text.
-- Paste several lines with `[ ]` to create several items.
-- Use `\[]` to keep the brackets as text.
+- Clique para marcar ou desmarcar.
+- **Enter** cria a próxima caixa.
+- **Enter** num item vazio volta para texto normal.
+- **Backspace** no início do item remove a caixa e mantém o texto.
+- Cole várias linhas com `[ ]` para criar vários itens.
+- Use `\[]` para manter os colchetes como texto.
 
-These items belong to the note and do not create a separate list in **Tarefas**.
+Esses itens pertencem à nota e não criam uma lista separada em **Tarefas**.
 
-## Images, PDFs and links
+## Imagens, PDFs e links
 
-In **Notas**, use **Adicionar mídia** (Add media) in the **⋯** menu or press **⇧⌘M**, paste an image or a link into the text, or drag images, PDFs and links onto the page. Accepted files are **PNG, JPEG and WebP** images up to **20 MB** each, and **PDF** documents up to **50 MB**.
+Em **Notas**, use **Adicionar mídia** no menu **⋯** ou pressione **⇧⌘M**, cole uma imagem ou um link no texto, ou arraste imagens, PDFs e links para a página. Os arquivos aceitos são imagens **PNG, JPEG e WebP** de até **20 MB** cada, e documentos **PDF** de até **50 MB**.
 
-Use the **Arraste** (Drag) handle to position the media next to a paragraph, on the left or the right. The **− / +** buttons adjust the width; the text follows the media position.
+Use a alça **Arraste** para posicionar a mídia ao lado de um parágrafo, à esquerda ou à direita. Os botões **− / +** ajustam a largura; o texto acompanha a posição da mídia.
 
-Link cards keep the title, description and image obtained from the site's metatags. Once created, the preview is available offline. Clicking the card opens the address in the browser. Sites without metadata or that require sign-in may appear without a preview. Cards do not update automatically.
+Os cartões de link guardam o título, a descrição e a imagem obtidos das metatags do site. Depois de criada, a prévia fica disponível sem internet. Clicar no cartão abre o endereço no navegador. Sites sem metadados ou que exigem login podem aparecer sem prévia. Os cartões não se atualizam sozinhos.
 
-PDFs appear as cards with a title and an initial excerpt, when available. Without extractable text, the card uses the file name. Click **Abrir PDF** (Open PDF) to open the saved copy in the computer's PDF reader.
+PDFs aparecem como cartões com título e um trecho inicial, quando disponíveis. Sem texto extraível, o cartão usa o nome do arquivo. Clique em **Abrir PDF** para abrir a cópia salva no leitor de PDF do computador.
 
-Imported images and PDFs are copied to the app's data folder. You can move or delete the original file after importing it.
+Imagens e PDFs importados são copiados para a pasta de dados do app. Você pode mover ou apagar o arquivo original depois de importá-lo.
 
-## Export to PDF
+## Exportar em PDF
 
-Open a note, task list or reminder and choose **Exportar PDF** (Export PDF) in the **⋯** menu at the top of the page, or press **⇧⌘E**. Choose the name and folder in the Mac dialog.
+Abra uma nota, lista de tarefas ou lembrete e escolha **Exportar PDF** no menu **⋯** no topo da página, ou pressione **⇧⌘E**. Escolha o nome e a pasta na janela do Mac.
 
-The A4 PDF includes title, notebook, categories, dates, formatted text, tables, checkboxes, images, link cards, attached PDFs and actions linked to the page. Long pages continue on further sheets, with page numbers. Export saves the latest changes before generating the file and works locally, without internet.
+O PDF em A4 inclui título, caderno, categorias, datas, texto formatado, tabelas, caixas de seleção, imagens, cartões de link, PDFs anexados e ações ligadas à página. Páginas longas continuam nas folhas seguintes, com numeração. A exportação salva as últimas mudanças antes de gerar o arquivo e funciona localmente, sem internet.
 
-## Keyboard and window
+## Teclado e janela
 
-| Action | Shortcut |
+| Ação | Atalho |
 | --- | --- |
-| Undo | **Ctrl Z** or **⌘ Z** |
-| Redo | **Ctrl/⌘ Shift Z** or **Ctrl Y** |
-| New page in the current section | **⌘ N** |
-| Search all notebooks | **⌘ F** |
-| Add media to a note | **⇧⌘ M** |
-| Related pages | **⌥⌘ R** |
-| Export PDF | **⇧⌘ E** |
-| Move page to the trash | **⇧⌘ ⌫** |
-| Close a menu | **Escape** |
+| Desfazer | **Ctrl Z** ou **⌘ Z** |
+| Refazer | **Ctrl/⌘ Shift Z** ou **Ctrl Y** |
+| Nova página na seção atual | **⌘ N** |
+| Buscar em todos os cadernos | **⌘ F** |
+| Adicionar mídia a uma nota | **⇧⌘ M** |
+| Páginas relacionadas | **⌥⌘ R** |
+| Exportar PDF | **⇧⌘ E** |
+| Mover página para a lixeira | **⇧⌘ ⌫** |
+| Fechar um menu | **Escape** |
 
-The page actions are also in the **Nota** menu of the menu bar, enabled when the open page offers them.
+As ações da página também ficam no menu **Nota** da barra de menus, habilitadas quando a página aberta as oferece.
 
-In notes, the undo history includes title, text, pills and checkboxes, kept per page during the session. It resets when you close the app. Moving media and scheduling alerts are not part of this history.
+Nas notas, o histórico de desfazer inclui título, texto, pílulas e caixas de seleção, guardado por página durante a sessão. Ele recomeça quando você fecha o app. Mover mídias e agendar alertas não fazem parte desse histórico.
 
-Drag a non-editable area of the notebook to move the window, and drag the notebook's border to resize it. The window uses the Mac's own buttons: red closes, yellow minimizes and green enlarges the window to the available height, with a width of up to 1,200 pixels. Double-clicking the top also enlarges or restores it.
+Arraste uma área não editável do caderno para mover a janela, e arraste a borda do caderno para redimensioná-la. A janela usa os botões do próprio Mac: o vermelho fecha, o amarelo minimiza e o verde aumenta a janela até a altura disponível, com largura de até 1.200 pixels. Um clique duplo no topo também aumenta ou restaura a janela.
 
-The paper tab on the left collapses or opens the side menu. This preference is saved.
+A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fica salva.
 
-## Dates and trash
+## Datas e lixeira
 
-Pages show when they were created and updated. Tasks record checks and unchecks; removed items keep their deletion date until restored. Data from older versions may show **não registrado** (not recorded) when the date did not exist.
+As páginas mostram quando foram criadas e atualizadas. As tarefas registram quando foram marcadas e desmarcadas; itens removidos guardam a data de exclusão até serem restaurados. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
 
-**Mover para a lixeira** (Move to the trash), in the **⋯** menu at the top of the page or with **⇧⌘⌫**, moves the page to the trash and keeps it recoverable. Task items and media can also be restored in **Lixeira** (Trash), separated by type. Restoring keeps content, notebook, categories and task states. An overdue reminder must be scheduled again.
+**Mover para a lixeira**, no menu **⋯** no topo da página ou com **⇧⌘⌫**, manda a página para a lixeira e a mantém recuperável. Itens de tarefa e mídias também podem ser restaurados na **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado de novo.
 
-**Excluir definitivamente** (Delete permanently) asks for confirmation and erases the item permanently. Images and PDFs stay on disk while another page or recoverable media still uses them.
+**Excluir definitivamente** pede confirmação e apaga o item para sempre. Imagens e PDFs continuam no disco enquanto outra página ou mídia recuperável ainda os usa.
 
-## Your data stays on your computer
+## Seus dados ficam no seu computador
 
-The app uses **SQLite** to store notes, notebooks, lists, categories and reminders. Images and PDFs live in a local media folder. There is no account, no upload of pages to a server and no cloud sync.
+O app usa **SQLite** para guardar notas, cadernos, listas, categorias e lembretes. Imagens e PDFs ficam numa pasta de mídia local. Não há conta, envio de páginas para servidor nem sincronização na nuvem.
 
-On a Mac, data lives in:
+No Mac, os dados ficam em:
 
 ```text
 ~/Library/Application Support/caderninho/
 ```
 
-To make a full backup:
+Para fazer um backup completo:
 
-1. Wait for **Salvo às…** (Saved at…) and close the app.
-2. Copy the whole `caderninho` folder to the backup location.
-3. Keep `notebook.sqlite` and the `media` folder together: the database alone does not contain the images.
+1. Espere aparecer **Salvo às…** e feche o app.
+2. Copie a pasta `caderninho` inteira para o local do backup.
+3. Mantenha `notebook.sqlite` e a pasta `media` juntos: o banco sozinho não contém as imagens.
 
-To restore, close the app, keep a copy of the current folder and replace it with the backup folder before opening the app again.
+Para restaurar, feche o app, guarde uma cópia da pasta atual e substitua-a pela pasta do backup antes de abrir o app de novo.
 
-If **Falha ao salvar** (Failed to save) appears, check free disk space and folder permissions before closing the app. Do not remove the database's auxiliary files while the app is open.
+Se aparecer **Falha ao salvar**, verifique o espaço livre em disco e as permissões da pasta antes de fechar o app. Não remova os arquivos auxiliares do banco com o app aberto.
 
-## Actions linked to the page
+## Ações ligadas à página
 
-Select a passage in a note and click the **task icon** in the formatting menu. You can also drag that button to the margin. On images and link cards, use the **task icon** in the media control strip.
+Selecione um trecho numa nota e clique no **ícone de tarefa** no menu de formatação. Você também pode arrastar esse botão para a margem. Em imagens e cartões de link, use o **ícone de tarefa** na faixa de controles da mídia.
 
-Choose **Tarefa** (Task) or **Lembrete** (Reminder), write your next step and, for a reminder, set the day and time. Creating it does not modify the original text or create a second note. A single page can have several actions and several independent alerts.
+Escolha **Tarefa** ou **Lembrete**, escreva o próximo passo e, no caso de lembrete, defina dia e horário. Criar a ação não altera o texto original nem cria uma segunda nota. Uma mesma página pode ter várias ações e vários alertas independentes.
 
-- Passages with actions get a soft, permanent dashed highlight. Completing the task turns the highlight green.
-- The margin keeps the actions together with a copy of their context. Use the arrow next to **Ações desta nota** (Actions in this note) to collapse it.
-- Tasks also appear on the Daily page and in **Tarefas**, under **Da margem das notas** (From note margins) for the current notebook.
-- Reminders appear in the calendar and on the Daily page of their scheduled day. The app must be open to play the alert.
-- **Ver origem** (View origin) and **Voltar à origem** (Back to origin) open the note and highlight the passage or media.
-- The pencil lets you edit the task or reschedule the reminder. Completion leaves a stamp with the date; unchecking keeps the history.
-- If the origin changes or is removed, the copy of the passage remains available and the margin warns when it cannot locate the content.
-- The **×** button moves the action to the task or reminder trash, where it can be restored. Removing the action preserves the original note.
+- Trechos com ações ganham um destaque tracejado suave e permanente. Concluir a tarefa deixa o destaque verde.
+- A margem guarda as ações junto com uma cópia do contexto. Use a seta ao lado de **Ações desta nota** para recolhê-la.
+- As tarefas também aparecem na página do dia e em **Tarefas**, em **Da margem das notas**, para o caderno atual.
+- Os lembretes aparecem no calendário e na página do dia agendado. O app precisa estar aberto para tocar o alerta.
+- **Ver origem** e **Voltar à origem** abrem a nota e destacam o trecho ou a mídia.
+- O lápis permite editar a tarefa ou reagendar o lembrete. A conclusão deixa um selo com a data; desmarcar mantém o histórico.
+- Se a origem mudar ou for removida, a cópia do trecho continua disponível e a margem avisa quando não consegue localizar o conteúdo.
+- O botão **×** manda a ação para a lixeira de tarefas ou de lembretes, onde pode ser restaurada. Remover a ação preserva a nota original.
 
-In the form, **Esc** cancels and returns the text selection. Nothing is created until you confirm with **Criar tarefa** (Create task) or **Agendar lembrete** (Schedule reminder).
+No formulário, **Esc** cancela e devolve a seleção de texto. Nada é criado até você confirmar com **Criar tarefa** ou **Agendar lembrete**.
 
-## Connections between pages
+## Conexões entre páginas
 
-After autosave, Caderninho looks for relationships between notes, tasks and reminders in the same notebook. Up to two connections fade in at the footer, after **Relacionados:** (Related). Click a title to open the source page. When there is no relevant relationship, it stays empty.
+Depois do salvamento automático, o Caderninho procura relações entre notas, tarefas e lembretes do mesmo caderno. Até duas conexões aparecem suavemente no rodapé, depois de **Relacionados:**. Clique num título para abrir a página de origem. Quando não há relação relevante, o espaço fica vazio.
 
-Use **Relacionados** in the **⋯** menu, or **⌥⌘R**, to open the graph. The current page sits at the center; content with higher affinity sits closer. Click a connection to open its source page. In narrow windows, the button shows only the icon, with the name on hover.
+Use **Relacionados** no menu **⋯**, ou **⌥⌘R**, para abrir o grafo. A página atual fica no centro; conteúdos com mais afinidade ficam mais perto. Clique numa conexão para abrir a página de origem. Em janelas estreitas, o botão mostra só o ícone, com o nome ao passar o mouse.
 
-The calculation combines categories, shared words and the meaning of the text. On a Mac, text found in images also contributes. Pages and images are not sent for analysis in the cloud. The first use needs internet to download the model; after that, analysis works locally.
+O cálculo combina categorias, palavras em comum e o significado do texto. No Mac, o texto encontrado em imagens também conta. Páginas e imagens não são enviadas para análise na nuvem. O primeiro uso precisa de internet para baixar o modelo; depois disso, a análise funciona localmente.
