@@ -53,7 +53,7 @@ button > svg{pointer-events:none;}
 @media(hover:hover){:is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
      .schedule-status,.calendar-navigation,.entry-form,.source-card-footer,.note-pager,.drawer-heading) button:not(:disabled):hover,.primary:not(:disabled):hover,.category-add:hover,.row-delete:hover{
    background:var(--control-hover);
- }:is(.purge,[data-remove-book],[data-source-remove],.row-delete):not(:disabled):hover,.view-toolbar .trash-toolbar:hover{background:#f2d3cb66;color:var(--control-danger);}}
+ }:is(.entry-form button,.primary):not(:disabled):hover{background:#4a4a3c;}:is(.purge,[data-remove-book],[data-source-remove],.row-delete):not(:disabled):hover,.view-toolbar .trash-toolbar:hover{background:#f2d3cb66;color:var(--control-danger);}}
 @media(hover:hover) and (prefers-reduced-motion:no-preference){:is(.view-toolbar,.notebook-actions,.trash-actions,.trash-tabs,.schedule-fields,
      .schedule-status,.entry-form,.source-card-footer) button:not(:disabled):hover > .small-icon,.primary:not(:disabled):hover > .small-icon,.category-add:hover > .small-icon{
    transform-origin:50% 60%;
