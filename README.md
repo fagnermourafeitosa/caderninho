@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://fagnermourafeitosa.github.io/caderninho/">Ver o site</a> ·
   <a href="docs/INSTALLATION.md">Instalar no Mac</a> ·
   <a href="docs/USER_GUIDE.md">Guia de uso</a>
 </p>
