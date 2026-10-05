@@ -76,10 +76,6 @@ Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e co
 
 As únicas requisições de rede são as que você dispara: buscar a prévia de um link no site que você colou e baixar uma única vez o modelo usado pelas páginas relacionadas.
 
-## Open source · MIT License
-
-Caderninho is open source under the [MIT License](https://opensource.org/license/mit). You can use, study, modify, fork, and redistribute it, including commercially. Keep the copyright and license notice in copies or substantial portions of the software, as required by MIT.
-
 ## Limites
 
 - Só para macOS, com interface em português.
@@ -97,3 +93,7 @@ Gostou do Caderninho? Você pode apoiar o projeto com um café:
 <a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-button.svg" alt="Buy me a coffee" height="44"></a>
 
 As capturas de tela mostram o app real com exemplos fictícios.
+
+## Open source · MIT License
+
+Caderninho is open source under the [MIT License](https://opensource.org/license/mit). You can use, study, modify, fork, and redistribute it, including commercially. Keep the copyright and license notice in copies or substantial portions of the software, as required by MIT.
