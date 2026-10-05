@@ -24,7 +24,7 @@
    Do instead: keep ordinary writing blocks in the shared contenteditable page; native input targets the host, so resolve the caret block from Selection. Slice rich runs across the complete DOM range for deletion/formatting, including reverse ranges and line-boundary endpoints. Preserve prefix/suffix, SQLite structure and one-step replacement undo; guard caret offsets for detached nodes while constructing checkboxes. Normalize native nodes and route page-boundary carets into writing spans before editing, so plain text never escapes persistence. Validate native sendInputEvent keyboard/mouse selection plus Backspace/Delete, not only synthetic events.
 
 2. **[2026-10-01] Contextual editor without block actions**
-   Do instead: provide grouped searchable slash/+ command insertion (300px, 40px rows, ink icons, active yellow, no permanent scrollbar), arrows/Enter/Escape and accent-insensitive aliases, text-selection formatting and an Office-style hover/drag table size grid. Do not add transform/duplicate/move/delete block menus. Save sanitized structured blocks in SQLite alongside searchable plain text, include tables/formatting in undo. Mermaid remains planned in ROADMAP.md until requested.
+   Do instead: provide grouped searchable slash/+ command insertion (300px, 40px rows, ink icons, active yellow, no permanent scrollbar), arrows/Enter/Escape and accent-insensitive aliases, text-selection formatting and an Office-style hover/drag table size grid. Do not add transform/duplicate/move/delete block menus. Save sanitized structured blocks in SQLite alongside searchable plain text, include tables/formatting in undo. Mermaid diagrams are implemented (spec 002); keep them as text blocks.
 
 3. **[2026-10-01] Undo must include the custom paper editor**
    Do instead: use bounded per-page text/title snapshots for textarea and rich checkbox edits, intercept Ctrl/Cmd+Z and redo, route native menus to the same history, retain media/scheduling state, and reset the baseline after external page changes. Keep history session-local and autosave undo results to SQLite.
@@ -41,7 +41,10 @@
 
 ## Documentation
 1. **[2026-10-04] User-facing English README**
-   Do instead: write README in English (AGENTS.md rules govern workflow); focus README on distinctive benefits (source-linked actions, related ideas, collage and daily history), use real screenshots with fictional data, and omit technical implementation details and obvious editing features. Keep setup/technical instructions in linked guides; explain external link-preview requests accurately.
+   Do instead: write README in English (AGENTS.md rules govern workflow); product README, not marketing: lead with ONE idea (notes that turn into tasks without losing context, see docs/PRODUCT.md Positioning), then daily history and Portuguese-first as secondary, with related pages/collage/diagrams grouped as support; explain how each works and state limits; use real screenshots with fictional data, and omit technical implementation details and obvious editing features. Keep setup/technical instructions in linked guides; explain external link-preview requests accurately.
+
+2. **[2026-10-04] Recapture README screenshots with the script, then look at every image**
+   Do instead: `node scripts/vendor-mermaid.cjs && npx electron scripts/capture-readme.cjs` (Node 22); open each PNG before using it and keep screenshots that show a UI bug out of the README (flag the bug instead). Other sessions may commit on main meanwhile; check `git log` before committing.
 
 ## User Directives
 1. **[2026-10-01] Daily overview and temporal records**
