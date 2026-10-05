@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-brand-logo.svg" alt="Buy me a coffee" height="36"></a>
+  <a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-button.svg" alt="Buy me a coffee" height="44"></a>
 </p>
 
 Você escreve "pedir dois orçamentos" numa nota sobre a reforma da cozinha. Três semanas depois, a tarefa está numa lista e ninguém lembra de qual reforma era, quais orçamentos, nem por quê.
@@ -90,6 +90,6 @@ As únicas requisições de rede são as que você dispara: buscar a prévia de 
 
 Gostou do Caderninho? Você pode apoiar o projeto com um café:
 
-<a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-brand-logo.svg" alt="Buy me a coffee" height="36"></a>
+<a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-button.svg" alt="Buy me a coffee" height="44"></a>
 
 As capturas de tela mostram o app real com exemplos fictícios.
