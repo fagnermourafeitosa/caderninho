@@ -49,9 +49,9 @@ The reference stays with the idea it sparked. And when something to do comes up 
 
 ## The day has its own page
 
-At the top, pick up the latest note in the notebook and explore the ideas linked to it in a graph. Right below, tasks from your lists and from note margins meet reminders and recent pages. You follow your day without opening each project to find out what is still pending.
+At the top, pick up the latest note in the notebook; when it connects to other pages, the linked ideas appear beside it in a graph. Right below, tasks from your lists and from note margins meet reminders and recent pages. You follow your day without opening each project to find out what is still pending.
 
-![Daily page with the latest note and its connection graph at the top, followed by tasks and reminders](docs/images/pagina-do-dia.png)
+![Daily page with the latest note beside its connection graph, followed by tasks and reminders](docs/images/pagina-do-dia.png)
 
 Tomorrow, today's page remains available for reference. The snapshot of that moment's tasks, reminders and notes is kept.
 

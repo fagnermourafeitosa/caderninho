@@ -3,7 +3,7 @@
 - **Specification ID**: 003
 - **Date**: 2026-10-04
 - **Slug**: native-mac-paper-refresh
-- **Status**: In Progress
+- **Status**: Waiting Approve
 - **Owner**: Renderer presentation shell and main-process window chrome
 - **Related Specification**: [001 — Project Structure](001-2026-10-04-project-structure.md)
 
@@ -119,30 +119,30 @@ sequenceDiagram
 
 ## User Stories
 
-- [ ] 1. As a Mac user, I want the real traffic lights in their usual place, so that closing, minimizing and zooming work like every other window.
-- [ ] 2. As a Mac user, I want the green button to toggle the notebook's full-height size, so that it behaves like the top double-click.
-- [ ] 3. As a writer, I want the page to start near the top of the window, so that I see more of my note.
-- [ ] 4. As a writer, I want the notebook to still feel like paper, so that the app keeps its identity without decorative clutter.
-- [ ] 5. As a reader, I want one consistent typeface for text and labels, so that the interface feels calm and serious.
-- [ ] 6. As a reader, I want dates written in correct Portuguese casing ("domingo, 4 de outubro"), so that the app does not look careless.
-- [ ] 7. As a user, I want the sidebar to be a compact list, so that navigation takes less room than my content.
-- [ ] 8. As a user, I want icons that share one style, so that I recognize controls without decoding three visual languages.
-- [ ] 9. As a user, I want popovers, the command palette and notices to sit visibly above the page, so that I know what is temporary.
-- [ ] 10. As a user, I want yellow to mean "selected", so that I always know where I am.
-- [ ] 11. As a user, I want "today" and "selected day" to look different on the calendar, so that I don't confuse them.
-- [ ] 12. As a user, I want one clear primary action per view, so that the toolbar doesn't make me read every button.
-- [ ] 13. As a keyboard user, I want Nova nota, Adicionar mídia, Relacionados, Exportar PDF and Mover para a lixeira in the menu bar with shortcuts, so that I don't have to reach for the page toolbar.
-- [ ] 14. As a user, I want menu items that do not apply to the current view to be disabled, so that I don't trigger actions that do nothing.
-- [ ] 15. As a user, I want the trash action to look destructive only when I aim at it, so that the toolbar doesn't feel alarming.
-- [ ] 16. As a user, I want the Página do dia note preview to use the full width, so that text doesn't wrap word by word.
-- [ ] 17. As a user, I want an empty related graph to take one line, so that it doesn't dominate the page.
-- [ ] 18. As a user, I want "1 lembrete" / "2 lembretes" pluralized correctly, so that the summary reads naturally.
-- [ ] 19. As a user, I want metadata text readable at AA contrast, so that dates and counts aren't strained to read.
-- [ ] 20. As a user, I want disabled destructive actions to be clearly disabled rather than faded pink, so that I understand why I can't use them.
-- [ ] 21. As a user, I want notices that are visible but quiet, so that confirmations don't interrupt writing.
-- [ ] 22. As a user, I want resizing from the book border to keep working, so that removing the grips doesn't remove the ability.
-- [ ] 23. As a user, I want the traffic lights to follow the book when I collapse or expand the sidebar, so that they always sit on the paper.
-- [ ] 24. As a user who prefers reduced motion, I want the refreshed hover and sidebar transitions to respect that setting, so that the interface stays still.
+- [x] 1. As a Mac user, I want the real traffic lights in their usual place, so that closing, minimizing and zooming work like every other window.
+- [x] 2. As a Mac user, I want the green button to toggle the notebook's full-height size, so that it behaves like the top double-click.
+- [x] 3. As a writer, I want the page to start near the top of the window, so that I see more of my note.
+- [x] 4. As a writer, I want the notebook to still feel like paper, so that the app keeps its identity without decorative clutter.
+- [x] 5. As a reader, I want one consistent typeface for text and labels, so that the interface feels calm and serious.
+- [x] 6. As a reader, I want dates written in correct Portuguese casing ("domingo, 4 de outubro"), so that the app does not look careless.
+- [x] 7. As a user, I want the sidebar to be a compact list, so that navigation takes less room than my content.
+- [x] 8. As a user, I want icons that share one style, so that I recognize controls without decoding three visual languages.
+- [x] 9. As a user, I want popovers, the command palette and notices to sit visibly above the page, so that I know what is temporary.
+- [x] 10. As a user, I want yellow to mean "selected", so that I always know where I am.
+- [x] 11. As a user, I want "today" and "selected day" to look different on the calendar, so that I don't confuse them.
+- [x] 12. As a user, I want one clear primary action per view, so that the toolbar doesn't make me read every button.
+- [x] 13. As a keyboard user, I want Nova nota, Adicionar mídia, Relacionados, Exportar PDF and Mover para a lixeira in the menu bar with shortcuts, so that I don't have to reach for the page toolbar.
+- [x] 14. As a user, I want menu items that do not apply to the current view to be disabled, so that I don't trigger actions that do nothing.
+- [x] 15. As a user, I want the trash action to look destructive only when I aim at it, so that the toolbar doesn't feel alarming.
+- [x] 16. As a user, I want the Página do dia note preview to use the full width, so that text doesn't wrap word by word.
+- [x] 17. As a user, I want an empty related graph to take one line, so that it doesn't dominate the page.
+- [x] 18. As a user, I want "1 lembrete" / "2 lembretes" pluralized correctly, so that the summary reads naturally.
+- [x] 19. As a user, I want metadata text readable at AA contrast, so that dates and counts aren't strained to read.
+- [x] 20. As a user, I want disabled destructive actions to be clearly disabled rather than faded pink, so that I understand why I can't use them.
+- [x] 21. As a user, I want notices that are visible but quiet, so that confirmations don't interrupt writing.
+- [x] 22. As a user, I want resizing from the book border to keep working, so that removing the grips doesn't remove the ability.
+- [x] 23. As a user, I want the traffic lights to follow the book when I collapse or expand the sidebar, so that they always sit on the paper.
+- [x] 24. As a user who prefers reduced motion, I want the refreshed hover and sidebar transitions to respect that setting, so that the interface stays still.
 
 ---
 
@@ -241,23 +241,23 @@ Per project rules, screen appearance is validated by the user in the running app
 
 ## Acceptance Criteria
 
-- [ ] 1. No spiral rings are rendered; a left-edge binding is visible on the book.
-- [ ] 2. Native traffic lights are shown over the paper in both sidebar states; drawn traffic lights, bottom handle and corner grip are gone.
-- [ ] 3. The green button and top double-click toggle the same full-height size; border resizing still works.
-- [ ] 4. New York is the rendered typeface for writing, titles and labels; the handwritten accent appears only on the Página do dia date and the notebook tab label.
-- [ ] 5. Dates and months follow Portuguese casing; all count labels pluralize correctly.
-- [ ] 6. All interface icons use the single stroke style; illustrations remain only in empty states.
-- [ ] 7. The sidebar is a source list on the kraft surface with 32px rows.
-- [ ] 8. Palette, popovers, dialogs and toasts use the raised sheet with hairline border.
-- [ ] 9. Yellow appears only on selection states; calendar today and selected day are distinct.
-- [ ] 10. Each view shows one primary action and an overflow; trash is red only on hover.
-- [ ] 11. The "Nota" menu exposes the five note commands with the listed shortcuts and correct enablement.
-- [ ] 12. Página do dia shows a full-width note preview and a one-line empty related state with the new caption.
-- [ ] 13. `--muted` text meets 4.5:1 on paper and paper shade.
-- [ ] 14. Reduced-motion users see no hover wobble or sidebar transition.
+- [x] 1. No spiral rings are rendered; a left-edge binding is visible on the book.
+- [x] 2. Native traffic lights are shown over the paper in both sidebar states; drawn traffic lights, bottom handle and corner grip are gone.
+- [x] 3. The green button and top double-click toggle the same full-height size; border resizing still works.
+- [x] 4. New York is the rendered typeface for writing, titles and labels; the handwritten accent appears only on the Página do dia date and the notebook tab label.
+- [x] 5. Dates and months follow Portuguese casing; all count labels pluralize correctly.
+- [x] 6. All interface icons use the single stroke style; illustrations remain only in empty states.
+- [x] 7. The sidebar is a source list on the kraft surface with 32px rows.
+- [x] 8. Palette, popovers, dialogs and toasts use the raised sheet with hairline border.
+- [x] 9. Yellow appears only on selection states; calendar today and selected day are distinct.
+- [x] 10. Each view shows one primary action and an overflow; trash is red only on hover.
+- [x] 11. The "Nota" menu exposes the five note commands with the listed shortcuts and correct enablement.
+- [x] 12. Página do dia shows a full-width note preview and a one-line empty related state with the new caption.
+- [x] 13. `--muted` text meets 4.5:1 on paper and paper shade.
+- [x] 14. Reduced-motion users see no hover wobble or sidebar transition.
 - [x] 15. `docs/DESIGN.md` and `docs/PRODUCT.md` are updated to describe the new tokens, typography, icon system and surfaces.
-- [ ] 16. All unit, integration, smoke and regression tests pass.
-- [ ] 17. Quality checks (`npm test` on Node 22+, `node --check` on changed files, affected smoke tests) pass with 0 errors.
+- [x] 16. All unit, integration, smoke and regression tests pass.
+- [x] 17. Quality checks (`npm test` on Node 22+, `node --check` on changed files, affected smoke tests) pass with 0 errors.
 - [ ] 18. The packaged app starts and loads New York from the system font files.
 
 ---
