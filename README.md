@@ -15,6 +15,10 @@
   <a href="docs/USER_GUIDE.md">Guia de uso</a>
 </p>
 
+<p align="center">
+  <a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-brand-logo.svg" alt="Buy me a coffee" height="36"></a>
+</p>
+
 Você escreve "pedir dois orçamentos" numa nota sobre a reforma da cozinha. Três semanas depois, a tarefa está numa lista e ninguém lembra de qual reforma era, quais orçamentos, nem por quê.
 
 O Caderninho mantém a tarefa presa à frase que a criou. Selecione um trecho, transforme em tarefa ou lembrete, e a tarefa sempre sabe de onde veio. Todo o resto do app apoia essa ideia: uma página do dia que registra o que estava pendente, páginas relacionadas encontradas no seu próprio computador e referências colocadas ao lado do parágrafo a que pertencem.
@@ -83,5 +87,9 @@ As únicas requisições de rede são as que você dispara: buscar a prévia de 
 ---
 
 [Instalar no Mac](docs/INSTALLATION.md) · [Guia de uso](docs/USER_GUIDE.md)
+
+Gostou do Caderninho? Você pode apoiar o projeto com um café:
+
+<a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-brand-logo.svg" alt="Buy me a coffee" height="36"></a>
 
 As capturas de tela mostram o app real com exemplos fictícios.

@@ -58,6 +58,10 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .btn-ink{background:var(--ink);color:var(--paper)}
 .btn-ink:hover{background:#45453a}
 .btn-quiet{border-color:var(--edge)}
+.btn-coffee{background:#ffdd00;color:#0d0c22;border-color:#0d0c22}
+.btn-coffee:hover{background:#ffe433}
+.btn-coffee img,.end .btn-coffee img{width:auto;height:22px;margin:0}
+.btn-coffee .cup{display:none}
 .btn-quiet:hover{background:var(--hover)}
 
 /* top bar */
@@ -66,6 +70,8 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .brand{display:flex;align-items:center;gap:9px;font-weight:650;font-size:17px;text-decoration:none}
 .brand img{width:30px}
 .top .btn{padding:9px 14px;font-size:14px}
+.top .actions{display:flex;gap:8px}
+@media (max-width:520px){.top .btn-coffee .full{display:none}.top .btn-coffee .cup{display:block}}
 
 /* ---------- pinned scene ---------- */
 .scene{position:relative;height:calc(100vh + 9 * 75vh)}
@@ -231,6 +237,7 @@ code{font:14px ui-monospace,"SF Mono",Menlo,monospace;background:var(--shade);pa
 .end img{width:84px;margin:0 auto 20px}
 .end h2{font-size:clamp(30px,4vw,44px);font-weight:650;margin:0 auto 26px;max-width:20ch;line-height:1.12}
 .end .row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+footer .coffee{display:inline-flex;align-items:center;gap:5px;vertical-align:bottom}
 footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--muted);padding:28px 0 36px;border-top:1px solid var(--hairline)}
 
 /* ---------- responsive ---------- */
@@ -289,7 +296,10 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
 
 <div class="top">
   <a class="brand" href="#"><img src="img/icon.png" alt="">Caderninho</a>
-  <a class="btn btn-ink" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/INSTALLATION.md">Instalar no Mac</a>
+  <div class="actions">
+    <a class="btn btn-coffee" href="https://buymeacoffee.com/caderninho"><img class="full" src="img/bmc-brand-logo.svg" alt="Buy me a coffee"><img class="cup" src="img/bmc-logo.svg" alt=""></a>
+    <a class="btn btn-ink" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/INSTALLATION.md">Instalar no Mac</a>
+  </div>
 </div>
 
 <main>
@@ -504,10 +514,11 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
     <div class="row">
       <a class="btn btn-ink" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/INSTALLATION.md"><svg class="i"><use href="#i-mac"/></svg>Instalar no Mac</a>
       <a class="btn btn-quiet" href="https://github.com/fagnermourafeitosa/caderninho/blob/main/docs/USER_GUIDE.md">Guia de uso</a>
+      <a class="btn btn-coffee" href="https://buymeacoffee.com/caderninho"><img class="full" src="img/bmc-brand-logo.svg" alt="Buy me a coffee"></a>
     </div>
   </section>
 
-  <footer class="wrap"><span>Caderninho · <a href="https://github.com/fagnermourafeitosa/caderninho">código no GitHub</a></span><span>As capturas de tela mostram o app real com exemplos fictícios.</span></footer>
+  <footer class="wrap"><span>Caderninho · <a href="https://github.com/fagnermourafeitosa/caderninho">código no GitHub</a> · <a class="coffee" href="https://buymeacoffee.com/caderninho"><img src="img/bmc-logo.svg" alt="" style="height:14px;width:auto">Me pague um café</a></span><span>As capturas de tela mostram o app real com exemplos fictícios.</span></footer>
 </div>
 </main>
 
