@@ -8,14 +8,16 @@ const { MediaStore, webUrl } = require('./media.cjs');
 const { pathToFileURL } = require('node:url');
 const { randomUUID } = require('node:crypto');
 const { movePosition } = require('./window-move.cjs');
+const { registerFontProtocol, SCHEME: FONT_SCHEME } = require('./system-fonts.cjs');
+const { noteMenu, availableCommands } = require('./note-menu.cjs');
 const ROOT = path.join(__dirname, '..', '..');
-protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
+protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
 let win, store, reminderInterval, saveFailed = false;
 let media, observedDay, related;
 let resolveReady;
 const ready = new Promise(resolve => { resolveReady = resolve; });
-let restoreBounds = null, resizeSession = null, moveSession = null;
+let restoreBounds = null, resizeSession = null, moveSession = null, noteCommands = [];
 const MIN_WIDTH = 620, MIN_HEIGHT = 520, MAX_EXPANDED_WIDTH = 1200;
 // Effects that leave the app; an external harness may replace them before the app is ready.
 const services = {
@@ -73,12 +75,22 @@ else {
       const url = new URL(request.url), file = url.hostname === 'blob' ? media.file(url.pathname.slice(1)) : null;
       return file ? net.fetch(pathToFileURL(file).href) : new Response('Arquivo não encontrado', { status: 404 });
     });
+    registerFontProtocol(protocol, net);
     createWindow();
   });
   app.on('activate', () => { if (store && !BrowserWindow.getAllWindows().length) createWindow(); });
   app.on('before-quit', event => { if (!flush()) event.preventDefault(); });
   app.on('will-quit', () => { related?.close(); store?.close(); });
   app.on('window-all-closed', () => app.quit());
+}
+function buildMenu() {
+  const send = command => { if (win && !win.isDestroyed()) win.webContents.send('notebook:command', command); };
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    ...(process.platform === 'darwin' ? [{ label: 'Caderninho', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'hide' }, { role: 'quit' }] }] : []),
+    noteMenu(noteCommands, send),
+    { label: 'Editar', submenu: [{ label: 'Desfazer', accelerator: 'CommandOrControl+Z', click: (_item, targetWindow) => dispatchHistory('undo', targetWindow) }, { label: 'Refazer', accelerator: 'CommandOrControl+Shift+Z', click: (_item, targetWindow) => dispatchHistory('redo', targetWindow) }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] },
+    { role: 'windowMenu' }
+  ]));
 }
 function dispatchHistory(direction, targetWindow) {
   const focused = targetWindow || BrowserWindow.getFocusedWindow();
@@ -91,11 +103,9 @@ async function createWindow() {
   const area = screen.getPrimaryDisplay().workArea;
   restoreBounds = null; resizeSession = null;
   moveSession = null;
-  win = new BrowserWindow({ width: Math.min(820, area.width), height: Math.min(820, area.height), minWidth: MIN_WIDTH, minHeight: MIN_HEIGHT, resizable: true, fullscreenable: false, frame: false, transparent: true, hasShadow: false, backgroundColor: '#00000000', title: 'Caderninho', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: false } });
-  Menu.setApplicationMenu(Menu.buildFromTemplate([
-    ...(process.platform === 'darwin' ? [{ label: 'Caderninho', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'hide' }, { role: 'quit' }] }] : []),
-    { label: 'Editar', submenu: [{ label: 'Desfazer', accelerator: 'CommandOrControl+Z', click: (_item, targetWindow) => dispatchHistory('undo', targetWindow) }, { label: 'Refazer', accelerator: 'CommandOrControl+Shift+Z', click: (_item, targetWindow) => dispatchHistory('redo', targetWindow) }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] }
-  ]));
+  win = new BrowserWindow({ width: Math.min(820, area.width), height: Math.min(820, area.height), minWidth: MIN_WIDTH, minHeight: MIN_HEIGHT, resizable: true, fullscreenable: false, titleBarStyle: 'hidden', trafficLightPosition: { x: 24, y: 24 }, transparent: true, hasShadow: false, backgroundColor: '#00000000', title: 'Caderninho', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: false } });
+    buildMenu();
+  win.on('maximize', () => { win.unmaximize(); toggleHeight(); });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
   win.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
@@ -195,10 +205,22 @@ ipcMain.handle('cuts:open', async (_event, id) => { const cut = store.cut(id);
  if (cut.kind !== 'link') throw new Error('Este recorte não é um link.'); return shell.openExternal(webUrl(cut.url).href); });
 ipcMain.handle('notebook:sound', () => { services.playSound(); return true; });
 ipcMain.handle('notebook:window', (_event, action) => {
-  if (action === 'close') win.close();
-  else if (action === 'minimize') win.minimize();
-  else if (action === 'maximize') return toggleHeight();
-  else if (action === 'state') return windowState();
+  if (action === 'maximize') return toggleHeight();
+  if (action === 'state') return windowState();
+  throw new Error('Ação de janela inválida.');
+});
+ipcMain.on('notebook:note-commands', (event, commands) => {
+  if (!win || event.sender !== win.webContents) return;
+  const next = availableCommands(commands);
+  if (next.join() === noteCommands.join()) return;
+  noteCommands = next; buildMenu();
+});
+// The renderer knows where the paper starts; native traffic lights sit on it.
+ipcMain.on('notebook:window-buttons', (event, position) => {
+  if (!win || win.isDestroyed() || event.sender !== win.webContents || process.platform !== 'darwin') return;
+  const { x, y } = position || {};
+  if (![x, y].every(value => Number.isInteger(value) && value >= 0 && value <= 400)) return;
+  win.setWindowButtonPosition({ x, y });
 });
 ipcMain.on('notebook:resize', (event, phase, input = {}) => {
   if (!win || event.sender !== win.webContents) return;

@@ -52,9 +52,12 @@ async function refreshHomeRelated(){
   if(request!==homeRelatedRequest||view!=='home'||!host.isConnected||host.dataset.noteId!==note.id||latestHomeNote()?.id!==note.id)return;
   const results=orderRelated(data.results).slice(0,4),signature=JSON.stringify([note.title,data.status,results.map(item=>[item.id,item.title,item.score])]);
   if(host.dataset.connections===signature)return;
-  renderRelatedGraph(note,{...data,results},host,{openCenter:true});host.dataset.connections=signature;
+  const layout=host.closest('.home-connections-layout');host.dataset.connections=signature;
+  if(!results.length){host.replaceChildren();layout.classList.remove('with-related');return;}
+  renderRelatedGraph(note,{...data,results},host,{openCenter:true});layout.classList.add('with-related');
+  host.insertAdjacentHTML('afterbegin',`<div class="daily-section-heading"><h2>${relatedGraphIcon}<span>Ideias por perto</span></h2></div>`);
  }catch{
-  if(request===homeRelatedRequest&&host.isConnected)host.innerHTML='<p class="daily-empty" role="status">As conexões estão indisponíveis por enquanto. Você pode continuar na sua nota.</p>';
+  if(request===homeRelatedRequest&&host.isConnected){host.replaceChildren();host.closest('.home-connections-layout').classList.remove('with-related');}
  }
 }
 document.addEventListener('DOMContentLoaded',()=>{

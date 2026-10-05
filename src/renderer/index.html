@@ -3,18 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: caderno-media:; object-src 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: caderno-media:; font-src 'self' caderno-font:; object-src 'none'; base-uri 'none'">
   <title>Caderninho</title>
+  <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="controls.css">
   <link rel="stylesheet" href="excalifont.css">
+  <link rel="stylesheet" href="shell.css">
   <script defer src="../shared/smart-text.js"></script>
+  <script defer src="../shared/text-format.js"></script>
   <script defer src="../shared/category-text.js"></script>
   <script defer src="../shared/editor-document.js"></script>
   <script defer src="vendor/mermaid.min.js"></script>
   <script defer src="../shared/diagram-style.js"></script>
   <script defer src="edit-history.js"></script>
   <script defer src="renderer.js"></script>
+  <script defer src="page-actions.js"></script>
+  <script defer src="notes-index.js"></script>
   <script defer src="cuts.js"></script>
   <script defer src="margin.js"></script>
   <script defer src="undo.js"></script>
@@ -33,65 +38,66 @@
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
-      <symbol id="icon-export" viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z M14 3v5h5 M12 10v7 M9 14l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-      <symbol id="icon-home" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13H55Q60 13 59 20L58 62H16Q11 62 11 56V20Q11 13 17 13Z" fill="#fff4d8"/><path d="M18 14V62M25 7V19M36 7V19M47 7V19M26 44H47M26 53H44"/><circle cx="42" cy="31" r="7" fill="#f6ba45"/><path d="M42 20V18M42 44V42M31 31H29M55 31H53"/></g></symbol>
-      <symbol id="icon-notebooks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20L43 14L52 57L20 63Z" fill="#c5d3ae"/><path d="M23 12L55 8L61 54L29 59Z" fill="#deb9a7"/><path d="M29 12L34 57M37 22L51 20M38 30L51 28"/><path d="M12 20L19 21L27 62"/></g></symbol>
-      <symbol id="icon-notes" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11L50 7Q55 6 55 12L59 52Q59 56 53 57L20 61Q15 62 15 55L11 18Q10 12 17 11Z" fill="#fff4d8"/><path d="M23 23L43 20M24 32L45 29M25 42L37 40"/><path d="M39 53L43 38L58 17Q61 13 65 17L68 20L51 43Z" fill="#f6ba45"/><path d="M43 38L51 43M58 17L66 23M39 53L42 44"/><path d="M7 52L3 56M64 51L69 54"/></g></symbol>
-      <symbol id="icon-tasks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16H56Q61 16 60 23L57 61H15L15 23Q15 17 18 16Z" fill="#fff4d8"/><path d="M28 12H33V7Q33 1 38 3Q43 4 41 11H47V21H27Z" fill="#c3d29a"/><path d="M25 39L34 49L49 31" stroke="#d55135" stroke-width="5"/></g></symbol>
-      <symbol id="icon-reminders" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M31 15V10Q31 3 37 3Q44 3 42 14" fill="#f7b244"/><path d="M15 53Q24 40 24 29Q23 15 38 14Q52 15 52 30Q51 43 61 52Q42 63 15 53Z" fill="#de6945"/><path d="M31 57Q35 66 44 58" fill="#f6ba45"/><path d="M36 21Q32 30 34 45M12 16Q5 26 8 37M19 20Q14 25 15 32M58 18Q65 28 62 38M63 12Q73 23 69 40" fill="none"/></g></symbol>
-
-
-      <symbol id="icon-archive" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 27L58 25L57 62L15 64Z" fill="#e9ad39"/><path d="M9 17L59 13L64 24L12 29Z" fill="#f8cc65"/><path d="M12 29L64 24L63 32L12 36Z" fill="#e6a83e"/><path d="M28 44L45 43L45 49L28 50Z" fill="#fff4d8"/></g></symbol>
-      <symbol id="icon-media" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4L19 3Q21 3 21 5L22 18Q22 20 20 20L5 21Q3 21 3 19L2 6Q2 4 4 4Z" fill="#fbf0d5"/><path d="M4 17L9 11L13 15L16 12L21 18" fill="#c5d3ae"/><circle cx="16" cy="8" r="2" fill="#f8d985"/></g></symbol>
-      <symbol id="icon-trash" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7L7 20Q7 21 9 21H16Q18 21 18 19L19 7" fill="#f2d3cb"/><path d="M4 6L21 6M9 5L10 2H15L16 5M10 10L10.5 17M15 10L14.5 17" fill="none"/></g></symbol>
-      <symbol id="icon-calendar" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4H20V21H3L4 4Z" fill="#fbf0d5"/><path d="M4 9H20M8 2V6M16 2V6" fill="none"/><path d="M7 12H10V15H7Z" fill="#f8d985"/><path d="M14 13H17M7 18H10M14 18H17" fill="none"/></g></symbol>
-      <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12H19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-      <symbol id="icon-grip" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="8" cy="5" r="1.5"/><circle cx="16" cy="5" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></g></symbol>
-      <symbol id="icon-add" viewBox="0 0 24 24"><path d="M12 4V20M4 12H20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-      <symbol id="icon-close" viewBox="0 0 24 24"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-      <symbol id="icon-edit" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L6 13L16 3Q17 2 19 4L21 6L11 17Z" fill="#f8d985"/><path d="M6 13L11 17M15 4L20 8M4 20L8 19" fill="none"/></g></symbol>
-      <symbol id="icon-restore" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M4 9A8 8 0 1 1 5 18M3 3V9H9"/><path d="M10 13L12 15L16 11" stroke="#778355"/></g></symbol>
-      <symbol id="icon-sound" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9H7L12 5V19L7 15H3Z" fill="#eacb8f"/><path d="M16 8Q20 12 16 16M19 5Q25 12 19 19" fill="none"/></g></symbol>
-      <symbol id="icon-link" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 15L15 9M8 12L5 15Q2 18 5 21Q8 24 11 21L14 18M10 6L13 3Q16 0 19 3Q22 6 19 9L16 12" transform="translate(0 -1)"/></g></symbol>
-      <symbol id="icon-open" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M8 6H18V16"/></g></symbol>
-      <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-      <symbol id="icon-list" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M9 5H21M9 12H21M9 19H21"/><path d="M3 4H5V6H3ZM3 11H5V13H3ZM3 18H5V20H3Z" fill="#e2d1a7"/></g></symbol>
+      <symbol id="icon-home" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/><circle cx="10" cy="12.3" r="1.8"/></g></symbol>
+      <symbol id="icon-notebooks" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="14" rx="1"/><rect x="8" y="3" width="4" height="14" rx="1"/><path d="M13.2 4.6l3.6-1 2.7 13-3.6 1z"/></g></symbol>
+      <symbol id="icon-notes" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h6"/><path d="M14.5 2.8l2.7 2.7-6.7 6.7-3.3.6.6-3.3z"/></g></symbol>
+      <symbol id="icon-tasks" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M6.5 10.2l2.4 2.3 4.6-5"/></g></symbol>
+      <symbol id="icon-reminders" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14V9a5 5 0 0 1 10 0v5l1.5 1.5h-13z"/><path d="M8.3 17.5a1.8 1.8 0 0 0 3.4 0"/></g></symbol>
+      <symbol id="icon-archive" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="15" height="4" rx="1"/><path d="M4 7.5v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8M8 11h4"/></g></symbol>
+      <symbol id="icon-export" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-10z"/><path d="M11.5 2.5v4h4M10 9v5.5M7.5 12.2L10 14.7l2.5-2.5"/></g></symbol>
+      <symbol id="icon-media" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="7.5" cy="8.5" r="1.4"/><path d="M3.5 14.5l4.5-4 3.5 3 2-1.8 3 2.8"/></g></symbol>
+      <symbol id="icon-trash" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h13M8 5.5V3.5h4v2M5 5.5l.8 11a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9l.8-11"/></g></symbol>
+      <symbol id="icon-calendar" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3M6.5 11h2M11.5 11h2M6.5 14h2"/></g></symbol>
+      <symbol id="icon-minus" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10h10"/></g></symbol>
+      <symbol id="icon-grip" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 5h.01M12.5 5h.01M7.5 10h.01M12.5 10h.01M7.5 15h.01M12.5 15h.01" stroke-width="2.4"/></g></symbol>
+      <symbol id="icon-add" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></g></symbol>
+      <symbol id="icon-close" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></g></symbol>
+      <symbol id="icon-edit" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5l3 3L7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></g></symbol>
+      <symbol id="icon-restore" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a6.5 6.5 0 1 1 .6 5.5"/><path d="M3.5 3.5V8H8"/></g></symbol>
+      <symbol id="icon-sound" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8h3l4-3.5v11l-4-3.5h-3z"/><path d="M13.5 7.5a3.5 3.5 0 0 1 0 5M15.5 5a7 7 0 0 1 0 10"/></g></symbol>
+      <symbol id="icon-link" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 11.5l3-3M9 6l1.5-1.5a3 3 0 0 1 4.2 4.2L13 10.5M11 14l-1.5 1.5a3 3 0 0 1-4.2-4.2L7 9.5"/></g></symbol>
+      <symbol id="icon-open" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14L14 6M7.5 6H14v6.5"/></g></symbol>
+      <symbol id="icon-chevron" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4.5L7 10l5.5 5.5"/></g></symbol>
+      <symbol id="icon-list" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 5.5h9M7.5 10h9M7.5 14.5h9M3.5 5.5h.01M3.5 10h.01M3.5 14.5h.01" /></g></symbol>
+      <symbol id="icon-more" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10h.01M10 10h.01M15.5 10h.01" stroke-width="2.6"/></g></symbol>
+      <symbol id="icon-clock" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4.3l2.8 1.7"/></g></symbol>
+      <symbol id="icon-related" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/><circle cx="10" cy="15" r="2.2"/><path d="M6.4 6.8l2.4 6.2M13.6 6.8l-2.4 6.2M7.2 5h5.6"/></g></symbol>
+      <symbol id="icon-search" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.3 12.3L17 17"/></g></symbol>
+      <symbol id="illus-home" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13H55Q60 13 59 20L58 62H16Q11 62 11 56V20Q11 13 17 13Z" fill="#fff4d8"/><path d="M18 14V62M25 7V19M36 7V19M47 7V19M26 44H47M26 53H44"/><circle cx="42" cy="31" r="7" fill="#f6ba45"/><path d="M42 20V18M42 44V42M31 31H29M55 31H53"/></g></symbol>
+      <symbol id="illus-notebooks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20L43 14L52 57L20 63Z" fill="#c5d3ae"/><path d="M23 12L55 8L61 54L29 59Z" fill="#deb9a7"/><path d="M29 12L34 57M37 22L51 20M38 30L51 28"/><path d="M12 20L19 21L27 62"/></g></symbol>
+      <symbol id="illus-notes" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11L50 7Q55 6 55 12L59 52Q59 56 53 57L20 61Q15 62 15 55L11 18Q10 12 17 11Z" fill="#fff4d8"/><path d="M23 23L43 20M24 32L45 29M25 42L37 40"/><path d="M39 53L43 38L58 17Q61 13 65 17L68 20L51 43Z" fill="#f6ba45"/><path d="M43 38L51 43M58 17L66 23M39 53L42 44"/><path d="M7 52L3 56M64 51L69 54"/></g></symbol>
+      <symbol id="illus-tasks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16H56Q61 16 60 23L57 61H15L15 23Q15 17 18 16Z" fill="#fff4d8"/><path d="M28 12H33V7Q33 1 38 3Q43 4 41 11H47V21H27Z" fill="#c3d29a"/><path d="M25 39L34 49L49 31" stroke="#d55135" stroke-width="5"/></g></symbol>
+      <symbol id="illus-reminders" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M31 15V10Q31 3 37 3Q44 3 42 14" fill="#f7b244"/><path d="M15 53Q24 40 24 29Q23 15 38 14Q52 15 52 30Q51 43 61 52Q42 63 15 53Z" fill="#de6945"/><path d="M31 57Q35 66 44 58" fill="#f6ba45"/><path d="M36 21Q32 30 34 45M12 16Q5 26 8 37M19 20Q14 25 15 32M58 18Q65 28 62 38M63 12Q73 23 69 40" fill="none"/></g></symbol>
+      <symbol id="illus-archive" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 27L58 25L57 62L15 64Z" fill="#e9ad39"/><path d="M9 17L59 13L64 24L12 29Z" fill="#f8cc65"/><path d="M12 29L64 24L63 32L12 36Z" fill="#e6a83e"/><path d="M28 44L45 43L45 49L28 50Z" fill="#fff4d8"/></g></symbol>
     </defs>
   </svg>
   <main class="app">
     <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+      <h6 class="sidebar-heading" id="sidebar-notebook"></h6>
       <nav>
         <button data-view="home" class="nav-item active" aria-current="page"><svg aria-hidden="true"><use href="#icon-home"/></svg><span>Caderninho</span></button>
         <button data-view="notebooks" class="nav-item"><svg aria-hidden="true"><use href="#icon-notebooks"/></svg><span>Cadernos</span></button>
         <button data-view="notes" class="nav-item"><svg aria-hidden="true"><use href="#icon-notes"/></svg><span>Notas</span></button>
         <button data-view="tasks" class="nav-item"><svg aria-hidden="true"><use href="#icon-tasks"/></svg><span>Tarefas</span></button>
         <button data-view="reminders" class="nav-item"><svg aria-hidden="true"><use href="#icon-reminders"/></svg><span>Lembretes</span></button>
-        <button data-view="archive" class="nav-item"><svg aria-hidden="true"><use href="#icon-archive"/></svg><span>Lixeira</span></button>
+        <button data-view="archive" class="nav-item nav-group-start"><svg aria-hidden="true"><use href="#icon-archive"/></svg><span>Lixeira</span></button>
       </nav>
     </aside>
     <section class="notebook" aria-label="Caderninho">
       <div class="book-stack" aria-hidden="true"></div>
-      <div class="spiral" aria-hidden="true"></div>
       <nav class="paper-tabs" aria-label="Cadernos" id="notebook-tabs"></nav>
       <button id="sidebar-toggle" class="fold-tab" aria-controls="sidebar" aria-expanded="true" aria-label="Recolher menu lateral" title="Recolher menu lateral">
-        <svg viewBox="0 0 34 72" aria-hidden="true"><path class="tab-paper" d="M32 2L10 3Q3 3 3 12L2 60Q2 68 11 68L32 69Z"/><path class="tab-fold" d="M23 3L32 13L23 12Z"/><path class="tab-arrow" d="M21 29L13 36L21 43"/></svg>
+        <svg class="fold-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>
       </button>
       <div class="sheet" id="sheet">
-        <div class="window-controls" aria-label="Controles da janela"><div class="traffic-lights"><button id="close" aria-label="Fechar" title="Fechar"></button><button id="minimize" aria-label="Minimizar" title="Minimizar"></button><button id="maximize" aria-label="Maximizar janela" title="Ampliar ou restaurar"></button></div></div>
+        <div class="book-binding" aria-hidden="true"></div>
         <header class="book-header"><span id="save-state" class="save-state" role="status" title="Salvamento local automático">Salvo neste Mac</span><div class="global-search" id="global-search-control"><div class="global-search-field"><input id="global-search" type="search" placeholder="Buscar em todos os cadernos…" aria-label="Buscar em todos os cadernos" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="global-search-results" autocomplete="off" disabled></div><button id="global-search-toggle" aria-label="Abrir busca" title="Buscar (⌘F)" aria-expanded="false" aria-controls="global-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg></button><div id="global-search-results" role="listbox" aria-label="Resultados da busca" hidden></div></div></header>
         <div id="list-progress" class="list-progress" hidden></div>
         <div class="page-content" id="page-content"></div>
         <footer class="book-footer"><span id="footer-label">Uma coisa de cada vez.</span><span id="page-number">01</span></footer>
       </div>
-      <div class="resize-handle resize-mark" data-resize="e" role="separator" aria-label="Arraste para redimensionar a largura" title="Arraste para ajustar a largura"><span></span></div>
-      <div class="resize-handle resize-mark resize-mark-s" data-resize="s" role="separator" aria-label="Arraste para redimensionar a altura" title="Arraste para ajustar a altura"><span></span></div>
-      <div class="resize-handle resize-corner" data-resize="se" role="separator" aria-label="Arraste para redimensionar a janela" title="Arraste para ajustar largura e altura"><span></span></div>
       <div id="flip-layer" aria-hidden="true"></div>
-      <aside class="notes-drawer" id="notes-drawer" hidden aria-label="Todas as notas">
-        <div class="drawer-heading"><h2 id="drawer-title">Suas notas</h2><button id="drawer-close" aria-label="Fechar lista"><svg class="small-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
-        <input id="search" type="search" placeholder="Procurar uma nota…" aria-label="Procurar uma nota">
-        <div id="notes-list"></div>
-      </aside>
+      <div class="toast" id="toast" role="status" hidden></div>
     </section>
     <div class="book-edges" aria-hidden="true">
       <div data-resize="n"></div><div data-resize="s"></div><div data-resize="e"></div><div data-resize="w"></div>
@@ -102,7 +108,6 @@
     <div data-resize="n"></div><div data-resize="s"></div><div data-resize="e"></div><div data-resize="w"></div>
     <div data-resize="ne"></div><div data-resize="nw"></div><div data-resize="se"></div><div data-resize="sw"></div>
   </div>
-  <div class="toast" id="toast" role="status" hidden></div>
   <dialog id="cut-dialog" class="cut-dialog"><form id="cut-link-form"><div class="drawer-heading"><h2>Adicionar mídia</h2><button type="button" id="cut-dialog-close" aria-label="Fechar mídia"><svg class="small-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div><p>Imagens, PDFs e links presos à sua página.</p><button type="button" id="cut-image-pick" class="primary"><svg class="small-icon" aria-hidden="true"><use href="#icon-media"/></svg><span>Escolher imagem ou PDF…</span></button><input type="file" id="cut-image-file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" multiple hidden><label for="cut-url">Link da página</label><input id="cut-url" type="url" placeholder="https://…" required><button type="submit" class="primary"><svg class="small-icon" aria-hidden="true"><use href="#icon-link"/></svg><span>Colar link</span></button><small>Também pode colar ou arrastar uma imagem, um PDF ou um link na nota.</small></form></dialog>
   <dialog id="category-dialog" class="cut-dialog category-dialog"><form id="category-form"><div class="drawer-heading"><h2>Categoria</h2><button id="category-close" type="button" aria-label="Fechar categorias"><svg class="small-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div><label for="category-name">Escolha uma existente ou crie uma nova</label><input id="category-name" type="text" maxlength="49" required placeholder="#trabalho" autocomplete="off"><p id="category-error" class="category-error" role="alert" hidden></p><div id="category-choices" class="category-choices"></div><button class="primary" type="submit"><svg class="small-icon" aria-hidden="true"><use href="#icon-add"/></svg><span>Adicionar categoria</span></button><small>Você também pode escrever #categoria no texto da página.</small></form></dialog>
 <dialog id="notebook-dialog" class="cut-dialog notebook-dialog"><form id="notebook-form"><div class="drawer-heading"><h2 id="notebook-dialog-title">Novo caderno</h2><button id="notebook-close" type="button" aria-label="Fechar caderno"><svg class="small-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div><label for="notebook-name">Nome</label><input id="notebook-name" maxlength="80" required autocomplete="off"><label for="notebook-description">Descrição <span class="subtle">(opcional)</span></label><textarea id="notebook-description" maxlength="500" rows="2"></textarea><fieldset class="notebook-palette"><legend>Cor do caderno</legend><div id="notebook-colors"></div></fieldset><p id="notebook-error" class="category-error" role="alert" hidden></p><button class="primary" type="submit"><svg class="small-icon" aria-hidden="true"><use href="#icon-notebooks"/></svg><span>Guardar caderno</span></button></form></dialog>

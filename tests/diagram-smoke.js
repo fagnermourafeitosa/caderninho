@@ -33,6 +33,8 @@
  assert(savedCode().endsWith('C -->'),'Código inválido também é salvo');
  await type('flowchart TD\n  A[Pedido] --> B{Aprovação}\n  B --> C[Comprar com calma]\n  C --> D[Guardar nota fiscal]');
  await until(()=>drawn('Guardar nota fiscal')&&block().querySelector('.diagram-notice').hidden,'Código corrigido volta a desenhar');
+ // The drawing never scrolls on its own: only the page does.
+ {const drawing=block().querySelector('.diagram-drawing'),svg=drawing.querySelector('svg');assert(!['auto','scroll'].includes(getComputedStyle(drawing).overflowY)&&drawing.scrollHeight<=drawing.clientHeight+1&&drawing.scrollWidth<=drawing.clientWidth+1&&svg.getBoundingClientRect().width<=drawing.clientWidth+1,'Diagrama sem barra de rolagem própria');}
 
  // Esc closes; double-click reopens; Concluir closes.
  block().querySelector('.diagram-code').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));await settle();

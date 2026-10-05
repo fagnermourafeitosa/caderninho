@@ -1,0 +1,100 @@
+/* Native Mac paper shell: kraft sidebar, stitched binding, one primary action and raised menus. */
+
+/* Sidebar: a Mac source list on kraft paper. */
+
+.sidebar{grid-column:1;grid-row:1;position:relative;height:100%;min-width:0;overflow:hidden;display:flex;flex-direction:column;padding:22px 10px 12px;background:var(--kraft);border:2px solid var(--edge);border-radius:16px;box-shadow:0 10px 18px -10px #3c2f2040;-webkit-app-region:no-drag;cursor:grab;transition:opacity .18s ease,transform .24s ease;transform-origin:right center}
+.sidebar::after{pointer-events:none;content:'';position:absolute;inset:0;border-radius:inherit;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23000' d='M0 0h180v180H0z' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
+.sidebar-heading{margin:0;padding:0 10px 8px;font:600 11px/1.3 var(--body-font);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar nav{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:8px;font:var(--text-control) var(--body-font);color:var(--ink);text-align:left;white-space:nowrap;-webkit-app-region:no-drag;cursor:pointer;transition:background .15s}
+.nav-item svg{width:16px;height:16px;flex:none;pointer-events:none}
+.nav-item span{pointer-events:none;overflow:hidden;text-overflow:ellipsis}
+.nav-item.nav-group-start{margin-top:14px}
+.nav-item:hover{background:var(--hover)}
+.nav-item.active{background:var(--accent-soft);font-weight:600}
+.nav-item:focus-visible{outline:2px solid #ae772f;outline-offset:2px}
+.sidebar-collapsed .sidebar{opacity:0;transform:translateX(20px);pointer-events:none;visibility:hidden;transition:opacity .18s ease,transform .24s ease,visibility 0s .24s}
+.notebook{cursor:grab}
+/* The spiral rings gave way to a stitched binding on the left edge. */
+
+.book-binding{position:absolute;left:0;top:0;bottom:0;width:22px;z-index:1;pointer-events:none;background:linear-gradient(90deg,#e7d4a8,var(--paper-shade) 70%,#f6e9c9);border-right:1px solid #c9b385}
+.book-binding::after{content:'';position:absolute;top:14px;bottom:14px;left:10px;border-left:1.5px dashed #9b8659}
+/* Toolbar: one ink primary action; secondary actions live in "Mais". */
+
+.view-toolbar{min-height:28px}
+.view-toolbar .toolbar-right{gap:6px}
+.view-toolbar #notes-open{font-weight:400;color:var(--muted)}
+.view-toolbar #notes-open .subtle{color:var(--muted)}
+.view-toolbar .toolbar-primary{height:28px;padding:0 12px;border-radius:7px;background:var(--ink);color:var(--paper)!important;font:600 var(--text-control)/1 var(--body-font)}
+.view-toolbar .toolbar-primary .small-icon{width:15px;height:15px}
+@media(hover:hover){.view-toolbar .toolbar-primary:not(:disabled):hover{background:#4a4a3c;color:var(--paper)!important}}
+.page-more{position:relative;display:inline-flex}
+#page-more{width:30px;height:28px;justify-content:center;padding:0;border-radius:7px}
+#page-more[aria-expanded=true]{background:var(--hover)}
+.page-more-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:25;width:262px;padding:5px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:10px;box-shadow:0 10px 24px #3c2f2028,0 1px 3px #3c2f201f}
+.page-more-menu[hidden]{display:none}
+.page-more-menu button{display:flex;align-items:center;gap:10px;width:100%;height:30px;padding:0 9px;border-radius:6px;font:var(--text-control) var(--body-font);color:var(--ink);text-align:left}
+.page-more-menu button .small-icon{width:15px;height:15px;flex:none}
+.page-more-menu kbd{margin-left:auto;font:12px var(--body-font);color:var(--muted);letter-spacing:.04em}
+.page-more-menu button:hover,.page-more-menu button:focus-visible{background:var(--hover);outline:none}
+.page-more-menu .page-more-danger{color:#9c3f28}
+.page-more-menu .page-more-danger kbd{color:#9c3f2899}
+.page-more-menu hr{height:1px;margin:5px 4px;border:0;background:var(--line)}
+.page-more-menu button:disabled{opacity:.45}
+/* Note header: title, one metadata line, then the alarm chip. */
+
+.smart-margin{justify-content:flex-start;margin:0 0 10px;min-height:0}
+.margin-existing{height:28px;padding:0 6px 0 10px;border-radius:8px;background:var(--hover);color:var(--ink);font:var(--text-control) var(--body-font)}
+.margin-existing button{color:var(--muted)}
+/* Disabled destructive actions read as disabled, not faded pink. */
+
+:is(.purge,[data-remove-book],[data-source-remove],.row-delete):disabled{color:var(--muted);opacity:.55;cursor:not-allowed}
+/* The hand appears only on the date of the day and on notebook tabs. */
+
+.notebook-tab span{font-family:var(--hand-font)}
+.daily-date{text-transform:none}
+.home-connections .daily-section-heading>span{font-size:var(--text-meta)}
+@media(max-width:760px){.view-toolbar .toolbar-primary .toolbar-action-label{display:none}.view-toolbar .toolbar-primary{padding:0 8px}}
+@media(prefers-reduced-motion:reduce){.nav-item,.sidebar{transition:none}}
+/* Like macOS overlay scrollbars: the page scrolls, the bar shows only while the pointer is on it. */
+
+.note-body{scrollbar-width:none}
+.note-body:hover{scrollbar-width:thin}
+
+/* Every toolbar: navigation on the left, the primary action with search and "Mais" packed on the right. */
+.view-toolbar .toolbar-left{display:flex;align-items:center;gap:8px;min-width:0}
+.view-toolbar .toolbar-right{display:flex;align-items:center;gap:6px;flex:none}
+.view-toolbar .toolbar-back{width:28px;height:28px;justify-content:center;padding:0;border-radius:7px}
+.view-toolbar .toolbar-back .small-icon{width:16px;height:16px}
+.daily-picker select{font:var(--text-control) var(--body-font)}
+
+/* Index of notes and lists: the first screen of each section. */
+.index-search{width:100%;margin:2px 0 10px;padding:8px 10px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:8px;font:var(--text-control) var(--body-font);color:var(--ink)}
+.index-search:focus{outline:2px solid #ae772f;outline-offset:1px}
+.notes-index{scrollbar-width:none}
+.notes-index:hover{scrollbar-width:thin}
+.note-index-row{display:block;width:100%;padding:12px 10px;text-align:left;border-bottom:1px solid var(--line);border-radius:6px}
+.note-index-row:hover{background:var(--hover)}
+.note-index-row strong{display:block;font:600 var(--text-secondary)/1.35 var(--body-font);overflow-wrap:anywhere}
+.note-index-row small{display:block;margin-top:4px;font:var(--text-meta)/1.5 var(--body-font);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.index-empty{padding:14px 10px;color:var(--muted);font-size:var(--text-control)}
+
+/* Note header: title, then the page's categories, then where and when it lives. */
+.note-categories .category-badges{margin:0 0 6px}
+.note-provenance{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:0 0 16px;font:var(--text-meta)/1.5 var(--body-font);color:var(--muted)}
+.note-provenance .notebook-association{margin:0;font:inherit;color:var(--ink)}
+.note-provenance .notebook-association select{border:0;padding:0 2px;font:inherit;color:inherit;background:transparent}
+.note-provenance .notebook-association select:hover{background:var(--hover);border-radius:4px}
+.note-provenance .list-date{margin:0;font:inherit;color:var(--muted)}
+
+/* Home: the latest note alone, or beside its connections; it never scrolls by itself. */
+.home-connections-layout{grid-template-columns:minmax(0,1fr)}
+.home-connections-layout.with-related{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.home-connections-layout:not(.with-related) #home-related-content{display:none}
+.home-note-preview{max-height:430px;overflow:hidden}
+.home-note-preview.clipped{-webkit-mask-image:linear-gradient(to bottom,#000 78%,transparent)}
+.home-note-preview .paper-cut{float:none;margin:10px 0;max-width:100%}
+.note-provenance .notebook-association select{appearance:none;-webkit-appearance:none;margin:0 0 0 -2px;padding:0 16px 0 2px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 8l4 4 4-4' fill='none' stroke='%23303025' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right center/12px no-repeat;cursor:pointer}
+.note-provenance .notebook-association select:hover{background-color:var(--hover)}
+.daily-overview,.scroll-list{scrollbar-width:none}
+.daily-overview:hover,.scroll-list:hover{scrollbar-width:thin}

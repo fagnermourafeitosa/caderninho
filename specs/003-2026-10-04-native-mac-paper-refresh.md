@@ -3,7 +3,7 @@
 - **Specification ID**: 003
 - **Date**: 2026-10-04
 - **Slug**: native-mac-paper-refresh
-- **Status**: Not Implemented
+- **Status**: In Progress
 - **Owner**: Renderer presentation shell and main-process window chrome
 - **Related Specification**: [001 — Project Structure](001-2026-10-04-project-structure.md)
 
@@ -202,9 +202,10 @@ sequenceDiagram
 13. **Toolbars**: each view declares its primary action and its overflow list. Overflow opens a raised-sheet menu with the same rows and icons as the "Nota" menu.
 14. **Menu shortcuts**: Nova nota ⌘N (already handled in the renderer, moves to the menu accelerator), Adicionar mídia ⇧⌘M, Relacionados ⌥⌘R, Exportar PDF ⇧⌘E, Mover para a lixeira ⌘⌫. Existing ⌘F search is unchanged.
 15. **Página do dia**: the latest-note preview spans the full content width; media in the preview flows below text, never beside it. The related section with zero connections renders as one muted line. The caption "Seu caderno em conexão" is replaced with "Notas parecidas com a última que você escreveu".
-16. **Tokens**: `--muted: #6b624c`. Disabled destructive controls: `--muted` at 55% opacity, `cursor: not-allowed`.
-17. **File responsibility**: font protocol and menu construction each live in their own main-process module, not inline in the window bootstrap. Each changed file keeps one primary responsibility.
-18. **Inward dependencies**: renderer formatting helpers do not import Electron APIs; main menu enablement reads the store, never renderer state.
+16. **Note header (approved with the 2026-10-04 mock)**: notebook, categories and the update date share one metadata line below the title. A scheduled alarm of a note renders as a compact chip (clock, time, cancel) right below that line.
+17. **Tokens**: `--muted: #6b624c`. Disabled destructive controls: `--muted` at 55% opacity, `cursor: not-allowed`.
+18. **File responsibility**: font protocol and menu construction each live in their own main-process module, not inline in the window bootstrap. Each changed file keeps one primary responsibility.
+19. **Inward dependencies**: renderer formatting helpers do not import Electron APIs; main menu enablement reads the store, never renderer state.
 
 ---
 
@@ -273,10 +274,10 @@ Per project rules, screen appearance is validated by the user in the running app
 
 ---
 
-## Open Questions
+## Resolved Questions
 
-1. **Handwritten accent face**: this spec proposes Excalifont (already bundled for diagrams, SIL OFL), so diagrams and accents share one hand. Alternative: keep Chalkboard SE for those two accents. Must be confirmed before implementation.
-2. **Green button feasibility**: Electron has no event before a native zoom. If wiring the green button to the custom height toggle cannot be done without a visible maximize-then-resize flicker, implementation STOPS and asks the user to choose between native zoom and disabling the green button.
+1. **Handwritten accent face**: Excalifont (already bundled for diagrams, SIL OFL), approved by the user with the 2026-10-04 mock.
+2. **Green button feasibility**: Electron has no event before a native zoom. If wiring the green button to the custom height toggle cannot be done without a visible maximize-then-resize flicker, the deviation is recorded here and reported.
 
 ---
 
@@ -285,3 +286,18 @@ Per project rules, screen appearance is validated by the user in the running app
 - New York is read at runtime from the user's macOS installation, never redistributed. Electron 44's Chromium does not resolve New York through `ui-serif`, `"New York"` or `".New York"` (verified on 2026-10-04: all three measure identically to Times), which is why the font protocol is required.
 - `NewYork.ttf` is expected to be a variable font. If it is not, `@font-face` declarations are split per weight, and implementation records the deviation here.
 - This specification supersedes the parts of earlier user directives that required drawn traffic lights, visible right/bottom/corner grips, Chalkboard SE labels and illustrated sidebar icons. `docs/PRODUCT.md` "Personality and references" must be rewritten to "warm vintage stationery expressed as material: paper layers, ink, binding and pastel notebook tabs".
+
+### Implementation deviations (2026-10-04)
+
+1. **Trash shortcut**: ⇧⌘⌫ instead of ⌘⌫. In the editor, ⌘⌫ deletes to the start of the line; a menu accelerator would take it away.
+2. **Menu enablement source**: the renderer reports the commands its page renders (`notebook:note-commands`, `send`, payload `string[]`); the main process keeps only known `NoteCommand` values and rebuilds the menu. Checklist and reminder pages also offer Relacionados, as the existing toolbar already did.
+3. **Traffic light position**: the renderer reports the sheet's top-left (`notebook:window-buttons`, `send`, payload `{x,y}` integers within 0–400); main applies `setWindowButtonPosition`. Main cannot know the CSS layout.
+4. **Sidebar order**: Cadernos stays second (existing notebook smoke contract); the separator sits before Lixeira.
+5. **Note dates**: the metadata line keeps both "Criada em" and "Atualizada em" (existing temporal-record contract).
+6. **Global search**: moves into the toolbar right after the primary action, before "Mais" (user request during implementation). Notices center on the notebook, not the window.
+7. **Green button**: wired with `maximize` → `unmaximize` + height toggle. A flicker check needs the user's eyes.
+8. **Toolbar (user review, 2026-10-04)**: no page title beside the traffic lights. Every toolbar is `toolbar-left` (navigation only: back chevron, day picker) and `toolbar-right` (primary action, search, "Mais"), packed with a 6px gap.
+9. **Notes and lists index (user review)**: the "Suas notas" drawer is removed. Notas and Tarefas open on an index page (title, count, search, rows); a row opens the page; an icon-only back chevron returns to the index. The index shows until another page is selected or created.
+10. **Note header hierarchy (user review)**: title → categories row → provenance line (notebook picker without a "Caderno" label · created · updated), muted 12px.
+11. **Home (user review)**: the latest note is always shown and never scrolls by itself (clipped with a fade). "Ideias por perto" appears beside it only when connections exist; otherwise the note takes the full width. This keeps the earlier side-by-side rule and replaces Solution item 10's stacked layout.
+12. **Diagrams and lists**: diagrams never scroll by themselves; page and list scrollbars show only on hover, like macOS overlay scrollbars.

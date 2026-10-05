@@ -61,6 +61,38 @@ async function runDiagramSmoke(win) {
   fs.writeFileSync(path.join(ROOT, 'artifacts', 'diagrama.png'), (await win.webContents.capturePage()).toPNG());
   console.log('DIAGRAM_SMOKE_OK', JSON.stringify({ noteId: result.noteId, errors: result.errors }));
 }
+async function runPagesSmoke(win) {
+  const result = await win.webContents.executeJavaScript(smokeScript('pages-smoke.js'));
+  if (result.errors.length) throw new Error(result.errors.join('\n'));
+  console.log('PAGES_SMOKE_OK');
+}
+// Native Mac shell: menu commands, enablement per view and traffic lights that follow the book.
+async function runMacShellSmoke(win) {
+  const { Menu } = require('electron');
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const noteItems = () => Menu.getApplicationMenu().items.find(item => item.label === 'Nota').submenu.items.filter(item => item.type !== 'separator');
+  const enabled = () => Object.fromEntries(noteItems().map(item => [item.label, item.enabled]));
+  const run = script => win.webContents.executeJavaScript(script);
+  const result = await run(smokeScript('mac-shell-smoke.js'));
+  if (result.errors.length) throw new Error(result.errors.join('\n'));
+  if (JSON.stringify(enabled()) !== JSON.stringify({ 'Nova nota': true, 'Adicionar mídia': false, 'Relacionados': false, 'Exportar PDF': false, 'Mover para a lixeira': false })) throw new Error('Menu Nota na home: ' + JSON.stringify(enabled()));
+  await run("(async()=>{state=await window.notebook.action('view:select',{view:'notes'});view='notes';render();})()"); await wait(50);
+  if (Object.values(enabled()).some(value => !value)) throw new Error('Menu Nota nas notas: ' + JSON.stringify(enabled()));
+  noteItems().find(item => item.label === 'Adicionar mídia').click(); await wait(100);
+  if (!await run("document.querySelector('#cut-dialog').open")) throw new Error('Nota > Adicionar mídia não abriu o diálogo');
+  await run("document.querySelector('#cut-dialog').close()");
+  const startedCollapsed = await run('Boolean(state.sidebarCollapsed)');
+  if (startedCollapsed) { await run("document.querySelector('#sidebar-toggle').click()"); await wait(400); }
+  const expanded = win.getWindowButtonPosition();
+  await run("document.querySelector('#sidebar-toggle').click()"); await wait(400);
+  const collapsed = win.getWindowButtonPosition();
+  await run("document.querySelector('#sidebar-toggle').click()"); await wait(400);
+  if (startedCollapsed) { await run("document.querySelector('#sidebar-toggle').click()"); await wait(400); }
+  if (!expanded || !collapsed || collapsed.x >= expanded.x || (startedCollapsed ? win.getWindowButtonPosition().x !== collapsed.x : win.getWindowButtonPosition().x !== expanded.x)) throw new Error('Semáforos não acompanham o livro: ' + JSON.stringify({ expanded, collapsed }));
+  fs.mkdirSync(path.join(ROOT, 'artifacts'), { recursive: true });
+  fs.writeFileSync(path.join(ROOT, 'artifacts', 'mac-shell.png'), (await win.webContents.capturePage()).toPNG());
+  console.log('MAC_SHELL_SMOKE_OK', JSON.stringify({ expanded, collapsed }));
+}
 async function runSmoke() {
   const { win, store, media, related } = testHook.context();
   try {
@@ -79,6 +111,8 @@ async function runSmoke() {
       }
       console.log('RELATED_RUNTIME_OK');app.quit();return;
     }
+    if(process.argv.includes('--pages-only')){await runPagesSmoke(win);app.quit();return;}
+    if(process.argv.includes('--mac-shell-only')){await runMacShellSmoke(win);app.quit();return;}
     if(process.argv.includes('--diagram-only')){await runDiagramSmoke(win);app.quit();return;}
     if(process.argv.includes('--native-only')){await runNativeEditorSmoke(win);app.quit();return;}
     if(process.argv.includes('--editor-only')) {
@@ -254,6 +288,8 @@ async function runSmoke() {
     if(editorResult.errors.length)throw new Error(editorResult.errors.join('\n'));
     fs.writeFileSync(path.join(ROOT,'artifacts','editor-tabela.png'),(await win.webContents.capturePage()).toPNG());
     await runDiagramSmoke(win);
+    await runMacShellSmoke(win);
+    await runPagesSmoke(win);
     console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'))));
     console.log('EDITOR_SMOKE_OK',JSON.stringify(editorResult));
     await runNativeEditorSmoke(win);

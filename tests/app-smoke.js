@@ -8,11 +8,13 @@
   assert(document.querySelector('#daily-overview')&&!document.querySelector('#daily-body'), 'Página do dia é a home inicial sem campo de anotações');
   assert(document.querySelector('.sidebar [data-view]').dataset.view === 'home', 'Caderninho é o primeiro item');
   await click('[data-view=notes]');
+  assert(document.querySelector('#notes-index'), 'Notas abrem no índice');
+  await click(`[data-note-id="${(await window.notebook.state()).selected.notes}"]`, 1100);
   assert(document.querySelector('#note-body'), 'Editor de notas');
   assert(document.querySelector('#add-cut svg') && document.querySelector('#new-note svg'), 'Ações da toolbar usam ícones');
   assert(!document.querySelector('#add-cut').textContent.includes('+') && !document.querySelector('#new-note').textContent.includes('+'), 'Ações sem prefixo +');
   assert(document.querySelector('.view-toolbar #trash-note svg') && !document.querySelector('.note-bottom #trash-note'), 'Lixeira com ícone fica na toolbar');
-  assert(document.querySelector('#trash-note').previousElementSibling.classList.contains('toolbar-separator'), 'Separador antes da lixeira');
+  assert(document.querySelector('#trash-note').previousElementSibling.tagName === 'HR', 'Separador antes da lixeira');
   assert(!document.querySelector('#themes-open') && !document.querySelector('#pin'), 'Temas e Fixar removidos');
   assert(document.querySelectorAll('.sidebar [data-view]').length === 6, 'Seis seções do menu');
   assert(!document.querySelector('.face') && !document.querySelector('.arm'), 'Área de escrita livre do mascote');
@@ -25,10 +27,6 @@
   assert(document.querySelector('#sidebar-toggle').getAttribute('aria-expanded') === 'false', 'Aba indica menu recolhido');
   assert(document.querySelector('#note-body').getBoundingClientRect().width > widthBeforeFold + 80, 'Recolher libera espaço para escrita');
   assert(document.querySelector('#note-body').value === initialText, 'Texto preservado ao recolher');
-  for (const name of ['close', 'minimize', 'maximize']) {
-    const control = document.querySelector('#' + name);
-    assert(control.closest('#sheet') && control.getBoundingClientRect().width > 0, 'Controle continua no caderno: ' + name);
-  }
   await click('#sidebar-toggle', 350);
   assert(!(await window.notebook.state()).sidebarCollapsed && !document.querySelector('#sidebar').inert, 'Reabrir restaura menu');
   const originalWindow = await window.notebook.window('state');
@@ -65,7 +63,7 @@
   header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
   await wait(100);
   assert((await window.notebook.window('state')).expanded, 'Dois cliques no topo maximizam');
-  document.querySelector('#maximize').dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
+  document.querySelector('#new-note').dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
   await wait(100);
   assert((await window.notebook.window('state')).expanded, 'Dois cliques em um botão não maximizam');
   header.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, clientY:header.getBoundingClientRect().top+3 }));
@@ -113,10 +111,10 @@
   fill('#task-input', 'Comprar café'); document.querySelector('#task-form').requestSubmit(); await wait(180);
   const secondList = (await window.notebook.state()).selected.tasks;
   assert(current(await window.notebook.state()).items.length === 1, 'Segunda lista independente');
-  await click('#notes-open');
-  fill('#search', 'Lista de trabalho');
-  assert(document.querySelectorAll('.note-list-item').length === 1, 'Busca por lista');
-  assert(document.querySelector('.note-list-item small').textContent.includes('1 / 2 concluídas'), 'Progresso organizado por lista');
+  await click('#back-to-index');
+  fill('#index-search', 'Lista de trabalho');
+  assert(document.querySelectorAll('.note-index-row').length === 1, 'Busca por lista');
+  assert(document.querySelector('.note-index-row small').textContent.includes('1 / 2 concluídas'), 'Progresso organizado por lista');
   await click(`[data-note-id="${firstList}"]`, 1100);
   assert(document.querySelectorAll('[data-task-id]').length === 2 && document.querySelector('[data-task-id]').checked, 'Lista e checkbox preservados');
   await click('[data-trash-item]');
@@ -149,6 +147,7 @@
   await click('[data-restore-id]', 1100);
   assert(document.querySelector('#note-body').value.includes('respirar'), 'Restaurar texto do lembrete');
   await click('[data-view=notes]');
+  await click(`[data-note-id="${(await window.notebook.state()).selected.notes}"]`, 1100);
   fill('#note-title', 'Uma ideia para guardar');
   fill('#note-body', 'Salvamento verificado.\nSegunda linha preservada.');
   await wait(220);
@@ -162,7 +161,6 @@
     await click(`[data-view="${selectedView}"]`);
     assert((await window.notebook.state()).activeView === selectedView, 'Clique no menu: ' + selectedView);
   }
-  await click('#notes-open');
   await click('[data-note-id=welcome]', 1100);
   document.querySelector('#toast').hidden = true;
   const body = document.querySelector('#note-body').getBoundingClientRect();

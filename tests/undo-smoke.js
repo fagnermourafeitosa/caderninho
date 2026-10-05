@@ -47,8 +47,8 @@
   const queued = editPageHistory('undo'); await Promise.resolve();
   document.execCommand('insertText', false, 'Depois de desfazer '); await queued; await wait(100);
   assert($('#note-body').value.includes('Depois de desfazer '), 'Digitar durante o salvamento do undo não perde texto');
-  openDrawer(); document.execCommand('insertText', false, 'Busca'); await wait(50); await shortcut();
-  assert($('#search').value === '', 'Ctrl+Z também funciona no campo de busca');
-  closeDrawer(); putCaret(document.querySelector('.line-text'));
+  openIndex(); $('#index-search').focus(); document.execCommand('insertText', false, 'Busca'); await wait(50); await shortcut();
+  assert($('#index-search').value === '', 'Ctrl+Z também funciona no campo de busca');
+  indexFor = null; render(); putCaret(document.querySelector('.line-text'));
   return { errors: window.smokeErrors, noteId: firstId };
 })()

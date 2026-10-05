@@ -7,20 +7,20 @@ function renderNotebookTabs() {
   $('#notebook-tab-add').onclick=()=>openNotebookDialog();
 }
 async function openNotebook(id) {
-  cancelTurn();closeDrawer();
+  cancelTurn();
   if(!await action('notebook:select',{id})) return;
   if(!['notes','tasks','reminders'].includes(view)) {if(!await action('view:select',{view:'notes'})) return;}
   view=state.activeView; reminderEditor=false; render();
 }
 function notebookAssociation(note) {
-  return `<label class="notebook-association">Caderno <select id="note-notebook" aria-label="Caderno desta página">${state.notebooks.map(book=>`<option value="${escape(book.id)}" ${note.notebookId===book.id?'selected':''}>${escape(book.name)}</option>`).join('')}</select></label>`;
+  return `<label class="notebook-association"><select id="note-notebook" aria-label="Caderno desta página">${state.notebooks.map(book=>`<option value="${escape(book.id)}" ${note.notebookId===book.id?'selected':''}>${escape(book.name)}</option>`).join('')}</select></label>`;
 }
 function wireNotebookAssociation(note) {
   $('#note-notebook').onchange=async event=>{if(await action('note:move',{id:note.id,notebookId:event.target.value})) {render();}};
 }
 function renderNotebooks() {
   $('#list-progress').hidden=true;
-  $('#page-content').innerHTML=`<div class="view-toolbar"><span class="toolbar-heading">${actionLabel('list','Seus cadernos')}</span><button id="notebook-new" class="add-note toolbar-action" aria-label="Novo caderno" title="Novo caderno">${icon('notebooks')}<span class="toolbar-action-label">Novo caderno</span></button></div><h1>Cadernos</h1><p class="view-description">Organize suas notas, listas e lembretes. Cada página pertence a um caderno.</p><div class="notebook-list scroll-list">`+state.notebooks.map(book=>`<article class="notebook-row"><button class="notebook-cover" data-open-book="${escape(book.id)}" style="--book-color:${book.color}" aria-label="Abrir caderno ${escape(book.name)}"><span>${escape(book.name)}</span></button><div class="notebook-copy"><h2>${escape(book.name)}${book.id===state.activeNotebook?'<small>Em uso</small>':''}</h2><p>${escape(book.description || 'Sem descrição')}</p><small>${book.count} ${book.count===1?'página':'páginas'} · Atualizado em ${formatDateTime(book.updated)}</small><div class="notebook-actions"><button data-open-book="${escape(book.id)}">${actionLabel('open','Abrir')}</button><button data-edit-book="${escape(book.id)}">${actionLabel('edit','Editar')}</button><button data-remove-book="${escape(book.id)}" ${state.notebooks.length===1?'disabled title="Mantenha pelo menos um caderno"':''}>${actionLabel('trash','Remover')}</button></div></div></article>`).join('')+'</div>';
+  $('#page-content').innerHTML=`<div class="view-toolbar"><span class="toolbar-left"></span><span class="toolbar-right"><button id="notebook-new" class="add-note toolbar-action toolbar-primary" aria-label="Novo caderno" title="Novo caderno">${icon('add')}<span class="toolbar-action-label">Novo caderno</span></button></span></div><h1>Cadernos</h1><p class="view-description">Organize suas notas, listas e lembretes. Cada página pertence a um caderno.</p><div class="notebook-list scroll-list">`+state.notebooks.map(book=>`<article class="notebook-row"><button class="notebook-cover" data-open-book="${escape(book.id)}" style="--book-color:${book.color}" aria-label="Abrir caderno ${escape(book.name)}"><span>${escape(book.name)}</span></button><div class="notebook-copy"><h2>${escape(book.name)}${book.id===state.activeNotebook?'<small>Em uso</small>':''}</h2><p>${escape(book.description || 'Sem descrição')}</p><small>${book.count} ${book.count===1?'página':'páginas'} · Atualizado em ${formatDateTime(book.updated)}</small><div class="notebook-actions"><button data-open-book="${escape(book.id)}">${actionLabel('open','Abrir')}</button><button data-edit-book="${escape(book.id)}">${actionLabel('edit','Editar')}</button><button data-remove-book="${escape(book.id)}" ${state.notebooks.length===1?'disabled title="Mantenha pelo menos um caderno"':''}>${actionLabel('trash','Remover')}</button></div></div></article>`).join('')+'</div>';
   $('#notebook-new').onclick=()=>openNotebookDialog();
   $('#page-content').querySelectorAll('[data-open-book]').forEach(button=>button.onclick=()=>openNotebook(button.dataset.openBook));
   $('#page-content').querySelectorAll('[data-edit-book]').forEach(button=>button.onclick=()=>openNotebookDialog(button.dataset.editBook));

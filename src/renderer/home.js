@@ -5,7 +5,7 @@ function homeRelatedSection() {
   if(state.daily.day!==state.daily.today)return '';
   const note=latestHomeNote();
   if(!note)return '';
-  return `<section class="daily-section home-connections" aria-label="Última nota e suas conexões"><div class="daily-section-heading"><h2>${relatedGraphIcon}<span>Ideias por perto</span></h2><span>Seu caderno em conexão</span></div><div class="home-connections-layout"><div class="home-latest"><small>Última nota</small><h3>${escape(note.title||'Sem título')}</h3><div id="home-note-preview" class="note-body collage-editor home-note-preview" aria-label="Prévia da última nota"></div><button type="button" data-home-note="${escape(note.id)}" class="daily-link">${actionLabel('open','Continuar nesta nota')}</button></div><div id="home-related-content" data-note-id="${escape(note.id)}"><p class="daily-empty" role="status">À procura de conexões…</p></div></div></section>`;
+  return `<section class="daily-section home-connections" aria-label="Última nota e suas conexões"><div class="home-connections-layout"><div class="home-latest"><small>Última nota</small><h3>${escape(note.title||'Sem título')}</h3><div id="home-note-preview" class="note-body collage-editor home-note-preview" aria-label="Prévia da última nota"></div><button type="button" data-home-note="${escape(note.id)}" class="daily-link">${actionLabel('open','Continuar nesta nota')}</button></div><div id="home-related-content" data-note-id="${escape(note.id)}"></div></div></section>`;
 }
 function renderHomeNotePreview(){
   const host=$('#home-note-preview'),note=latestHomeNote();if(!host||!note)return;
@@ -19,6 +19,7 @@ function renderHomeNotePreview(){
   preview.querySelectorAll('[role="textbox"],[tabindex]').forEach(element=>{element.removeAttribute('role');element.removeAttribute('tabindex');});
   preview.querySelectorAll('input').forEach(input=>{input.disabled=true;});
   host.replaceChildren(...preview.childNodes);
+  requestAnimationFrame(() => host.classList.toggle('clipped', host.scrollHeight > host.clientHeight + 1));
   drawDiagrams(host);
   host.scrollTop=scroll;
   host.dataset.noteId=note.id;
@@ -49,11 +50,11 @@ function refreshHomePanels() {
   $('#daily-panels').innerHTML = homeSections(); bindHomePanels();
   const data = state.daily.overview;
   renderHomeNotePreview();
-  $('#daily-summary').textContent = `${data.tasks.filter(task => !task.done).length} tarefas pendentes · ${data.reminders.length} lembretes · ${data.recentNotes.length} notas recentes`;
+  $('#daily-summary').textContent = [textFormat.plural(data.tasks.filter(task => !task.done).length, 'tarefa pendente', 'tarefas pendentes'), textFormat.plural(data.reminders.length, 'lembrete', 'lembretes'), textFormat.plural(data.recentNotes.length, 'nota recente', 'notas recentes')].join(' · ');
 }
 function renderHome() {
   const daily = state.daily, history = daily.day !== daily.today, index = daily.days.indexOf(daily.day);
-  $('#page-content').innerHTML = `<div class="view-toolbar daily-toolbar"><label class="daily-picker">${icon('home')}<span>Página</span> <select id="daily-select" aria-label="Consultar páginas anteriores">${daily.days.map(day => `<option value="${day}" ${day === daily.day ? 'selected' : ''}>${day === daily.today ? 'Hoje · ' : ''}${dayLabel(day)}</option>`).join('')}</select></label><span class="toolbar-right">${history ? `<button id="daily-today">${icon('home')}<span>Voltar a hoje</span></button>` : ''}<button id="new-note" class="add-note toolbar-action" title="Nova nota" aria-label="Nova nota">${icon('notes')}<span>Nova nota</span></button></span></div><div class="daily-heading"><h1>${history ? 'Página anterior' : 'Página do dia'}</h1><span class="daily-date">${escape(dayLabel(daily.day, true))}</span></div><p id="daily-summary" class="daily-summary"></p><div id="daily-overview" class="daily-overview">${homeRelatedSection()}<div id="daily-panels"></div></div><div class="daily-bottom"><span>${history ? 'Um retrato do que ficou neste dia.' : 'Pendentes de todas as listas + concluídas hoje.'}</span><div class="note-pager"><button id="daily-prev" aria-label="Dia anterior" ${index >= daily.days.length - 1 ? 'disabled' : ''}>${icon('chevron')}</button><button id="daily-next" aria-label="Dia seguinte" ${index === 0 ? 'disabled' : ''}>${icon('chevron')}</button></div></div>`;
+  $('#page-content').innerHTML = `<div class="view-toolbar daily-toolbar"><span class="toolbar-left"><label class="daily-picker"><select id="daily-select" aria-label="Consultar páginas anteriores">${daily.days.map(day => `<option value="${day}" ${day === daily.day ? 'selected' : ''}>${day === daily.today ? 'Hoje · ' : ''}${dayLabel(day)}</option>`).join('')}</select></label>${history ? `<button id="daily-today">${icon('home')}<span>Voltar a hoje</span></button>` : ''}</span><span class="toolbar-right"><button id="new-note" class="add-note toolbar-action toolbar-primary" title="Nova nota" aria-label="Nova nota">${icon('add')}<span>Nova nota</span></button></span></div><div class="daily-heading"><h1>${history ? 'Página anterior' : 'Página do dia'}</h1><span class="daily-date">${escape(textFormat.sentenceCase(dayLabel(daily.day, true)))}</span></div><p id="daily-summary" class="daily-summary"></p><div id="daily-overview" class="daily-overview">${homeRelatedSection()}<div id="daily-panels"></div></div><div class="daily-bottom"><span>${history ? 'Um retrato do que ficou neste dia.' : 'Pendentes de todas as listas + concluídas hoje.'}</span><div class="note-pager"><button id="daily-prev" aria-label="Dia anterior" ${index >= daily.days.length - 1 ? 'disabled' : ''}>${icon('chevron')}</button><button id="daily-next" aria-label="Dia seguinte" ${index === 0 ? 'disabled' : ''}>${icon('chevron')}</button></div></div>`;
   $('#page-number').textContent = daily.day.slice(8);
   $('#new-note').onclick = createNote;
   const select = async day => { if (await action('day:select', { day })) renderHome(); };
