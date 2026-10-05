@@ -255,7 +255,7 @@ Per project rules, screen appearance is validated by the user in the running app
 - [ ] 12. Página do dia shows a full-width note preview and a one-line empty related state with the new caption.
 - [ ] 13. `--muted` text meets 4.5:1 on paper and paper shade.
 - [ ] 14. Reduced-motion users see no hover wobble or sidebar transition.
-- [ ] 15. `docs/DESIGN.md` and `docs/PRODUCT.md` are updated to describe the new tokens, typography, icon system and surfaces.
+- [x] 15. `docs/DESIGN.md` and `docs/PRODUCT.md` are updated to describe the new tokens, typography, icon system and surfaces.
 - [ ] 16. All unit, integration, smoke and regression tests pass.
 - [ ] 17. Quality checks (`npm test` on Node 22+, `node --check` on changed files, affected smoke tests) pass with 0 errors.
 - [ ] 18. The packaged app starts and loads New York from the system font files.

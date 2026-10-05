@@ -8,11 +8,11 @@ The app interface is in Portuguese. Labels are shown in bold exactly as they app
 
 Open **Caderninho.app**. The first screen, **Caderninho**, brings together your pending tasks, today's reminders, latest notes and a preview of the notebook's most recently updated note, with its connection graph.
 
-To write, open **Notas** (Notes) and click **+ Nova nota** (New note). Give it a title and start. Changes are saved automatically on your computer. If something fails, the app shows a notice.
+To write, open **Notas** (Notes): it opens on the list of your notes. Click a note to open it, or **+ Nova nota** (New note) to start one. Give it a title and start. Changes are saved automatically on your computer. If something fails, the app shows a notice.
 
 ## Search across all notebooks
 
-Click the **magnifying glass at the top** or press **⌘F**. The field opens from right to left and searches titles and content of notes, lists and reminders in all notebooks, regardless of the open section. Search ignores differences in accents and letter case; pages in the trash are left out.
+Click the **magnifying glass at the top**, right after the main button, or press **⌘F**. The field opens and searches titles and content of notes, lists and reminders in all notebooks, regardless of the open section. Search ignores differences in accents and letter case; pages in the trash are left out.
 
 Each result shows the page type, the notebook and an excerpt of the content. Click to open it, or use **↑/↓** and **Enter**. **Escape** collapses the field.
 
@@ -24,7 +24,7 @@ There is always at least one notebook. On first launch, **Meu caderno** (My note
 
 The tabs on the right let you switch notebooks. On hover, the tab opens and reveals the name vertically. The selected tab stays open, showing which notebook you are in. The last tab, **+**, opens the creation form.
 
-On the page itself, the **Caderno** (Notebook) field lets you move a note, list or reminder to another notebook. When removing a notebook, you choose another one to receive all its pages, including those in the trash. No page is deleted by this operation, and the last notebook cannot be removed.
+On the page itself, the notebook name below the title, next to the dates, lets you move a note, list or reminder to another notebook. When removing a notebook, you choose another one to receive all its pages, including those in the trash. No page is deleted by this operation, and the last notebook cannot be removed.
 
 ## What you can keep
 
@@ -43,7 +43,7 @@ On the page itself, the **Caderno** (Notebook) field lets you move a note, list 
 
 See pending tasks, items completed today, today's alerts and latest notes. Checking a task here updates its original page. Click a title to open the corresponding page.
 
-At the top of today's page, the notebook's latest note appears with its formatting and media, next to the connection graph. Use **Continuar nesta nota** (Continue in this note) to edit it, or click a connection to open another page. The next day, the previous page's summary remains available in the date picker. Previous days are read-only; choose **Hoje** (Today) to return to the current day.
+At the top of today's page, the notebook's latest note appears with its formatting and media. When it has connections, **Ideias por perto** (Nearby ideas) shows them beside it as a graph. Use **Continuar nesta nota** (Continue in this note) to edit it, or click a connection to open another page. The next day, the previous page's summary remains available in the date picker. Previous days are read-only; choose **Hoje** (Today) to return to the current day.
 
 ### Categories
 
@@ -63,7 +63,7 @@ Names accept letters, accents, numbers, hyphens and underscores; spaces become h
 
 In **Tarefas** (Tasks), click **+ Nova lista** (New list). Give it a title, write an item in the bottom field and press **Enter** or **+ Adicionar** (Add). You can edit items and check them as you complete them.
 
-Use **Suas listas** (Your lists) to switch lists or search by content. Each list keeps its own items, completion states and dates. The progress indicator shows how many items have been completed.
+**Tarefas** opens on the index of your lists; search there by content and click a list to open it. The arrow at the top left returns to the index. Each list keeps its own items, completion states and dates. The progress indicator shows how many items have been completed.
 
 ### Reminders and calendar
 
@@ -108,7 +108,7 @@ These items belong to the note and do not create a separate list in **Tarefas**.
 
 ## Images, PDFs and links
 
-In **Notas**, use **Adicionar mídia** (Add media), paste an image or a link into the text, or drag images, PDFs and links onto the page. Accepted files are **PNG, JPEG and WebP** images up to **20 MB** each, and **PDF** documents up to **50 MB**.
+In **Notas**, use **Adicionar mídia** (Add media) in the **⋯** menu or press **⇧⌘M**, paste an image or a link into the text, or drag images, PDFs and links onto the page. Accepted files are **PNG, JPEG and WebP** images up to **20 MB** each, and **PDF** documents up to **50 MB**.
 
 Use the **Arraste** (Drag) handle to position the media next to a paragraph, on the left or the right. The **− / +** buttons adjust the width; the text follows the media position.
 
@@ -120,7 +120,7 @@ Imported images and PDFs are copied to the app's data folder. You can move or de
 
 ## Export to PDF
 
-Open a note, task list or reminder and use **Exportar PDF** (Export PDF) in the page bar. In smaller windows, look for the sheet icon with a down arrow. Choose the name and folder in the Mac dialog.
+Open a note, task list or reminder and choose **Exportar PDF** (Export PDF) in the **⋯** menu at the top of the page, or press **⇧⌘E**. Choose the name and folder in the Mac dialog.
 
 The A4 PDF includes title, notebook, categories, dates, formatted text, tables, checkboxes, images, link cards, attached PDFs and actions linked to the page. Long pages continue on further sheets, with page numbers. Export saves the latest changes before generating the file and works locally, without internet.
 
@@ -130,13 +130,19 @@ The A4 PDF includes title, notebook, categories, dates, formatted text, tables, 
 | --- | --- |
 | Undo | **Ctrl Z** or **⌘ Z** |
 | Redo | **Ctrl/⌘ Shift Z** or **Ctrl Y** |
-| New page in the current section | **Ctrl/⌘ N** |
-| Search pages in the current section | **Ctrl/⌘ F** |
-| Close page list | **Escape** |
+| New page in the current section | **⌘ N** |
+| Search all notebooks | **⌘ F** |
+| Add media to a note | **⇧⌘ M** |
+| Related pages | **⌥⌘ R** |
+| Export PDF | **⇧⌘ E** |
+| Move page to the trash | **⇧⌘ ⌫** |
+| Close a menu | **Escape** |
+
+The page actions are also in the **Nota** menu of the menu bar, enabled when the open page offers them.
 
 In notes, the undo history includes title, text, pills and checkboxes, kept per page during the session. It resets when you close the app. Moving media and scheduling alerts are not part of this history.
 
-Drag a non-editable area of the notebook to move the window. Use the edges to resize; the mark on the right edge adjusts the width. The red button closes, the yellow one minimizes and the green one enlarges the window to the available height, with a width of up to 1,200 pixels. Double-clicking the top also enlarges or restores it.
+Drag a non-editable area of the notebook to move the window, and drag the notebook's border to resize it. The window uses the Mac's own buttons: red closes, yellow minimizes and green enlarges the window to the available height, with a width of up to 1,200 pixels. Double-clicking the top also enlarges or restores it.
 
 The paper tab on the left collapses or opens the side menu. This preference is saved.
 
@@ -144,7 +150,7 @@ The paper tab on the left collapses or opens the side menu. This preference is s
 
 Pages show when they were created and updated. Tasks record checks and unchecks; removed items keep their deletion date until restored. Data from older versions may show **não registrado** (not recorded) when the date did not exist.
 
-The **pastel red trash icon**, at the top of the page after the separator, moves the page to the trash and keeps it recoverable. Task items and media can also be restored in **Lixeira** (Trash), separated by type. Restoring keeps content, notebook, categories and task states. An overdue reminder must be scheduled again.
+**Mover para a lixeira** (Move to the trash), in the **⋯** menu at the top of the page or with **⇧⌘⌫**, moves the page to the trash and keeps it recoverable. Task items and media can also be restored in **Lixeira** (Trash), separated by type. Restoring keeps content, notebook, categories and task states. An overdue reminder must be scheduled again.
 
 **Excluir definitivamente** (Delete permanently) asks for confirmation and erases the item permanently. Images and PDFs stay on disk while another page or recoverable media still uses them.
 
@@ -189,6 +195,6 @@ In the form, **Esc** cancels and returns the text selection. Nothing is created 
 
 After autosave, Caderninho looks for relationships between notes, tasks and reminders in the same notebook. Up to two connections fade in at the footer, after **Relacionados:** (Related). Click a title to open the source page. When there is no relevant relationship, it stays empty.
 
-Use **Relacionados**, at the top of the page, to open the graph. The current page sits at the center; content with higher affinity sits closer. Click a connection to open its source page. In narrow windows, the button shows only the icon, with the name on hover.
+Use **Relacionados** in the **⋯** menu, or **⌥⌘R**, to open the graph. The current page sits at the center; content with higher affinity sits closer. Click a connection to open its source page. In narrow windows, the button shows only the icon, with the name on hover.
 
 The calculation combines categories, shared words and the meaning of the text. On a Mac, text found in images also contributes. Pages and images are not sent for analysis in the cloud. The first use needs internet to download the model; after that, analysis works locally.
