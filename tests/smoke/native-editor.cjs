@@ -56,10 +56,23 @@ async function runNativeEditorSmoke(win){
     if(await js("window.shortcutPrevented")!==false||!s.active||s.start!==3||s.end!==3)throw new Error('Page editor intercepted '+label+' in diagram code: '+JSON.stringify({prevented:await js("window.shortcutPrevented"),...s}));
   };
   await pageKeepsShortcut('a',['meta'],'Cmd+A');await pageKeepsShortcut('a',['control'],'Ctrl+A');await pageKeepsShortcut('ArrowUp',['shift','meta'],'Cmd+Shift+Up');
+  for(const modifier of ['meta','control'])for(const letter of ['b','i','u'])await pageKeepsShortcut(letter,[modifier],modifier+'+'+letter);
   win.webContents.selectAll();await pause();
   {const s=JSON.parse(await js(codeSelection));if(!s.active||s.start!==0||s.end!==s.length)throw new Error('Select all in diagram code did not select only the code: '+JSON.stringify(s));}
   await js("closeDiagramEditor($('#note-body .diagram-block'))");await pause();
   if(!await js("currentNote().editorDoc[0].code===$('#note-body .diagram-code').value"))throw new Error('Diagram deletion was not saved');
+  // Formatting shortcuts at a caret use native typing attributes and persist through ordinary input.
+  for(const modifier of ['meta','control'])for(const [letter,mark] of [['b','bold'],['i','italic'],['u','underline']]){
+    await js("state=await window.notebook.action('note:create',{type:'notes',title:'Insertion shortcuts'});state=await window.notebook.action('note:update',{id:currentNote().id,body:'Before '});view='notes';render();const body=$('#note-body');body.focus();body.setSelectionRange(body.value.length,body.value.length);");
+    key(letter,[modifier]);await pause();
+    win.webContents.sendInputEvent({type:'char',keyCode:'X'});await pause();
+    if(!await js(`currentNote().editorDoc?.[0].runs.some(run=>run.text==='X'&&run.marks.${mark})`))throw Error(modifier+'+'+letter+' did not persist the insertion style');
+    if(!await js(`currentNote().editorDoc[0].runs[0].text==='Before '&&!currentNote().editorDoc[0].runs[0].marks.${mark}`))throw Error('Insertion shortcut changed existing text');
+    key(letter,[modifier]);await pause();win.webContents.sendInputEvent({type:'char',keyCode:'Y'});await pause();
+    if(!await js(`currentNote().editorDoc[0].runs.at(-1).text==='Y'&&!currentNote().editorDoc[0].runs.at(-1).marks.${mark}`))throw Error('Repeated insertion shortcut did not disable '+mark);
+    key('z',['meta']);await pause();if(!await js("!currentNote().body.endsWith('Y')"))throw Error('Typing shortcut undo did not restore text');
+    key('z',['meta','shift']);await pause();if(!await js(`currentNote().editorDoc[0].runs.at(-1).text==='Y'&&!currentNote().editorDoc[0].runs.at(-1).marks.${mark}`))throw Error('Typing shortcut redo did not restore marks');
+  }
   console.log('NATIVE_EDITOR_SMOKE_OK');
 }
 module.exports = { runNativeEditorSmoke };

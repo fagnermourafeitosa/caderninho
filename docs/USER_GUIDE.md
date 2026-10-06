@@ -81,6 +81,8 @@ Digite **`/`** no texto para inserir texto, **Título**, **Subtítulo**, **Títu
 
 Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código no texto, link e marca-texto**. Selecionar com **Shift + setas** atravessa parágrafos. A formatação vale para todo o texto selecionado, inclusive em várias linhas ou células. **Backspace/Delete** apagam toda a seleção; ao lado de uma divisória, removem o bloco. No início de um título, citação ou lista, Backspace volta para texto normal sem perder o conteúdo. O marca-texto tem uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
 
+Use **Cmd/Ctrl + B** for bold, **Cmd/Ctrl + I** for italic and **Cmd/Ctrl + U** for underline in the note body. A shortcut toggles the selected text; without a selection, it toggles the style of subsequent typing. Formatting is saved automatically and supports undo/redo.
+
 ### Tabelas
 
 Escolha **Tabela** no menu de inserção. A grade mostra a prévia de **colunas × linhas** enquanto você passa o mouse. Clique no tamanho desejado, ou pressione, arraste e solte para criar a tabela. O seletor inicial vai até 8 × 8; depois você pode adicionar linhas e colunas, até 20 × 20.
