@@ -15,7 +15,9 @@
 
 ## Shell & Command Reliability
 1. **[2026-10-04] Default shell node is v10 (nvm)**
-   Do instead: run tests with `PATH=~/.nvm/versions/node/v22.23.1/bin:$PATH npm test`; v10 fails with `node: bad option: --test`.
+   Do instead: run tests with `PATH=~/.nvm/versions/node/v22.23.1/bin:$PATH npm test`; v10 fails with `node: bad option: --test`. Cloud sessions (Linux) already default to Node 22; check `node -v` first.
+3. **[2026-10-07] Smoke tests run on Linux cloud sessions**
+   Do instead: `npm ci --ignore-scripts` (onnxruntime's install script fails on the proxy), then `node node_modules/electron/install.js` and `node node_modules/esbuild/install.js`; run `xvfb-run -a node_modules/.bin/electron --no-sandbox tests/smoke/run.cjs --<suite>-only`. The default suite stops at the macOS-only New York font check; native/editor (Ctrl+A in diagram), source (native right-click), search (focus) and pdf-cuts (OCR) also stop at macOS-only steps. Compare against a baseline worktree before calling a failure a regression.
 2. **[2026-10-04] Electron 44 clipboard is async**
    Do instead: `await clipboard.readText()/writeText()` in main/tests; restore the user's clipboard after smoke checks.
 
@@ -41,6 +43,10 @@
 
 7. **[2026-10-04] Native menus block, so smoke tests script them**
    Do instead: put menu presenters in main `services` and queue answers via `scriptedContextMenu()` in tests/smoke/sandbox.cjs. A native right-click from `sendInputEvent` on an unselected word only places a caret in the hidden smoke window (no macOS word selection); don't assert word selection there.
+
+## Pipelines (spec 008)
+1. **[2026-10-07] Task editors share the block editor through the focused host**
+   Do instead: block-editor/margin functions act on `editorHost()` (note body or the focused `.task-editor`); never hardcode `#note-body` in editing code. Modal dialogs live in the top layer, so move `#block-menu`/`#format-menu` into the open dialog and back on close. In hidden smoke windows pointer capture is not held: follow drags with document pointer listeners.
 
 ## Boards (spec 007)
 1. **[2026-10-06] Excalidraw 0.18.1 limits decide what the UI can look like**

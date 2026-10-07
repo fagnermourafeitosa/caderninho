@@ -11,6 +11,7 @@ const { testHook } = require('../../src/main/main.cjs');
 const { Store } = require('../../src/main/store.cjs');
 const { runNativeEditorSmoke } = require('./native-editor.cjs');
 const { runBoardsSmoke } = require('./boards.cjs');
+const { runPipelinesSmoke } = require('./pipelines.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 let alarmCount = 0;
 const contextMenu = scriptedContextMenu();
@@ -81,9 +82,9 @@ async function runEditorContextMenuSmoke(win) {
   win.webContents.sendInputEvent({ type: 'mouseDown', x: point.x, y: point.y, button: 'right', clickCount: 1 });
   win.webContents.sendInputEvent({ type: 'mouseUp', x: point.x, y: point.y, button: 'right', clickCount: 1 });
   await wait(300);
-  const native = await win.webContents.executeJavaScript("({form:Boolean(document.querySelector('#source-form')),quote:document.querySelector('#source-form blockquote')?.textContent})");
-  if (contextMenu.calls.length !== 8 || !native.form || native.quote !== 'pedir dois orçamentos') throw new Error('Clique direito nativo não abriu o formulário: ' + JSON.stringify({ calls: contextMenu.calls.length, native }));
-  await win.webContents.executeJavaScript("closeSourceComposer()");
+  const native = await win.webContents.executeJavaScript("({form:Boolean(document.querySelector('.new-task-dialog[open]')),quote:document.querySelector('#new-task-title')?.value})");
+  if (contextMenu.calls.length !== 8 || !native.form || native.quote !== 'pedir dois orçamentos') throw new Error('Clique direito nativo não abriu Nova tarefa: ' + JSON.stringify({ calls: contextMenu.calls.length, native }));
+  await win.webContents.executeJavaScript("document.querySelector('.new-task-dialog[open]').close()");
   console.log('EDITOR_CONTEXT_MENU_SMOKE_OK', JSON.stringify(result));
 }
 async function runPagesSmoke(win) {
@@ -122,7 +123,7 @@ async function runSmoke() {
   const { win, store, media, related } = testHook.context();
   try {
     await installRendererErrors(win.webContents);
-    if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(ROOT,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript('openSourceComposer(actionsForNote()[0].origin)');await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(ROOT,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());await runEditorContextMenuSmoke(win);app.quit();return;}
+    if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(ROOT,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript("openSourceComposer(actionsForNote()[0].origin,'reminder')");await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(ROOT,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());await runEditorContextMenuSmoke(win);app.quit();return;}
     if(process.argv.includes('--related-runtime-only')) {
       related.cacheDir=path.join(process.cwd(),'artifacts','embedding-cache');
       store.dispatch('note:update',{id:'welcome',title:'Custos de nuvem',body:'Reduzir os gastos com infraestrutura e serviços de nuvem.'});
@@ -137,6 +138,7 @@ async function runSmoke() {
       console.log('RELATED_RUNTIME_OK');app.quit();return;
     }
     if(process.argv.includes('--boards-only')){await runBoardsSmoke(win,smokeScript);app.quit();return;}
+    if(process.argv.includes('--pipelines-only')){await runPipelinesSmoke(win,smokeScript);app.quit();return;}
     if(process.argv.includes('--pages-only')){await runPagesSmoke(win);app.quit();return;}
     if(process.argv.includes('--mac-shell-only')){await runMacShellSmoke(win);app.quit();return;}
     if(process.argv.includes('--diagram-only')){await runDiagramSmoke(win);app.quit();return;}
@@ -272,7 +274,7 @@ async function runSmoke() {
     if (margin.errors.length || alarmCount !== 3) throw new Error('Falha na margem inteligente: ' + margin.errors.join('\n'));
     const marginStore = new Store(app.getPath('userData'));
     const inlineNote = marginStore.snapshot().notes.find(note => note.id === margin.noteId);
-    if (!inlineNote.enabled || !inlineNote.body.includes('[x]')) throw new Error('Margem não persistiu no SQLite');
+    if (!inlineNote.enabled || !inlineNote.body.includes('[] Outro item')) throw new Error('Margem não persistiu no SQLite');
     marginStore.close();
     await new Promise(resolve => setTimeout(resolve, 150));
     fs.writeFileSync(path.join(ROOT, 'artifacts', 'margem-inteligente.png'), (await win.webContents.capturePage()).toPNG());
@@ -294,7 +296,7 @@ async function runSmoke() {
     const home = await win.webContents.executeJavaScript(smokeScript('home-smoke.js'));
     if (home.errors.length) throw new Error(home.errors.join('\n'));
     const homeStore = new Store(app.getPath('userData'));
-    if (!homeStore.snapshot().daily.overview.tasks.find(task=>task.id===home.taskId)?.done) throw new Error('Conclusão na home não persistiu');
+    if (!homeStore.snapshot().pipelines.some(pipeline=>pipeline.tasks.some(task=>task.id===home.taskId))) throw new Error('Card da home não pertence a um pipeline salvo');
     homeStore.close();
     await new Promise(resolve => setTimeout(resolve, 100));
     fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());

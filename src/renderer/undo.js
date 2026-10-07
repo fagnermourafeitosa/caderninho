@@ -26,8 +26,7 @@ function rememberNoteEdit(input,options={}) {
   const next = { title: input.title ?? previous.title, body: input.body ?? previous.body,editorDoc:Object.hasOwn(input,'editorDoc')?input.editorDoc:previous.editorDoc, selection: editorSelection() };
   let group = Object.hasOwn(input, 'title') ? 'title' : 'body';
   if (group === 'body') {
-    const structure = text => text.split('\n').map(line => smartText.checkbox(line)?.[1]?.toLowerCase() ?? '-').join('|');
-    if (structure(previous.body) !== structure(next.body)) group = null;
+    if (previous.body.split('\n').length !== next.body.split('\n').length) group = null;
   }
   if(options.group===false || (next.body===previous.body && JSON.stringify(next.editorDoc)!==JSON.stringify(previous.editorDoc))) group=null;
   history.record(next, group);
@@ -65,7 +64,7 @@ function editPageHistory(direction) {
       const note = { ...currentNote(), title: restored.title, body: restored.body,editorDoc:restored.editorDoc }, editor = $('#note-body'), scroll = editor?.scrollTop || 0;
       $('#note-title').value = note.title;
       if (editor) {
-        if (view === 'notes' && (note.editorDoc || editor.classList.contains('collage-editor') || note.cuts.length || categoryText.tokens(note.body).length || note.body.split('\n').some(line => smartText.checkbox(line)))) mountCollage(note);
+        if (view === 'notes' && (note.editorDoc || editor.classList.contains('collage-editor') || note.cuts.length || categoryText.tokens(note.body).length)) mountCollage(note);
         else editor.value = note.body;
         $('#note-body').scrollTop = scroll;
       }
@@ -84,7 +83,11 @@ function editPageHistory(direction) {
 function capturePageSelection() { const history = pageHistories.get(currentNote()?.id); if (history) history.current.selection = editorSelection(); }
 // The board canvas keeps Excalidraw's own history; the page history never handles its keys.
 const insideBoard = target => Boolean(target?.closest?.('.board-canvas'));
+// Task editors (description, comments) keep their own history.
+const taskEditorOf = target => (target?.closest?.('.task-editor') ? taskEditors.get(target.closest('.task-editor')) : null);
 document.addEventListener('beforeinput', event => {
+  const taskEditor = taskEditorOf(event.target);
+  if (taskEditor && (event.inputType === 'historyUndo' || event.inputType === 'historyRedo')) { event.preventDefault(); taskEditor.step(event.inputType === 'historyUndo' ? 'undo' : 'redo'); return; }
   if (insideBoard(event.target) || !isPageHistoryTarget(event.target)) return;
   if (event.inputType === 'historyUndo' || event.inputType === 'historyRedo') {
     event.preventDefault(); editPageHistory(event.inputType === 'historyUndo' ? 'undo' : 'redo'); return;
@@ -95,6 +98,8 @@ document.addEventListener('keydown', event => {
   const key = event.key.toLowerCase();
   if (!(event.ctrlKey || event.metaKey) || event.altKey || !['z', 'y'].includes(key) || insideBoard(event.target)) return;
   const direction = key === 'y' || event.shiftKey ? 'redo' : 'undo';
+  const taskEditor = taskEditorOf(event.target);
+  if (taskEditor) { event.preventDefault(); event.stopImmediatePropagation(); taskEditor.step(direction); return; }
   if (isPageHistoryTarget(event.target)) {
     event.preventDefault(); event.stopImmediatePropagation(); editPageHistory(direction);
   } else if (event.ctrlKey && event.target.closest('input:not([type=checkbox]):not([type=file]), textarea, [contenteditable="true"]')) {
@@ -102,7 +107,8 @@ document.addEventListener('keydown', event => {
   }
 }, true);
 window.notebook.onHistory(direction => {
-  if (view === 'boards' && window.CaderninhoBoard?.hasFocus()) window.CaderninhoBoard.history(direction);
+  if (taskEditorActive() && activeTaskEditor().host.contains(document.activeElement)) activeTaskEditor().step(direction);
+  else if (view === 'boards' && window.CaderninhoBoard?.hasFocus()) window.CaderninhoBoard.history(direction);
   else if (isPageHistoryTarget()) editPageHistory(direction);
   else document.execCommand(direction);
 });

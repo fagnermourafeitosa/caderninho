@@ -42,18 +42,9 @@ test('a hashtag still being typed does not create partial categories',t=>{
   store.dispatch('view:select',{view:'home'});
   assert.equal(page(store,id).categories[0].key,'pessoal');
 });
-test('task lists and notes share registered categories',t=>{
-  const {store}=fixture(t);store.dispatch('note:create',{type:'tasks'}); const id=store.snapshot().selected.tasks;
-  store.dispatch('item:create',{noteId:id,title:'Preparar #trabalho'});
-  const categoryId=page(store,id).categories[0].id;
-  const itemId=page(store,id).items[0].id;
-  store.dispatch('item:update',{id:itemId,title:'Preparar #pe',categoryCursor:12});
-  assert.equal(store.snapshot().categories.length,1,'Não cadastra hashtag parcial do item');
-  store.dispatch('item:update',{id:itemId,title:'Preparar #trabalho'});
-  store.dispatch('item:trash',{id:itemId});assert.equal(page(store,id).categories.length,0);
-  store.dispatch('item:restore',{id:itemId});assert.equal(page(store,id).categories[0].id,categoryId);
-  store.dispatch('note:create',{type:'notes',title:'Ideia'});store.dispatch('note:update',{id:store.snapshot().selected.notes,body:'Ideia #TRABALHO'});
-  assert.equal(page(store,store.snapshot().selected.notes).categories[0].id,categoryId);
+test('pipelines and notes share registered categories',t=>{
+  const {store}=fixture(t);store.dispatch('note:create',{type:'notes',title:'Ideia'});store.dispatch('note:update',{id:store.snapshot().selected.notes,body:'Ideia #TRABALHO'});
+  const categoryId=page(store,store.snapshot().selected.notes).categories[0].id;
   store.dispatch('note:create',{type:'tasks'}); const other=store.snapshot().selected.tasks;
   store.dispatch('category:attach',{noteId:other,categoryId});
   assert.equal(page(store,other).categories[0].id,categoryId);

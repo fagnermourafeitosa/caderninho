@@ -1,8 +1,8 @@
-const blockLabels={paragraph:'Texto',h1:'Título',h2:'Subtítulo',h3:'Título pequeno',quote:'Citação',check:'Tarefa',bullet:'Lista',number:'Lista numerada',divider:'Divisor',code:'Código',table:'Tabela',diagram:'Diagrama',media:'Imagem ou link'};
+const blockLabels={paragraph:'Texto',h1:'Título',h2:'Subtítulo',h3:'Título pequeno',quote:'Citação',bullet:'Lista',number:'Lista numerada',divider:'Divisor',code:'Código',table:'Tabela',diagram:'Diagrama',media:'Imagem ou link',image:'Imagem'};
 const blockCommands=[
   ['paragraph','Texto','¶','parágrafo texto normal'],['h1','Texto','H1','título grande titulo 1'],['h2','Texto','H2','título médio titulo 2 subtítulo'],['h3','Texto','H3','título pequeno titulo 3'],['quote','Texto','quote','citação frase'],
-  ['check','Listas','check','checkbox tarefa checklist'],['bullet','Listas','bullet','lista marcadores bullets'],['number','Listas','1.','lista numerada números'],
-  ['divider','Estrutura','divider','divisor linha separador'],['code','Estrutura','code','código programação'],['table','Estrutura','table','tabela colunas linhas'],['diagram','Estrutura','diagram','diagrama mermaid fluxograma fluxo sequência mapa mental linha do tempo gráfico'],['media','Mídia','media','imagem link mídia adicionar recorte']
+  ['bullet','Listas','bullet','lista marcadores bullets'],['number','Listas','1.','lista numerada números'],
+  ['divider','Estrutura','divider','divisor linha separador'],['code','Estrutura','code','código programação'],['table','Estrutura','table','tabela colunas linhas'],['diagram','Estrutura','diagram','diagrama mermaid fluxograma fluxo sequência mapa mental linha do tempo gráfico'],['media','Mídia','media','imagem link mídia adicionar recorte'],['image','Mídia','media','imagem foto anexar']
 ];
 const commandPaths={link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',highlight:'M9 11l6-7 5 5-7 6z M9 11l4 4-3 3H6v-4z M4 21h16',quote:'M5 6h5v6H5z M14 6h5v6h-5z M10 12c0 4-2 6-5 6 M19 12c0 4-2 6-5 6',check:'M4 4h16v16H4z M8 12l3 3 6-7',bullet:'M9 6h11 M9 12h11 M9 18h11 M4 6h.1 M4 12h.1 M4 18h.1',divider:'M3 12h18',code:'M8 7l-5 5 5 5 M16 7l5 5-5 5 M14 4l-4 16',table:'M3 4h18v16H3z M3 10h18 M3 15h18 M9 4v16 M15 4v16',diagram:'M3 4h7v5H3z M14 15h7v5h-7z M6.5 9v4.5h11V15 M14 6.5h4',media:'M3 4h18v16H3z M3 17l6-6 4 4 3-3 5 5 M15 8h.1'};
 function commandIcon(icon){return commandPaths[icon]?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${commandPaths[icon]}"/></svg>`:icon;}
@@ -30,20 +30,24 @@ function readInlineRuns(element){
   return result.length?result:pageDocument.plainRuns('');
 }
 function renderInlineRuns(span,runs){
-  const text=pageDocument.runText(runs),tokens=(span.closest('[data-block-type=code]')?[]:categoryText.tokens(text)).filter(token=>!runs.some((run,index)=>{const start=runs.slice(0,index).reduce((n,value)=>n+value.text.length,0);return run.marks.code&&token.start>=start&&token.start<start+run.text.length;}));
+  const text=pageDocument.runText(runs),tokens=(span.closest('[data-block-type=code], .task-editor')||renderingTaskEditor?[]:categoryText.tokens(text)).filter(token=>!runs.some((run,index)=>{const start=runs.slice(0,index).reduce((n,value)=>n+value.text.length,0);return run.marks.code&&token.start>=start&&token.start<start+run.text.length;}));
   const fragment=document.createDocumentFragment();
   function segment(start,end,parent){let at=0;for(const run of runs){const a=Math.max(start,at),b=Math.min(end,at+run.text.length);if(b>a){let element=document.createTextNode(run.text.slice(a-at,b-at));for(const [mark,tag] of [['code','code'],['bold','strong'],['italic','em'],['underline','u'],['strike','s']])if(run.marks[mark]){const wrap=document.createElement(tag);wrap.append(element);element=wrap;}if(run.marks.highlight){const wrap=document.createElement('mark');wrap.dataset.highlight=run.marks.highlight;wrap.style.backgroundColor=run.marks.highlight;wrap.append(element);element=wrap;}if(run.marks.link){const wrap=document.createElement('a');wrap.href=run.marks.link;wrap.append(element);element=wrap;}parent.append(element);}at+=run.text.length;}}
   let at=0;for(const token of tokens){segment(at,token.start,fragment);const pill=document.createElement('span');pill.className='inline-category';segment(token.start,token.end,pill);fragment.append(pill);at=token.end;}segment(at,text.length,fragment);span.replaceChildren(fragment);if(!text)span.append(document.createElement('br'));
 }
 function readEditorBlock(line){
-  const type=line.dataset.checkbox?'check':line.dataset.blockType||'paragraph',id=line.dataset.blockId||(line.dataset.blockId=pageDocument.id());
+  const type=line.dataset.blockType||'paragraph',id=line.dataset.blockId||(line.dataset.blockId=pageDocument.id());
+  if(type==='image')return {id,type,imageId:line.dataset.imageId};
+  if(type==='task')return {id,type,taskId:line.dataset.taskId,title:line.dataset.title};
   if(type==='diagram')return {id,type,code:line.querySelector('.diagram-code').value};
   if(type==='table')return {id,type,header:line.dataset.header!=='false',rows:[...line.querySelectorAll('tr')].map(row=>[...row.querySelectorAll('.table-cell-text')].map(readInlineRuns))};
-  return {id,type,checked:line.dataset.checked==='true',runs:type==='divider'?[]:readInlineRuns(editableText(line))};
+  return {id,type,runs:type==='divider'?[]:readInlineRuns(editableText(line))};
 }
-function readEditorDocument(){normalizePageDOM();return [...$('#note-body').querySelectorAll('.writing-line')].map(readEditorBlock);}
+function readEditorDocument(){normalizePageDOM();return [...editorHost().querySelectorAll('.writing-line')].map(readEditorBlock);}
 function renderDocumentBlock(block,index){
   if(block.type==='diagram')return renderDiagramBlock(block,index);
+  if(block.type==='image')return renderImageBlock(block,index);
+  if(block.type==='task')return renderTaskLineBlock(block,index);
   if(block.type==='table'){
     const outer=document.createElement('div');outer.className='writing-line table-block';outer.contentEditable='false';outer.dataset.blockType='table';outer.dataset.blockId=block.id;outer.dataset.lineIndex=index;outer.dataset.header=block.header;
     const table=document.createElement('table');table.className='paper-table';table.style.minWidth=Math.max(320,block.rows[0].length*90)+'px';const tbody=document.createElement('tbody');
@@ -51,7 +55,7 @@ function renderDocumentBlock(block,index){
     const tools=document.createElement('div');tools.className='table-tools';tools.innerHTML='<button type="button" data-table-action="row">+ Linha</button><button type="button" data-table-action="column">+ Coluna</button><button type="button" data-table-action="header">Cabeçalho</button><button type="button" data-table-action="remove">Remover tabela</button>';
     tools.querySelectorAll('button').forEach(button=>button.onclick=()=>changeTable(outer,button.dataset.tableAction));outer.append(tools);return outer;
   }
-  const line=makeWritingLine(block.type==='check'?`[${block.checked?'x':' '}] `+pageDocument.runText(block.runs):pageDocument.runText(block.runs),index);
+  const line=makeWritingLine(pageDocument.runText(block.runs),index);
   line.dataset.blockType=block.type;line.dataset.blockId=block.id;line.classList.add('block-'+block.type);
   renderInlineRuns(editableText(line),block.runs);if(block.type==='code')editableText(line).spellcheck=false;
   if(block.type==='divider'){line.classList.add('block-divider');editableText(line).contentEditable='true';editableText(line).setAttribute('aria-label','Divisor');}
@@ -59,6 +63,7 @@ function renderDocumentBlock(block,index){
 }
 function renderDocumentBlocks(editor,note){let offset=0;note.editorDoc.forEach((block,i)=>{const size=pageDocument.blockText(block).split('\n').length;note.cuts.filter(cut=>Math.min(cut.anchor,note.body.split('\n').length-1)>=offset&&Math.min(cut.anchor,note.body.split('\n').length-1)<offset+size).forEach(cut=>editor.append(cutCard(cut)));editor.append(renderDocumentBlock(block,offset));offset+=size;});editor.dataset.structured='true';}
 function ensureRichEditor(){
+  if(taskEditorActive())return editorHost();
   const old=$('#note-body');if(!old)return null;if(old.dataset.structured==='true')return old;
   const previousSelection=old.tagName==='TEXTAREA'?null:editorSelection();
   let line=0,start=0,end=0,endLine=0;
@@ -68,9 +73,9 @@ function ensureRichEditor(){
   try{mountCollage({...currentNote(),body:old.value,editorDoc:doc});const lines=$('#note-body').querySelectorAll('.writing-line'),span=editableText(lines[Math.max(0,line)]);putCaret(span,start);if(endLine!==line||end>start){const range=getSelection().getRangeAt(0),point=editorTextPoint(editableText(lines[Math.max(0,endLine)]),end);range.setEnd(point.node,point.offset);}if(previousSelection)restoreEditorSelection(previousSelection);}finally{transformingCategoryEditor=false;}
   return $('#note-body');
 }
-function saveDocument(group=false,history=true){normalizePageDOM();const editor=$('#note-body');reindexDocument();updateDetail();renderSmartMargin();const doc=readEditorDocument();const noteId=currentNote().id;return action('note:update',{id:noteId,body:pageDocument.text(doc),editorDoc:doc},{group,history}).then(ok=>{if(ok&&view==='notes'&&currentNote()?.id===noteId&&!sourceDraft&&actionsForNote().length)renderSourceMargin();return ok;});}
-function reindexDocument(){let at=0;$('#note-body')?.querySelectorAll('.writing-line').forEach(line=>{line.dataset.lineIndex=at;at+=readWritingLine(line).split('\n').length;});}
-function replaceDocument(doc,focusIndex=0){const note={...currentNote(),editorDoc:doc,body:pageDocument.text(doc)};mountCollage(note);const line=$('#note-body').querySelectorAll('.writing-line')[focusIndex];if(line)putCaret(editableText(line));return saveDocument();}
+function saveDocument(group=false,history=true){if(taskEditorActive())return activeTaskEditor().changed();normalizePageDOM();const editor=$('#note-body');reindexDocument();updateDetail();renderSmartMargin();const doc=readEditorDocument();const noteId=currentNote().id;return action('note:update',{id:noteId,body:pageDocument.text(doc),editorDoc:doc},{group,history}).then(ok=>{if(ok&&view==='notes'&&currentNote()?.id===noteId&&!sourceDraft&&actionsForNote().length)renderSourceMargin();return ok;});}
+function reindexDocument(){let at=0;editorHost()?.querySelectorAll('.writing-line').forEach(line=>{line.dataset.lineIndex=at;at+=readWritingLine(line).split('\n').length;});}
+function replaceDocument(doc,focusIndex=0){if(taskEditorActive()){const session=activeTaskEditor();session.render(doc);const line=session.host.querySelectorAll('.writing-line')[focusIndex];if(line&&line.querySelector('.line-text'))putCaret(editableText(line));return session.changed();}const note={...currentNote(),editorDoc:doc,body:pageDocument.text(doc)};mountCollage(note);const line=$('#note-body').querySelectorAll('.writing-line')[focusIndex];if(line)putCaret(editableText(line));return saveDocument();}
 function popupPosition(menu,rect){menu.style.left=Math.max(12,Math.min(rect.left,innerWidth-menu.offsetWidth-12))+'px';menu.style.top=Math.max(12,Math.min(rect.bottom+6,innerHeight-menu.offsetHeight-12))+'px';}
 function hideEditorMenus(){ $('#block-menu').hidden=true;$('#format-menu').hidden=true;insertionContext=null; }
 function selectCommand(button){
@@ -81,6 +86,7 @@ function renderCommands(query=''){
   const menu=$('#block-menu'),list=menu.querySelector('.command-results'),words=commandSearch(query).split(/\s+/).filter(Boolean);
   list.replaceChildren();let group='';
   for(const [type,section,icon,aliases] of blockCommands){
+    if(!editorCommandAllowed(type))continue;
     if(!words.every(word=>commandSearch(blockLabels[type]+' '+aliases).includes(word)))continue;
     if(!words.length&&section!==group){const label=document.createElement('div');label.className='command-group';label.textContent=section;label.setAttribute('role','presentation');list.append(label);group=section;}
     const button=document.createElement('button');button.type='button';button.id='command-'+type;button.dataset.insertBlock=type;button.setAttribute('role','option');button.tabIndex=-1;
@@ -104,8 +110,9 @@ function removeSlash(){const ctx=insertionContext;if(!ctx?.slash)return;const sp
 function insertEditorBlock(type,rows=0,columns=0,code=''){
   const context=insertionContext;if(!context)return;capturePageSelection();removeSlash();
   if(type==='media'){hideEditorMenus();saveDocument();openCutDialog();return;}
-  const editor=$('#note-body'),lines=[...editor.querySelectorAll('.writing-line')],index=lines.indexOf(context.line),doc=readEditorDocument();
-  const block=type==='table'?{id:pageDocument.id(),type,header:true,rows:Array.from({length:rows},()=>Array.from({length:columns},()=>pageDocument.plainRuns('')))}:type==='diagram'?{id:pageDocument.id(),type,code}:{id:pageDocument.id(),type,checked:false,runs:pageDocument.plainRuns('')};
+  if(type==='image'){hideEditorMenus();activeTaskEditor()?.pickImage(context.line);return;}
+  const editor=editorHost(),lines=[...editor.querySelectorAll('.writing-line')],index=lines.indexOf(context.line),doc=readEditorDocument();
+  const block=type==='table'?{id:pageDocument.id(),type,header:true,rows:Array.from({length:rows},()=>Array.from({length:columns},()=>pageDocument.plainRuns('')))}:type==='diagram'?{id:pageDocument.id(),type,code}:{id:pageDocument.id(),type,runs:pageDocument.plainRuns('')};
   const empty=doc[index]?.type==='paragraph'&&!pageDocument.runText(doc[index].runs);
   if(empty)doc.splice(index,1,block);else doc.splice(index+1,0,block);
   const next=empty?index:index+1;if(['table','divider','diagram'].includes(type)&&next===doc.length-1)doc.push({id:pageDocument.id(),type:'paragraph',runs:pageDocument.plainRuns('')});
@@ -122,27 +129,27 @@ function showTablePicker(){
   popupPosition(menu,insertionContext.line.getBoundingClientRect());menu.tabIndex=0;menu.focus({preventScroll:true});
 }
 function changeTable(line,actionName){
-  capturePageSelection();const index=[...$('#note-body').querySelectorAll('.writing-line')].indexOf(line),doc=readEditorDocument(),block=doc[index];
+  capturePageSelection();const index=[...editorHost().querySelectorAll('.writing-line')].indexOf(line),doc=readEditorDocument(),block=doc[index];
   if(actionName==='row'){if(block.rows.length>=20)return toast('A tabela pode ter até 20 linhas.');block.rows.push(Array.from({length:block.rows[0].length},()=>pageDocument.plainRuns('')));}
   if(actionName==='column'){if(block.rows[0].length>=20)return toast('A tabela pode ter até 20 colunas.');block.rows.forEach(row=>row.push(pageDocument.plainRuns('')));}
   if(actionName==='header')block.header=!block.header;
   if(actionName==='remove')doc.splice(index,1);
   if(!doc.length)doc.push({id:pageDocument.id(),type:'paragraph',runs:pageDocument.plainRuns('')});replaceDocument(doc,Math.min(index,doc.length-1));
 }
-function tableKey(event){const cell=event.target.closest('.table-cell-text');if(!cell)return false;if(event.key==='Enter'){event.preventDefault();document.execCommand('insertLineBreak');return true;}if(event.key!=='Tab')return false;event.preventDefault();const line=cell.closest('.table-block'),cells=[...line.querySelectorAll('.table-cell-text')],index=cells.indexOf(cell);let next=cells[index+(event.shiftKey?-1:1)];if(!next&&!event.shiftKey){changeTable(line,'row');next=$('#note-body').querySelector(`[data-block-id="${line.dataset.blockId}"]`)?.querySelectorAll('.table-cell-text')[index+1];}if(next)putCaret(next);return true;}
-function detectSlash(event){normalizePageDOM();ensurePageCaret();if(event.isComposing||view!=='notes')return;const editor=$('#note-body');if(!editor)return;if(editor.tagName==='TEXTAREA'){const before=editor.value.slice(0,editor.selectionStart);if(/(?:^|\s)\/[^\s/]*$/.test(before))ensureRichEditor();else return;}
+function tableKey(event){const cell=event.target.closest('.table-cell-text');if(!cell)return false;if(event.key==='Enter'){event.preventDefault();document.execCommand('insertLineBreak');return true;}if(event.key!=='Tab')return false;event.preventDefault();const line=cell.closest('.table-block'),cells=[...line.querySelectorAll('.table-cell-text')],index=cells.indexOf(cell);let next=cells[index+(event.shiftKey?-1:1)];if(!next&&!event.shiftKey){changeTable(line,'row');next=editorHost().querySelector(`[data-block-id="${line.dataset.blockId}"]`)?.querySelectorAll('.table-cell-text')[index+1];}if(next)putCaret(next);return true;}
+function detectSlash(event){normalizePageDOM();ensurePageCaret();if(event.isComposing||(view!=='notes'&&!taskEditorActive()))return;const editor=editorHost();if(!editor)return;if(editor.tagName==='TEXTAREA'){const before=editor.value.slice(0,editor.selectionStart);if(/(?:^|\s)\/[^\s/]*$/.test(before))ensureRichEditor();else return;}
   const span=getSelection().anchorNode?.parentElement?.closest('.line-text');if(!span||span.closest('.table-block')||span.closest('[data-block-type=code]'))return;const end=caretOffset(span),before=span.textContent.slice(0,end),match=before.match(/(?:^|\s)(\/[^\s/]*)$/);if(match)openInsertMenu(span.closest('.writing-line'),{start:end-match[1].length,end,query:match[1].slice(1)});else if(insertionContext?.slash)hideEditorMenus();
 }
 function showFormatMenu(){
-  const menu=$('#format-menu');if(view!=='notes'||!currentNote()||$('#block-menu').hidden===false||document.querySelector('dialog[open]'))return;
+  const menu=$('#format-menu'),task=taskEditorActive();if((!task&&(view!=='notes'||!currentNote()))||$('#block-menu').hidden===false||document.querySelector('dialog[open]'))return;
   const selection=getSelection(),parts=selection.rangeCount?editorRangeParts(selection.getRangeAt(0)):[],span=parts.find(part=>part.end>part.start)?.span;
-  if(!span||selection.isCollapsed||!$('#note-body').contains(selection.focusNode)){menu.hidden=true;return;}
+  if(!span||selection.isCollapsed||!editorHost().contains(selection.focusNode)){menu.hidden=true;return;}
   const range=selection.getRangeAt(0);if(!menu.hidden&&formatRange&&range.startContainer===formatRange.startContainer&&range.startOffset===formatRange.startOffset&&range.endContainer===formatRange.endContainer&&range.endOffset===formatRange.endOffset)return;
-  formatRange=range.cloneRange();menu.innerHTML=[['bold','B','Negrito'],['italic','I','Itálico'],['underline','U','Sublinhado'],['strikeThrough','S','Tachado'],['code',commandIcon('code'),'Código'],['link',commandIcon('link'),'Link'],['highlight',commandIcon('highlight'),'Marca-texto']].map(([command,label,title])=>`<button type="button" data-format="${command}" title="${title}" aria-label="${title}">${label}</button>`).join('');menu.innerHTML+=`<button type="button" class="source-create" draggable="true" aria-label="Criar tarefa ou lembrete" title="Criar tarefa ou lembrete · Arraste para a margem">${commandIcon('check')}</button>`;menu.hidden=false;menu.onpointerdown=event=>{if(!event.target.closest('.source-create'))event.preventDefault();};menu.querySelectorAll('[data-format]').forEach(button=>button.onclick=()=>formatSelection(button.dataset.format));const create=menu.querySelector('.source-create');create.onclick=()=>openSourceComposer(selectedOrigin());create.ondragstart=event=>{sourceDrag=selectedOrigin();if(!sourceDrag){event.preventDefault();return;}event.dataTransfer.setData('application/x-caderninho-action','text');event.dataTransfer.effectAllowed='copy';renderSourceMargin();};const rect=formatRange.getBoundingClientRect();popupPosition(menu,rect);
+  formatRange=range.cloneRange();menu.innerHTML=[['bold','B','Negrito'],['italic','I','Itálico'],['underline','U','Sublinhado'],['strikeThrough','S','Tachado'],['code',commandIcon('code'),'Código'],['link',commandIcon('link'),'Link'],['highlight',commandIcon('highlight'),'Marca-texto']].map(([command,label,title])=>`<button type="button" data-format="${command}" title="${title}" aria-label="${title}">${label}</button>`).join('');if(task){menu.hidden=false;menu.onpointerdown=event=>event.preventDefault();menu.querySelectorAll('[data-format]').forEach(button=>button.onclick=()=>formatSelection(button.dataset.format));popupPosition(menu,formatRange.getBoundingClientRect());return;}menu.innerHTML+=`<button type="button" class="source-create" draggable="true" aria-label="Criar tarefa ou lembrete" title="Criar tarefa ou lembrete · Arraste para a margem">${commandIcon('check')}</button>`;menu.hidden=false;menu.onpointerdown=event=>{if(!event.target.closest('.source-create'))event.preventDefault();};menu.querySelectorAll('[data-format]').forEach(button=>button.onclick=()=>formatSelection(button.dataset.format));const create=menu.querySelector('.source-create');create.onclick=()=>openSourceComposer(selectedOrigin());create.ondragstart=event=>{sourceDrag=selectedOrigin();if(!sourceDrag){event.preventDefault();return;}event.dataTransfer.setData('application/x-caderninho-action','text');event.dataTransfer.effectAllowed='copy';renderSourceMargin();};const rect=formatRange.getBoundingClientRect();popupPosition(menu,rect);
 }
 function restoreFormatRange(){if(!formatRange)return;const selection=getSelection();selection.removeAllRanges();selection.addRange(formatRange);}
 function formatSelection(command,value){
-  const previousEditor=$('#note-body');ensureRichEditor();if(previousEditor!==$('#note-body')&&getSelection().rangeCount)formatRange=getSelection().getRangeAt(0).cloneRange();restoreFormatRange();capturePageSelection();
+  const previousEditor=editorHost();ensureRichEditor();if(previousEditor!==editorHost()&&getSelection().rangeCount)formatRange=getSelection().getRangeAt(0).cloneRange();restoreFormatRange();capturePageSelection();
   if(command==='link'){ $('#editor-link-url').value='';$('#editor-link-dialog').showModal();$('#editor-link-url').focus();return;}
   if(command==='highlight'){const menu=$('#format-menu');menu.innerHTML=pageDocument.COLORS.map((color,i)=>`<button class="highlight-choice" style="background:${color}" aria-label="Marca-texto ${notebookColorNames[i]}" data-highlight="${color}"></button>`).join('')+'<button data-clear-highlight aria-label="Remover marca-texto">×</button>';menu.querySelectorAll('[data-highlight]').forEach(button=>button.onclick=()=>formatSelection('hiliteColor',button.dataset.highlight));menu.querySelector('[data-clear-highlight]').onclick=()=>formatSelection('hiliteColor','transparent');return;}
   applySelectionFormat(command,value);
@@ -150,12 +157,12 @@ function formatSelection(command,value){
 }
 $('#editor-link-close').onclick=()=>$('#editor-link-dialog').close();
 $('#editor-link-form').onsubmit=event=>{event.preventDefault();const url=pageDocument.link($('#editor-link-url').value);if(!url)return toast('Use um endereço HTTP ou HTTPS.');$('#editor-link-dialog').close();formatSelection('createLink',url);};
-document.addEventListener('selectionchange',()=>{if($('#note-body')?.tagName!=='TEXTAREA')showFormatMenu();});
+document.addEventListener('selectionchange',()=>{if(editorHost()?.tagName!=='TEXTAREA')showFormatMenu();});
 document.addEventListener('mouseup',event=>{const editor=$('#note-body');if(editor?.tagName==='TEXTAREA'&&event.target===editor&&editor.selectionStart!==editor.selectionEnd){ensureRichEditor();showFormatMenu();}});
-document.addEventListener('input',event=>{if(event.target.closest('#note-body'))detectSlash(event);});
+document.addEventListener('input',event=>{if(event.target.closest(RICH_EDITORS))detectSlash(event);});
 document.addEventListener('pointerdown',event=>{if(!event.target.closest('#block-menu,#format-menu,#add-block,dialog'))hideEditorMenus();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'){const context=insertionContext;if(context)event.preventDefault();hideEditorMenus();if(context&&document.contains(context.line))putCaret(editableText(context.line),context.slash?.end??context.caret);}});
-document.addEventListener('click',event=>{const anchor=event.target.closest('#note-body a');if(anchor){event.preventDefault();if(event.ctrlKey||event.metaKey)window.notebook.openLink(anchor.href).catch(error=>toast(error.message));}});
+document.addEventListener('click',event=>{const anchor=event.target.closest('#note-body a, .task-editor a');if(anchor){event.preventDefault();if(event.ctrlKey||event.metaKey)window.notebook.openLink(anchor.href).catch(error=>toast(error.message));}});
 
 document.addEventListener('keydown',event=>{
   if($('#block-menu').hidden||!insertionContext||$('#block-menu .table-picker'))return;
@@ -176,7 +183,7 @@ function editorTextPoint(element,offset){
   return last?{node:last,offset:last.length}:{node:element,offset:element.childNodes.length};
 }
 function editorRangeParts(range){
-  const editor=$('#note-body');if(!editor||!range||!editor.contains(range.startContainer)||!editor.contains(range.endContainer))return [];
+  const editor=editorHost();if(!editor||!range||!editor.contains(range.startContainer)||!editor.contains(range.endContainer))return [];
   const parts=[];
   for(const span of editor.querySelectorAll('.line-text')){
     const line=span.closest('.writing-line');if(!range.intersectsNode(span)&&range.startContainer!==line&&range.endContainer!==line)continue;
@@ -195,12 +202,12 @@ function applySelectionFormat(command,value){
   const remove=key==='highlight'?value==='transparent':key==='link'?false:selected.every(run=>run.marks[key]);
   for(const part of parts){const runs=readInlineRuns(part.span),middle=sliceInlineRuns(runs,part.start,part.end).map(run=>{const marks={...run.marks};if(remove)delete marks[key];else marks[key]=key==='highlight'||key==='link'?value:true;return {...run,marks};});renderInlineRuns(part.span,[...sliceInlineRuns(runs,0,part.start),...middle,...sliceInlineRuns(runs,part.end,part.length)]);}
   const first=parts[0],last=parts.at(-1),a=editorTextPoint(first.span,first.start),b=editorTextPoint(last.span,last.end),selection=getSelection();selection.setBaseAndExtent(a.node,a.offset,b.node,b.offset);
-  $('#note-body').dataset.structured='true';
+  editorHost().dataset.structured='true';
 }
 function deleteEditorSelection(save=true){
   const selection=getSelection();if(!selection.rangeCount||selection.isCollapsed)return false;
   const range=selection.getRangeAt(0),parts=editorRangeParts(range);if(!parts.length)return false;
-  capturePageSelection();if(!save){const history=pageHistories.get(currentNote()?.id);if(history)history.group=null;}const first=parts[0],last=parts.at(-1),lines=[...new Set(parts.map(part=>part.line))];
+  capturePageSelection();if(!save&&!taskEditorActive()){const history=pageHistories.get(currentNote()?.id);if(history)history.group=null;}const first=parts[0],last=parts.at(-1),lines=[...new Set(parts.map(part=>part.line))];
   let caretSpan=first.span,caret=first.start;
   // A range between ordinary blocks joins the remaining prefix and suffix as one paragraph.
   if(!first.span.classList.contains('table-cell-text')&&!last.span.classList.contains('table-cell-text')){
@@ -219,15 +226,15 @@ function deleteEditorSelection(save=true){
       for(const part of items){const runs=readInlineRuns(part.span);renderInlineRuns(part.span,[...sliceInlineRuns(runs,0,part.start),...sliceInlineRuns(runs,part.end,part.length)]);}
     }
   }
-  hideEditorMenus();$('#note-body').dataset.structured='true';putCaret(caretSpan,caret);if(save)saveDocument();else reindexDocument();return true;
+  hideEditorMenus();editorHost().dataset.structured='true';putCaret(caretSpan,caret);if(save)saveDocument();else reindexDocument();return true;
 }
 function resetBlockAppearance(line){
-  line.classList.remove(...[...line.classList].filter(name=>name.startsWith('block-')||['inline-task','is-checked'].includes(name)));
-  line.querySelector('.inline-check')?.remove();delete line.dataset.checkbox;delete line.dataset.checked;line.dataset.blockType='paragraph';editableText(line).spellcheck=true;editableText(line).setAttribute('aria-label',`Texto da nota, parágrafo ${Number(line.dataset.lineIndex)+1}`);
+  line.classList.remove(...[...line.classList].filter(name=>name.startsWith('block-')));
+  line.dataset.blockType='paragraph';editableText(line).spellcheck=true;editableText(line).setAttribute('aria-label',`Texto da nota, parágrafo ${Number(line.dataset.lineIndex)+1}`);
 }
 function handleDocumentKey(event){
   normalizePageDOM();ensurePageCaret();
-  const editor=$('#note-body'),selection=getSelection();if(!editor||!editor.contains(selection.anchorNode)||!editor.contains(selection.focusNode)||event.isComposing)return false;
+  const editor=editorHost(),selection=getSelection();if(!editor||!editor.contains(selection.anchorNode)||!editor.contains(selection.focusNode)||event.isComposing)return false;
   if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='a'){
     event.preventDefault();const range=document.createRange();range.selectNodeContents(editor);selection.removeAllRanges();selection.addRange(range);return true;
   }
@@ -253,7 +260,7 @@ function handleDocumentKey(event){
 }
 document.addEventListener('beforeinput',event=>{
   // Form fields inside blocks (diagram code) edit natively; moving the caret to the page would cancel their deletions.
-  if(!event.target.closest('#note-body')||event.target.closest('#note-body textarea, #note-body input')||event.isComposing)return;
+  if(!event.target.closest(RICH_EDITORS)||event.target.closest(RICH_EDITOR_FIELDS)||event.isComposing)return;
   normalizePageDOM();ensurePageCaret();
   const selection=getSelection(),anchor=selection.anchorNode?.nodeType===1?selection.anchorNode:selection.anchorNode?.parentElement,span=anchor?.closest('.line-text')||anchor?.closest('.writing-line')?.querySelector('.line-text');
   if(span?.closest('[data-block-type=divider]')&&event.inputType.startsWith('insert'))resetBlockAppearance(span.closest('.writing-line'));
@@ -267,7 +274,7 @@ document.addEventListener('beforeinput',event=>{
 // Native contenteditable input can put its caret on the page boundary instead of
 // inside a writing span. Repair unknown browser nodes before reading or editing.
 function normalizePageDOM(){
-  const editor=$('#note-body');if(!editor||editor.tagName==='TEXTAREA')return;
+  const editor=editorHost();if(!editor||editor.tagName==='TEXTAREA')return;
   const unknown=[...editor.childNodes].filter(node=>node.nodeType===3?Boolean(node.textContent):node.nodeType===1&&!node.matches('.writing-line,.paper-cut'));
   if(!unknown.length)return;
   const selection=getSelection(),inside=editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode);
@@ -278,7 +285,7 @@ function normalizePageDOM(){
     const collect=value=>{
       if(value.nodeType===1&&value.querySelector(':scope > div,:scope > p')){for(const child of [...value.childNodes])collect(child);return;}
       const text=value.nodeType===3?value.textContent:value.innerText??value.textContent;
-      for(const textLine of text.replace(/\r\n?/g,'\n').split('\n')){const line=makeWritingLine(textLine,0);line.dataset.blockType=line.dataset.checkbox?'check':'paragraph';fragment.append(line);}
+      for(const textLine of text.replace(/\r\n?/g,'\n').split('\n')){const line=makeWritingLine(textLine,0);line.dataset.blockType='paragraph';fragment.append(line);}
     };
     collect(node);node.replaceWith(fragment);
   }
@@ -286,7 +293,7 @@ function normalizePageDOM(){
   if(bookmark){const point=offset=>{for(const span of editor.querySelectorAll('.line-text')){const length=span.textContent.length;if(offset<=length)return editorTextPoint(span,offset);offset-=length;}return editorTextPoint([...editor.querySelectorAll('.line-text')].at(-1),Number.MAX_SAFE_INTEGER);};const a=point(bookmark.anchor),b=point(bookmark.focus);selection.setBaseAndExtent(a.node,a.offset,b.node,b.offset);}
 }
 function ensurePageCaret(){
-  const editor=$('#note-body'),selection=getSelection();if(!editor||editor.tagName==='TEXTAREA'||!selection.isCollapsed||!editor.contains(selection.anchorNode))return;
+  const editor=editorHost(),selection=getSelection();if(!editor||editor.tagName==='TEXTAREA'||!selection.isCollapsed||!editor.contains(selection.anchorNode))return;
   const node=selection.anchorNode,element=node.nodeType===1?node:node.parentElement;if(element.closest('.line-text'))return;
   const line=element.closest('.writing-line');
   if(line){const span=editableText(line);putCaret(span,caretOffset(span));return;}
@@ -295,4 +302,4 @@ function ensurePageCaret(){
     let target=previous||next;if(!target){target=makeWritingLine('',0);editor.append(target);}const span=editableText(target);putCaret(span,previous?span.textContent.length:0);
   }
 }
-document.addEventListener('input',event=>{if(event.target.closest('#note-body'))normalizePageDOM();},true);
+document.addEventListener('input',event=>{if(event.target.closest(RICH_EDITORS))normalizePageDOM();},true);

@@ -7,15 +7,23 @@ function globalSearchMatches(query) {
  if (!state) return [];
  const tokens = searchNormalize(query).trim().split(/\s+/).filter(Boolean);
  if (!tokens.length) return [];
- return state.notes.filter(note => !note.trashed).map(note => {
-  const book = state.notebooks.find(book => book.id === note.notebookId);
-  const text = [note.body, ...(note.items || []).map(item => item.title), ...(note.inlineTasks || []).map(item => item.title), ...(state.sourceActions || []).filter(item => item.noteId === note.id).map(item => item.title), ...(note.cuts || []).map(cut => `${cut.title || ''} ${cut.description || ''} ${cut.url || ''}`)].join(' ').replace(/\s+/g, ' ').trim();
-  const title = searchNormalize(note.title), body = searchNormalize(text);
-  const all = `${title} ${body} ${searchNormalize(book?.name)}`;
-  if (!tokens.every(token => all.includes(token))) return null;
+ const match = (title, text, book) => {
+  const normalTitle = searchNormalize(title), body = searchNormalize(text);
+  if (!tokens.every(token => `${normalTitle} ${body} ${searchNormalize(book?.name)}`.includes(token))) return null;
   const start = Math.max(0, body.indexOf(tokens[0]) - 35);
-  return {note, book, snippet: (start ? '…' : '') + text.slice(start, start + 140), score: tokens.reduce((score, token) => score + (title.includes(token) ? 4 : 0) + (title.startsWith(token) ? 2 : 0), 0)};
- }).filter(Boolean).sort((a,b) => b.score-a.score || Date.parse(b.note.updated)-Date.parse(a.note.updated));
+  return { snippet: (start ? '…' : '') + text.slice(start, start + 140), score: tokens.reduce((score, token) => score + (normalTitle.includes(token) ? 4 : 0) + (normalTitle.startsWith(token) ? 2 : 0), 0) };
+ };
+ // Pipeline tasks are found by title, description and comments; opening one opens its pipeline and the task.
+ const tasks = state.pipelines.filter(pipeline => !pipeline.trashed).flatMap(pipeline => pipeline.tasks.map(task => {
+  const book = state.notebooks.find(item => item.id === pipeline.notebookId), found = match(task.title, task.searchText, book);
+  return found && { kind: 'task', task, pipeline, book, title: task.title, type: 'Tarefa · ' + (pipeline.title || 'Sem título'), updated: task.updatedAt, ...found };
+ })).filter(Boolean);
+ return [...tasks, ...state.notes.filter(note => !note.trashed).map(note => {
+  const book = state.notebooks.find(book => book.id === note.notebookId);
+  const text = [note.body, ...(state.sourceActions || []).filter(item => item.noteId === note.id).map(item => item.title), ...(note.cuts || []).map(cut => `${cut.title || ''} ${cut.description || ''} ${cut.url || ''}`)].join(' ').replace(/\s+/g, ' ').trim();
+  const found = match(note.title, text, book);
+  return found && { kind: 'page', note, book, title: note.title, type: ({ notes: 'Nota', tasks: 'Pipeline', reminders: 'Lembrete', boards: 'Quadro' })[note.type], updated: note.updated, ...found };
+ })].filter(Boolean).sort((a,b) => b.score-a.score || Date.parse(b.updated)-Date.parse(a.updated));
 }
 function renderGlobalSearch() {
  clearTimeout(searchTimer); searchTimer = null;
@@ -24,7 +32,7 @@ function renderGlobalSearch() {
  searchResults.hidden = !query || !searchControl.classList.contains('open');
  searchInput.setAttribute('aria-expanded', String(!searchResults.hidden));
  searchInput.removeAttribute('aria-activedescendant');
- searchResults.innerHTML = searchMatches.length ? searchMatches.map(({note,book,snippet},index) => `<button type="button" role="option" aria-selected="false" id="global-result-${index}" data-search-index="${index}"><strong>${escape(note.title || 'Sem título')}</strong><small>${escape(({notes:'Nota',tasks:'Lista de tarefas',reminders:'Lembrete',boards:'Quadro'})[note.type])} · ${escape(book?.name || 'Caderno')}</small><span>${escape(snippet || 'Página em branco')}</span></button>`).join('') : '<p role="status">Nenhuma página encontrada.</p>';
+ searchResults.innerHTML = searchMatches.length ? searchMatches.map(({title,type,book,snippet},index) => `<button type="button" role="option" aria-selected="false" id="global-result-${index}" data-search-index="${index}"><strong>${escape(title || 'Sem título')}</strong><small>${escape(type)} · ${escape(book?.name || 'Caderno')}</small><span>${escape(snippet || 'Página em branco')}</span></button>`).join('') : '<p role="status">Nenhuma página encontrada.</p>';
  searchResults.querySelectorAll('[data-search-index]').forEach(button => button.onclick = () => selectGlobalResult(Number(button.dataset.searchIndex)));
 }
 function openGlobalSearch() {
@@ -41,6 +49,7 @@ function closeGlobalSearch(focus = false) {
 async function selectGlobalResult(index) {
  const result = searchMatches[index]; if (!result) return;
  closeGlobalSearch();
+ if (result.kind === 'task') { if (await turn('note:select',{id:result.pipeline.id})) openTaskModal(result.task.id); return; }
  if (await turn('note:select',{id:result.note.id})) $('#note-title')?.focus();
 }
 searchToggle.onclick = () => searchControl.classList.contains('open') ? closeGlobalSearch(true) : openGlobalSearch();

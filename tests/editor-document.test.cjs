@@ -8,16 +8,12 @@ test('structured text and tables persist, derive searchable text and survive tra
  store.dispatch('note:update',{id,editorDoc:doc});const note=open().snapshot().notes.find(note=>note.id===id);assert.equal(note.editorDoc[1].rows[1][0][0].text,'Ana');assert.equal(note.editorDoc[0].runs[0].marks.bold,true);assert.ok(note.body.includes('| Ana | #projeto |'));assert.ok(note.categories.some(category=>category.key==='projeto'));
  store.dispatch('note:trash',{id});store.dispatch('note:restore',{id});assert.deepEqual(store.snapshot().notes.find(note=>note.id===id).editorDoc,note.editorDoc);
 });
-test('daily checkbox edits preserve formatted blocks',t=>{
- const {store}=fixture(t);store.dispatch('note:create',{type:'notes'});const id=store.snapshot().selected.notes;
- const doc=[paragraph('Título',{italic:true}),{id:document.id(),type:'check',checked:false,runs:[{text:'Comprar papel',marks:{bold:true}}]}];store.dispatch('note:update',{id,editorDoc:doc});const item=store.snapshot().notes.find(note=>note.id===id).inlineTasks[0];store.dispatch('inline:toggle',{id:item.id});assert.equal(JSON.parse(store.note(id).editor_document)[1].checked,true);assert.equal(JSON.parse(store.note(id).editor_document)[1].runs[0].marks.bold,true);
-});
 test('schema rejects malformed or oversized tables and removes unsafe attributes',()=>{
  assert.throws(()=>document.normalize([{type:'table',rows:[[],[]]}]));assert.throws(()=>document.normalize([{type:'table',rows:[[document.plainRuns('a')],[]]}]));assert.throws(()=>document.normalize([{type:'script',runs:[]}])) ;
  const doc=document.normalize([paragraph('<script>literal</script>',{link:'javascript:alert(1)',highlight:'#000000',bold:true,onclick:'bad'})]);assert.deepEqual(doc[0].runs[0].marks,{bold:true});assert.equal(document.text(doc),'<script>literal</script>');
 });
-test('inline code and fenced code do not register categories or tasks',t=>{
- const {store}=fixture(t);store.dispatch('note:create',{type:'notes'});const id=store.snapshot().selected.notes;store.dispatch('note:update',{id,editorDoc:[paragraph('#codigo',{code:true}),{id:document.id(),type:'code',runs:document.plainRuns('[] literal\n#outro')}]});const note=store.snapshot().notes.find(note=>note.id===id);assert.equal(note.categories.length,0);assert.equal(note.inlineTasks.length,0);
+test('inline code and fenced code do not register categories',t=>{
+ const {store}=fixture(t);store.dispatch('note:create',{type:'notes'});const id=store.snapshot().selected.notes;store.dispatch('note:update',{id,editorDoc:[paragraph('#codigo',{code:true}),{id:document.id(),type:'code',runs:document.plainRuns('[] literal\n#outro')}]});const note=store.snapshot().notes.find(note=>note.id===id);assert.equal(note.categories.length,0);
 });
 test('diagram blocks keep their Mermaid code as typed, mirror it as a fenced block and persist',t=>{
  const {store,open}=fixture(t);store.dispatch('note:create',{type:'notes'});const id=store.snapshot().selected.notes;
@@ -37,12 +33,14 @@ test('editing text around a diagram keeps the diagram block',()=>{
  const doc=document.normalize([paragraph('Antes'),{type:'diagram',code:'flowchart LR\n A-->B'}]);
  const next=document.reconcile(doc,document.text(doc)+'\nDepois');assert.equal(next[1].type,'diagram');assert.equal(next[1].code,'flowchart LR\n A-->B');assert.equal(document.runText(next[2].runs),'Depois');
 });
-test('toggling a task outside the editor keeps diagrams and tables on the page',t=>{
- const {store}=fixture(t);store.dispatch('note:create',{type:'notes'});const id=store.snapshot().selected.notes;
- const diagram={id:document.id(),type:'diagram',code:'flowchart TD\n  A[Ideia] --> B'},table={id:document.id(),type:'table',header:true,rows:[[document.plainRuns('Pessoa')],[document.plainRuns('Ana')]]};
- store.dispatch('note:update',{id,editorDoc:[{id:document.id(),type:'check',checked:false,runs:document.plainRuns('Comprar papel')},diagram,table,paragraph('Depois')]});
- const item=store.snapshot().notes.find(note=>note.id===id).inlineTasks[0];store.dispatch('inline:toggle',{id:item.id});
- const doc=JSON.parse(store.note(id).editor_document);
- assert.deepEqual(doc.map(block=>block.type),['check','diagram','table','paragraph']);assert.equal(doc[0].checked,true);
- assert.equal(doc[1].code,diagram.code);assert.deepEqual(doc[2].rows,table.rows);
+test('checkbox blocks no longer exist; task lines and task images are allowed only in their context',()=>{
+ assert.throws(()=>document.normalize([{type:'check',checked:true,runs:[]}]),/Tipo de bloco/);
+ assert.deepEqual(document.normalize([{id:'t',type:'task',taskId:'abc-1',title:'Trocar a fiação',extra:1}]),[{id:'t',type:'task',taskId:'abc-1',title:'Trocar a fiação'}]);
+ assert.throws(()=>document.normalize([{type:'task',taskId:'../x',title:'x'}]),/Tarefa inválida/);
+ assert.throws(()=>document.normalize([{type:'image',imageId:'i1'}]),/Tipo de bloco/);
+ assert.deepEqual(document.normalize([{id:'i',type:'image',imageId:'i1'}],{context:'task'}),[{id:'i',type:'image',imageId:'i1'}]);
+ assert.throws(()=>document.normalize([{type:'task',taskId:'a',title:'x'}],{context:'task'}),/Tipo de bloco/);
+ assert.throws(()=>document.normalize([{type:'image',imageId:'a b'}],{context:'task'}),/Imagem inválida/);
+ assert.equal(document.text([{type:'task',taskId:'a',title:'Ligar'},{type:'image',imageId:'i'}]),'Ligar\n');
+ assert.deepEqual(document.fromPlain('[ ] texto').map(block=>[block.type,block.runs[0].text]),[['paragraph','[ ] texto']]);
 });

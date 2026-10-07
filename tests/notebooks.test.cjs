@@ -1,3 +1,4 @@
+const {createPipelineUseCases}=require('../src/main/pipelines/compose.cjs');
 const {test}=require('node:test');const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {Store}=require('../src/main/store.cjs');const {COLORS}=require('../src/main/notebooks.cjs');
@@ -16,10 +17,10 @@ test('every page has a notebook and changing notebooks scopes selected pages',t=
 });
 test('removing a notebook transfers active pages and trash without losing reminders',t=>{
   const {store}=fixture(t),first=store.snapshot().activeNotebook,second=createBook(store,'Segundo');
-  store.dispatch('note:create',{type:'tasks'});const tasks=store.snapshot().selected.tasks;store.dispatch('item:create',{noteId:tasks,title:'Preservar'});store.dispatch('note:trash',{id:tasks});
+  store.dispatch('note:create',{type:'tasks'});const tasks=store.snapshot().selected.tasks;createPipelineUseCases({store}).createTask({pipelineId:tasks,title:'Preservar'});store.dispatch('note:trash',{id:tasks});
   store.dispatch('note:create',{type:'reminders'});const reminder=store.snapshot().selected.reminders;const due=new Date(Date.now()+60000).toISOString();store.dispatch('schedule:activate',{id:reminder,due});
   store.dispatch('notebook:remove',{id:second,targetId:first});
-  const state=store.snapshot();assert.equal(state.notebooks.length,1);assert.equal(state.activeNotebook,first);assert.equal(state.notes.find(note=>note.id===tasks).notebookId,first);assert.equal(state.notes.find(note=>note.id===tasks).trashed,true);assert.equal(state.notes.find(note=>note.id===reminder).scheduledAt,due);
+  const state=store.snapshot();assert.equal(state.notebooks.length,1);assert.equal(state.activeNotebook,first);assert.equal(state.notes.find(note=>note.id===tasks).notebookId,first);assert.equal(state.notes.find(note=>note.id===tasks).trashed,true);assert.deepEqual(state.pipelines.find(pipeline=>pipeline.id===tasks).tasks.map(task=>task.title),['Preservar']);assert.equal(state.notes.find(note=>note.id===reminder).scheduledAt,due);
   assert.ok(store.db.prepare('SELECT deleted_at FROM notebooks WHERE id=?').get(second).deleted_at);
   assert.throws(()=>store.dispatch('notebook:remove',{id:first,targetId:first}));assert.equal(store.snapshot().notebooks.length,1);
 });

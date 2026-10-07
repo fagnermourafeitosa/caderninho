@@ -44,7 +44,7 @@ function categoryCursorFor(event,editor) {
   if(!line) return null;
   if(line.dataset.blockType==='code') return null;
   if(line.dataset.blockType==='table') {const cell=getSelection().anchorNode?.parentElement?.closest('.table-cell-text');if(!cell)return null;const blocks=[...editor.querySelectorAll('.writing-line')],prefix=blocks.slice(0,blocks.indexOf(line)).reduce((size,item)=>size+readWritingLine(item).length+1,0);const block=readEditorBlock(line),row=Number(cell.dataset.row),column=Number(cell.dataset.column);return prefix+block.rows.slice(0,row).reduce((size,cells)=>size+pageDocument.blockText({...block,rows:[cells]}).length+1,0)+2+block.rows[row].slice(0,column).reduce((size,runs)=>size+pageDocument.runText(runs).length+3,0)+caretOffset(cell);}
-  return lines.slice(0,lines.indexOf(line)).reduce((size,item)=>size+readWritingLine(item).length+1,0)+caretOffset(editableText(line))+(line.dataset.checkbox?4:0);
+  return lines.slice(0,lines.indexOf(line)).reduce((size,item)=>size+readWritingLine(item).length+1,0)+caretOffset(editableText(line));
 }
 document.addEventListener('focusout',event=>{
   if(transformingCategoryEditor || !unfinishedCategoryNote || !event.target.closest('#note-body') || event.relatedTarget?.closest('#note-body')) return;

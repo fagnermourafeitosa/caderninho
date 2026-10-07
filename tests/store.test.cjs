@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { Store } = require('../src/main/store.cjs');
+const { createPipelineUseCases } = require('../src/main/pipelines/compose.cjs');
 function fixture(t, legacy) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'caderninho-sqlite-test-'));
   let clock = new Date('2026-10-01T15:00:00Z').getTime();
@@ -38,36 +39,30 @@ test('SQLite commits edits immediately and preserves text after reopening', t =>
   assert.equal(fs.readFileSync(store.file).subarray(0, 16).toString(), 'SQLite format 3\u0000');
   assert.equal(store.db.prepare('PRAGMA integrity_check').get().integrity_check, 'ok');
 });
-test('multiple checklist pages have independent editable checkbox items', t => {
+test('multiple pipelines keep independent tasks and page dates', t => {
   const { store, open, advance, now } = fixture(t);
   const first = create(store, 'tasks', 'Trabalho');
   const created = new Date(now()).toISOString();
   advance(60_000);
-  store.dispatch('item:create', { noteId: first, title: 'Escrever' });
-  store.dispatch('item:create', { noteId: first, title: 'Revisar' });
+  const pipelines = createPipelineUseCases({ store });
+  const writing = pipelines.createTask({ pipelineId: first, title: 'Escrever' }).taskId;
+  pipelines.createTask({ pipelineId: first, title: 'Revisar' });
   const second = create(store, 'tasks', 'Casa');
-  store.dispatch('item:create', { noteId: second, title: 'Fazer café' });
-  const id = note(store, first).items[0].id;
-  store.dispatch('item:toggle', { id });
-  store.dispatch('item:update', { id, title: 'Escrever o rascunho' });
-  const reopened = open();
-  assert.equal(note(reopened, first).title, 'Trabalho');
-  assert.equal(note(reopened, first).created, created);
-  assert.equal(note(reopened, first).updated, new Date(now()).toISOString());
-  assert.equal(note(reopened, first).items[1].done, false);
-  assert.equal(note(reopened, second).title, 'Casa');
-  assert.equal(note(reopened, first).items.length, 2);
-  assert.equal(note(reopened, first).items[0].done, true);
-  assert.equal(note(reopened, first).items[0].title, 'Escrever o rascunho');
-  assert.equal(note(reopened, second).items.length, 1);
-  assert.equal(note(reopened, second).items[0].done, false);
+  pipelines.createTask({ pipelineId: second, title: 'Fazer café' });
+  pipelines.updateTask({ taskId: writing, title: 'Escrever o rascunho' });
+  const reopened = open().snapshot(), board = id => reopened.pipelines.find(pipeline => pipeline.id === id);
+  assert.equal(note(open(), first).title, 'Trabalho');
+  assert.equal(note(open(), first).created, created);
+  assert.equal(note(open(), first).updated, new Date(now()).toISOString());
+  assert.deepEqual(board(first).tasks.map(task => task.title).sort(), ['Escrever o rascunho', 'Revisar']);
+  assert.deepEqual(board(second).tasks.map(task => task.title), ['Fazer café']);
 });
 test('trash preserves page types, text, and checkbox states when restoring', t => {
   const { store } = fixture(t);
   for (const type of ['notes', 'tasks', 'reminders']) {
     const id = create(store, type, type);
     store.dispatch('note:update', { id, body: 'Conteúdo preservado' });
-    if (type === 'tasks') { store.dispatch('item:create', { noteId: id, title: 'Concluída' }); store.dispatch('item:toggle', { id: note(store, id).items[0].id }); }
+    if (type === 'tasks') { const pipelines = createPipelineUseCases({ store }), board = store.snapshot().pipelines.find(pipeline => pipeline.id === id); pipelines.moveTask({ taskId: pipelines.createTask({ pipelineId: id, title: 'Concluída' }).taskId, columnId: board.columns.at(-1).id, position: 0 }); }
     store.dispatch('note:trash', { id });
     assert.equal(note(store, id).trashed, true);
     assert.throws(() => store.dispatch('note:select', { id }));
@@ -75,21 +70,8 @@ test('trash preserves page types, text, and checkbox states when restoring', t =
     assert.equal(note(store, id).type, type);
     assert.equal(note(store, id).body, 'Conteúdo preservado');
     assert.equal(store.snapshot().activeView, type);
-    if (type === 'tasks') assert.equal(note(store, id).items[0].done, true);
+    if (type === 'tasks') assert.equal(store.snapshot().pipelines.find(pipeline => pipeline.id === id).tasks[0].done, true);
   }
-});
-test('individual checkboxes go to task trash and can be restored', t => {
-  const { store } = fixture(t);
-  const id = create(store, 'tasks');
-  store.dispatch('item:create', { noteId: id, title: 'Uma tarefa' });
-  const item = note(store, id).items[0];
-  store.dispatch('item:toggle', { id: item.id });
-  store.dispatch('item:trash', { id: item.id });
-  assert.equal(note(store, id).items.length, 0);
-  assert.equal(store.snapshot().trashItems[0].done, true);
-  store.dispatch('item:restore', { id: item.id });
-  assert.equal(store.snapshot().trashItems.length, 0);
-  assert.equal(note(store, id).items[0].done, true);
 });
 test('reminder notes preserve content and fire once after a delayed wakeup', t => {
   const { store, open, advance, now } = fixture(t);
@@ -138,27 +120,29 @@ test('legacy JSON is backed up and imported exactly once', t => {
   ], tasks: [{ id: 'checkbox', title: 'Feita', done: true }], reminders: [{ id: 'alarm', title: 'Água', due: '2026-10-02T12:00:00Z', fired: false }] };
   const { store, directory, open } = fixture(t, legacy);
   const state = store.snapshot();
-  assert.equal(state.notes.length, 4);
+  // Legacy checkbox tasks are dropped like every task list (spec 008).
+  assert.equal(state.notes.length, 3);
+  assert.equal(state.notes.some(n => n.type === 'tasks'), false);
   assert.equal(state.selected.notes, 'kept');
   assert.equal(note(store, 'kept').body, legacy.notes[0].body);
   assert.equal(note(store, 'old').trashed, true);
-  assert.equal(state.notes.find(n => n.type === 'tasks').items[0].done, true);
   assert.equal(state.notes.find(n => n.type === 'reminders').enabled, true);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(directory, 'notebook.json'), 'utf8')), legacy);
   const backups = fs.readdirSync(directory).filter(name => name.startsWith('notebook-before-sqlite-'));
   assert.equal(backups.length, 1);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(directory, backups[0]), 'utf8')), legacy);
-  assert.equal(open().snapshot().notes.length, 4);
+  assert.equal(open().snapshot().notes.length, 3);
   assert.equal(fs.readdirSync(directory).filter(name => name.startsWith('notebook-before-sqlite-')).length, 1);
 });
-test('purge only removes trashed data and cascades checklist items', t => {
+test('purge only removes trashed data and cascades pipeline columns and tasks', t => {
   const { store } = fixture(t);
   const id = create(store, 'tasks');
-  store.dispatch('item:create', { noteId: id, title: 'Filha' });
+  createPipelineUseCases({ store }).createTask({ pipelineId: id, title: 'Filha' });
   assert.throws(() => store.dispatch('note:purge', { id }));
   store.dispatch('note:trash', { id }); store.dispatch('note:purge', { id });
   assert.equal(note(store, id), undefined);
-  assert.equal(store.db.prepare('SELECT count(*) AS n FROM task_items WHERE note_id=?').get(id).n, 0);
+  assert.equal(store.db.prepare('SELECT count(*) AS n FROM pipeline_tasks WHERE note_id=?').get(id).n, 0);
+  assert.equal(store.db.prepare('SELECT count(*) AS n FROM pipeline_columns WHERE note_id=?').get(id).n, 0);
 });
 test('invalid commands roll back and view selection persists', t => {
   const { store, open } = fixture(t);
@@ -206,14 +190,12 @@ test('inline note alarm and checkbox states persist, fire once and respect trash
 });
 test('daily pages freeze past overview and retain independent annotations across midnight', t => {
   const { store, advance, open } = fixture(t);
-  const list = create(store,'tasks','Trabalho'); store.dispatch('item:create',{noteId:list,title:'Revisar'});
-  const task = note(store,list).items[0];
+  const page = create(store,'notes','Trabalho');
   const originalDay=store.dayKey(); store.dispatch('day:update',{day:originalDay,body:'Foi um bom dia.'});
-  store.dispatch('item:toggle',{id:task.id});
   const frozen=store.snapshot().daily.overview;
-  assert.equal(frozen.tasks[0].done,true);
+  assert.equal(frozen.recentNotes[0].title,'Trabalho');
   advance(24*60*60*1000);
-  store.dispatch('item:toggle',{id:task.id}); store.dispatch('item:update',{id:task.id,title:'Título novo'});
+  store.dispatch('note:update',{id:page,title:'Título novo'});
   const nextDay=store.dayKey(); store.dispatch('day:update',{day:nextDay,body:'Novos planos.'});
   store.dispatch('day:select',{day:originalDay});
   const previous=open().snapshot().daily;
@@ -221,33 +203,16 @@ test('daily pages freeze past overview and retain independent annotations across
   assert.throws(()=>store.dispatch('day:update',{day:originalDay,body:'Não mudar o passado'}));
   store.dispatch('day:select',{day:nextDay}); assert.equal(store.snapshot().daily.body,'Novos planos.');
 });
-test('entity timestamps, toggle history and restored deleted_at survive reopening', t => {
+test('entity timestamps and restored deleted_at survive reopening', t => {
   const { store, advance, open, now }=fixture(t), list=create(store,'tasks','Datas');
-  store.dispatch('item:create',{noteId:list,title:'Primeiro item'}); const id=note(store,list).items[0].id;
-  const created=note(store,list).items[0].created; assert.equal(created,new Date(now()).toISOString());
-  advance(1000); store.dispatch('item:toggle',{id}); const checked=note(store,list).items[0].checkedAt;
-  advance(1000); store.dispatch('item:toggle',{id}); const unchecked=note(store,list).items[0].uncheckedAt;
-  assert.notEqual(checked,unchecked); assert.equal(note(store,list).items[0].checkedAt,checked);
-  assert.deepEqual(store.db.prepare("SELECT action FROM activity_events WHERE entity_type='task' AND entity_id=? ORDER BY id").all(id).map(row=>row.action),['create','check','uncheck']);
-  store.dispatch('item:trash',{id}); assert.ok(store.snapshot().trashItems.find(item=>item.id===id).deletedAt);
-  advance(1000); store.dispatch('item:restore',{id}); const item=note(open(),list).items[0];
-  assert.equal(item.deletedAt,null); assert.equal(item.created,created); assert.equal(item.uncheckedAt,unchecked);
+  const pipelines=createPipelineUseCases({ store }), id=pipelines.createTask({ pipelineId:list, title:'Primeiro item' }).taskId;
+  const created=new Date(now()).toISOString(), card=state=>state.pipelines.find(pipeline=>pipeline.id===list).tasks.find(task=>task.id===id);
+  assert.equal(card(store.snapshot()).createdAt,created);
+  advance(1000); pipelines.trashTask({ taskId:id }); assert.ok(store.snapshot().trashTasks.find(task=>task.id===id).deletedAt);
+  advance(1000); pipelines.restoreTask({ taskId:id }); const restored=card(open().snapshot());
+  assert.equal(restored.deletedAt,null); assert.equal(restored.createdAt,created);
   store.dispatch('note:trash',{id:list}); assert.ok(note(store,list).deletedAt);
   store.dispatch('note:restore',{id:list}); assert.equal(note(open(),list).deletedAt,null);
-});
-test('inline tasks keep identity and dates while edited, moved, removed and restored', t => {
-  const { store,advance,open }=fixture(t), id=create(store,'notes','Inline');
-  store.dispatch('note:update',{id,body:'[] Comprar café\n[] Ler'});
-  const first=note(store,id).inlineTasks[0]; assert.ok(first.created);
-  advance(1000); store.dispatch('inline:toggle',{id:first.id}); assert.ok(note(store,id).body.startsWith('[x]'));
-  const checked=note(store,id).inlineTasks[0].checkedAt;
-  advance(1000); store.dispatch('note:update',{id,body:'[] Ler\n[x] Comprar café'});
-  const moved=note(store,id).inlineTasks.find(item=>item.id===first.id); assert.equal(moved.lineIndex,1); assert.equal(moved.checkedAt,checked);
-  advance(1000); store.dispatch('inline:toggle',{id:first.id}); const unchecked=note(store,id).inlineTasks.find(item=>item.id===first.id).uncheckedAt; assert.ok(unchecked);
-  store.dispatch('note:update',{id,body:'[] Ler'}); assert.ok(store.db.prepare('SELECT deleted_at FROM inline_tasks WHERE id=?').get(first.id).deleted_at);
-  advance(1000); store.dispatch('note:update',{id,body:'[] Ler\n[] Comprar café'});
-  const restored=note(open(),id).inlineTasks.find(item=>item.id===first.id); assert.equal(restored.deletedAt,null); assert.equal(restored.created,first.created);
-  assert.ok(store.snapshot().daily.overview.tasks.some(item=>item.id===first.id && item.source==='inline'));
 });
 
 test('removing quick capture preserves legacy saved data without accepting draft commands', t => {

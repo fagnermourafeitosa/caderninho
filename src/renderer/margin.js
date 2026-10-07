@@ -1,14 +1,12 @@
 function editableText(line) { return line.querySelector('.line-text') || line; }
 function readWritingLine(line) {
   if(line.dataset.blockType) return pageDocument.blockText(readEditorBlock(line));
-  const text = editableText(line).innerText.replace(/\n$/, '');
-  return line.dataset.checkbox ? `[${line.dataset.checked === 'true' ? 'x' : ' '}] ${text}` : text;
+  return editableText(line).innerText.replace(/\n$/, '');
 }
 function makeWritingLine(text, index) {
   const line = document.createElement('div'); line.className = 'writing-line'; line.contentEditable = 'true'; line.dataset.lineIndex = index;
   const span = document.createElement('span'); span.className = 'line-text'; span.contentEditable = 'true'; span.tabIndex=0; span.spellcheck = true; span.lang = 'pt-BR'; span.setAttribute('role', 'textbox'); span.setAttribute('aria-label', `Texto da nota, parágrafo ${index + 1}`); span.textContent = text; if (!text) span.append(document.createElement('br')); line.append(span);
-  convertInlineCheckbox(line);
-  highlightCategoryTokens(span);
+  if (!renderingTaskEditor && !taskEditorActive()) highlightCategoryTokens(span);
   return line;
 }
 function caretOffset(element, end = false) {
@@ -24,40 +22,29 @@ function putCaret(element, offset = 0) {
   while ((node = walker.nextNode())) { if (offset <= node.length) { const range = document.createRange(); range.setStart(node, offset); range.collapse(true); const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range); return; } offset -= node.length; }
   const range = document.createRange(); range.selectNodeContents(element); range.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(range);
 }
-function convertInlineCheckbox(line) {
-  const span = editableText(line), match = smartText.checkbox(span.innerText);
-  if (line.dataset.checkbox || !match) return;
-  const focused = span.contains(getSelection().anchorNode), offset = caretOffset(span);
-  const text = span.innerText.replace(/\n$/, '').slice(match[0].length);
-  span.textContent = text; if (!text) span.append(document.createElement('br'));
-  line.dataset.checkbox = 'true'; line.dataset.checked = String(match[1].toLowerCase() === 'x'); line.classList.add('inline-task');
-  const input = document.createElement('input'); input.type = 'checkbox'; input.className = 'inline-check'; input.checked = line.dataset.checked === 'true'; input.setAttribute('aria-label', 'Concluir item da nota');
-  input.onchange = () => { line.dataset.checked = String(input.checked); line.classList.toggle('is-checked', input.checked); const note = currentNote(); if (note) { action('note:update', { id: note.id, body: $('#note-body').value,...($('#note-body').dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) }); renderSmartMargin(); } };
-  line.classList.toggle('is-checked', input.checked); line.prepend(input);
-  if (focused) putCaret(span, Math.max(0, offset - match[0].length));
-}
 function smartNoteInput(noteId, event) {
+  if (detectTaskLine(noteId, event)) return;
   let editor = $('#note-body');
   const categoryCursor=categoryCursorFor(event,editor);
   unfinishedCategoryNote=categoryCursor!==null&&categoryText.tokens(editor.value).some(token=>categoryCursor>token.start&&categoryCursor<=token.end)?noteId:null;
-  if (!event?.isComposing && editor.tagName === 'TEXTAREA' && (categoryText.tokens(editor.value).length || editor.value.split('\n').some(line => smartText.checkbox(line)))) {
+  if (!event?.isComposing && editor.tagName === 'TEXTAREA' && categoryText.tokens(editor.value).length) {
     const body = editor.value, before = body.slice(0, editor.selectionStart), lineIndex = before.split('\n').length - 1;
-    const offset = before.split('\n').at(-1).length, prefix = smartText.checkbox(body.split('\n')[lineIndex]);
+    const offset = before.split('\n').at(-1).length;
     transformingCategoryEditor=true;
     try {
       mountCollage({ ...currentNote(), body }); editor = $('#note-body');
-      const line = editor.querySelectorAll('.writing-line')[lineIndex]; putCaret(editableText(line), Math.max(0, offset - (prefix?.[0].length || 0)));
+      const line = editor.querySelectorAll('.writing-line')[lineIndex]; putCaret(editableText(line), offset);
     } finally { transformingCategoryEditor=false; }
   } else if (editor.classList.contains('collage-editor')) {
     const line = event?.target.closest('.writing-line');
     const lines=line?[line]:[...editor.querySelectorAll('.writing-line')];
-    for(const item of lines) { if(item.classList.contains('table-block')) {if(!event?.isComposing) item.querySelectorAll('.table-cell-text').forEach(highlightCategoryTokens);} else if(!['code','divider','diagram'].includes(item.dataset.blockType)){convertInlineCheckbox(item);if(!event?.isComposing)highlightCategoryTokens(editableText(item));} }
+    for(const item of lines) { if(item.classList.contains('table-block')) {if(!event?.isComposing) item.querySelectorAll('.table-cell-text').forEach(highlightCategoryTokens);} else if(!['code','divider','diagram','image','task'].includes(item.dataset.blockType)&&!event?.isComposing)highlightCategoryTokens(editableText(item)); }
   }
   updateDetail(); renderSmartMargin(); action('note:update', { id: noteId, body: editor.value, categoryCursor,...(editor.dataset.structured==='true'?{editorDoc:readEditorDocument()}:{}) });
 }
 function handleWritingKey(event) {
   // Form fields inside blocks (diagram code) keep their native shortcuts, such as select-all.
-  if(event.target.closest('#note-body textarea, #note-body input')) return;
+  if(event.target.closest(RICH_EDITOR_FIELDS)) return;
   if(handleDocumentKey(event)) return;
   if(tableKey(event)) return;
   if(getSelection().focusNode?.parentElement?.closest('[data-block-type=code]') && event.key==='Enter'&&!event.isComposing){event.preventDefault();document.execCommand('insertLineBreak');return;}
@@ -67,27 +54,22 @@ function handleWritingKey(event) {
   const start = caretOffset(span), end = caretOffset(span, true), text = span.innerText.replace(/\n$/, '');
   if (event.key === 'Enter') {
     event.preventDefault();
-    if (line.dataset.checkbox && !text) {
-      line.replaceWith(makeWritingLine('', Number(line.dataset.lineIndex))); const replacement = $('#note-body').querySelector(`[data-line-index="${line.dataset.lineIndex}"]`); putCaret(editableText(replacement));
-    } else {
-      const prefix = line.dataset.checkbox ? '[ ] ' : '';
+    {
       const splitRuns=readInlineRuns(span);renderInlineRuns(span,sliceInlineRuns(splitRuns,0,start));
-      const next = makeWritingLine(prefix + text.slice(end), Number(line.dataset.lineIndex) + 1); if(['bullet','number','quote'].includes(line.dataset.blockType)) {next.dataset.blockType=line.dataset.blockType;next.classList.add('block-'+line.dataset.blockType);}
+      const next = makeWritingLine(text.slice(end), Number(line.dataset.lineIndex) + 1); if(['bullet','number','quote'].includes(line.dataset.blockType)) {next.dataset.blockType=line.dataset.blockType;next.classList.add('block-'+line.dataset.blockType);}
       renderInlineRuns(editableText(next),sliceInlineRuns(splitRuns,end,text.length));line.after(next); putCaret(editableText(next));
     }
-  } else if (event.key === 'Backspace' && start === 0 && end === 0 && line.dataset.checkbox) {
-    event.preventDefault(); line.querySelector('.inline-check').remove(); delete line.dataset.checkbox; delete line.dataset.checked; line.dataset.blockType='paragraph'; line.classList.remove('block-check'); line.classList.remove('inline-task', 'is-checked'); putCaret(span);
   } else if ((event.key === 'Backspace' && start === 0 && end === 0) || (event.key === 'Delete' && start === text.length && end === start)) {
-    const lines = [...$('#note-body').querySelectorAll('.writing-line')], index = lines.indexOf(line);
+    const lines = [...editorHost().querySelectorAll('.writing-line')], index = lines.indexOf(line);
     const previous = event.key === 'Backspace', neighbor = lines[index + (previous ? -1 : 1)];
     if (!neighbor) return; event.preventDefault();
-    if(['table','divider','diagram'].includes(neighbor.dataset.blockType)) {neighbor.remove();putCaret(span,start);saveDocument();return;}
+    if(['table','divider','diagram','image','task'].includes(neighbor.dataset.blockType)) {neighbor.remove();putCaret(span,start);saveDocument();return;}
     const keep = previous ? neighbor : line, remove = previous ? line : neighbor;
     const keepSpan = editableText(keep), offset = keepSpan.innerText.replace(/\n$/, '').length;
     renderInlineRuns(keepSpan,[...readInlineRuns(keepSpan),...readInlineRuns(editableText(remove))]); remove.remove(); putCaret(keepSpan, offset);
   } else return;
-  $('#note-body').querySelectorAll('.writing-line').forEach((item, index) => item.dataset.lineIndex = index);
-  $('#note-body').dispatchEvent(new Event('input', { bubbles: true }));
+  editorHost().querySelectorAll('.writing-line').forEach((item, index) => item.dataset.lineIndex = index);
+  editorHost().dispatchEvent(new Event('input', { bubbles: true }));
 }
 function formatStamp(due) { return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(due)); }
 function renderSmartMargin() {
@@ -112,10 +94,10 @@ function pasteWritingText(text) {
   capturePageSelection();
   if (!text.includes('\n')) { document.execCommand('insertText', false, text); return; }
   const span = editableText(line), original = span.innerText.replace(/\n$/, ''), start = caretOffset(span), end = caretOffset(span, true), parts = text.replace(/\r\n?/g, '\n').split('\n'),runs=readInlineRuns(span);
-  renderInlineRuns(span,[...sliceInlineRuns(runs,0,start),...pageDocument.plainRuns(parts[0])]); convertInlineCheckbox(line);
+  renderInlineRuns(span,[...sliceInlineRuns(runs,0,start),...pageDocument.plainRuns(parts[0])]);
   let last = line;
-  parts.slice(1).forEach((part, index) => { const suffix=index===parts.length-2?sliceInlineRuns(runs,end,original.length):[],marker=smartText.checkbox(part),next = makeWritingLine(part+pageDocument.runText(suffix), index + 1);renderInlineRuns(editableText(next),[...pageDocument.plainRuns(marker?part.slice(marker[0].length):part),...suffix]); last.after(next); last = next; });
-  $('#note-body').querySelectorAll('.writing-line').forEach((item, index) => item.dataset.lineIndex = index);
-  const marker = smartText.checkbox(parts.at(-1)); putCaret(editableText(last), Math.max(0, parts.at(-1).length - (marker?.[0].length || 0)));
-  $('#note-body').dispatchEvent(new Event('input', { bubbles: true }));
+  parts.slice(1).forEach((part, index) => { const suffix=index===parts.length-2?sliceInlineRuns(runs,end,original.length):[],next = makeWritingLine(part+pageDocument.runText(suffix), index + 1);renderInlineRuns(editableText(next),[...pageDocument.plainRuns(part),...suffix]); last.after(next); last = next; });
+  editorHost().querySelectorAll('.writing-line').forEach((item, index) => item.dataset.lineIndex = index);
+  putCaret(editableText(last), parts.at(-1).length);
+  editorHost().dispatchEvent(new Event('input', { bubbles: true }));
 }

@@ -10,8 +10,6 @@ function updateTemporalLabels() {
   const note = currentNote();
   if ($('#note-dates') && note) $('#note-dates').innerHTML=noteDates(note);
   if (note) {
-    document.querySelectorAll('[data-task-id]').forEach(input => { const item=note.items.find(item=>item.id===input.dataset.taskId); if(item) input.title=temporalDetails(item); });
-    document.querySelectorAll('.inline-check').forEach(input => { const lines=[...$('#note-body').querySelectorAll('.writing-line')],item=note.inlineTasks.find(item=>item.lineIndex===lines.indexOf(input.closest('.writing-line'))); if(item) input.title=temporalDetails(item); });
     document.querySelectorAll('[data-cut-id]').forEach(card=>{ const cut=note.cuts.find(cut=>cut.id===card.dataset.cutId); if(cut) card.title=temporalDetails(cut); });
   }
   if ($('#daily-body')) $('#daily-body').title=`Criada: ${formatDateTime(state.daily.created)}\nAtualizada: ${formatDateTime(state.daily.updated)}`;

@@ -16,11 +16,14 @@ const { registerEditorContextMenu } = require('./editor-context-menu/presentatio
 const { registerBoards } = require('./boards/presentation/ipc.cjs');
 const { createBoardUseCases } = require('./boards/compose.cjs');
 const { dialogExportTarget } = require('./boards/infrastructure/dialog-export-target.cjs');
+const { createPipelineUseCases } = require('./pipelines/compose.cjs');
+const { registerPipelines } = require('./pipelines/presentation/ipc.cjs');
+const { SCHEME: PIPELINE_SCHEME, pipelineProtocolHandler } = require('./pipelines/presentation/protocol.cjs');
 const ROOT = path.join(__dirname, '..', '..');
-protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
+protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: PIPELINE_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
 let win, store, reminderInterval, saveFailed = false;
-let media, observedDay, related, boards;
+let media, observedDay, related, boards, pipelines;
 let resolveReady;
 const ready = new Promise(resolve => { resolveReady = resolve; });
 let restoreBounds = null, resizeSession = null, moveSession = null, noteCommands = [];
@@ -79,8 +82,11 @@ else {
     related = new RelatedService(store, media, { ocrPath: app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(ROOT,'native','caderninho-ocr'), onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');} });
     services.scheduleRelated();
     boards = createBoardUseCases({ store, media, events: { boardSaved: () => { saveFailed = false; services.scheduleRelated(); }, boardImageAttached: () => {} }, exportTarget: () => services.boardExportTarget });
+    pipelines = createPipelineUseCases({ store });
   store.db.prepare("UPDATE cuts SET status='unavailable' WHERE status='loading'").run();
   media.collect();
+    pipelines.collectImages();
+    protocol.handle(PIPELINE_SCHEME, pipelineProtocolHandler(net, input => pipelines.imageFile(input)));
     protocol.handle('caderno-media', request => {
       const url = new URL(request.url), file = url.hostname === 'blob' ? media.file(url.pathname.slice(1)) : null;
       return file ? net.fetch(pathToFileURL(file).href) : new Response('Arquivo não encontrado', { status: 404 });
@@ -158,6 +164,9 @@ function checkReminders() {
 // The renderer shows the board error itself; here it is logged and blocks quit like any failed save.
 const boardCall = name => input => { try { return boards[name](input); } catch (error) { if (/SQLITE/.test(error.code || '')) { console.error(error); saveFailed = true; } throw error; } };
 registerBoards(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['open', 'save', 'file', 'attachImage', 'thumbnail', 'readThumbnail', 'export'].map(name => [name, boardCall(name)])) });
+// Pipeline use cases exist once SQLite is open; storage failures are reported like any other save.
+const pipelineCall = name => input => { try { const result = pipelines[name](input); saveFailed = false; return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
+registerPipelines(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: Object.fromEntries(['addColumn', 'renameColumn', 'moveColumn', 'removeColumn', 'createTask', 'updateTask', 'moveTask', 'trashTask', 'restoreTask', 'addComment', 'editComment', 'removeComment', 'attachImage', 'openTask'].map(name => [name, pipelineCall(name)])) });
 registerEditorContextMenu(ipcMain, { getWindow: liveWindow, open: request => openEditorContextMenu(services.contextMenu)(request) });
 ipcMain.handle('related:query', (_event,id) => related.query(id));
 ipcMain.handle('related:retry', () => { services.scheduleRelated(); });
@@ -176,17 +185,18 @@ ipcMain.handle('notebook:export-pdf', async (_event,id) => {
   return {canceled:false,filePath};
 });
 ipcMain.handle('notebook:action', (_event, action, input) => {
-  if (['source:purge','note:purge','item:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
+  if (['source:purge','note:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
   try { const state = store.dispatch(action, input); saveFailed = false; services.scheduleRelated(); return state; }
   catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
 });
 ipcMain.handle('notebook:purge', async (_event, kind, id) => {
-  if (!['note', 'item', 'cut', 'source'].includes(kind)) throw new Error('Tipo inválido.');
-  const item = kind === 'source' ? store.db.prepare('SELECT *,deleted_at AS trashed FROM source_actions WHERE id=?').get(id) : kind === 'note' ? store.note(id) : kind === 'cut' ? store.cut(id) : store.item(id);
+  if (!['note', 'task', 'cut', 'source'].includes(kind)) throw new Error('Tipo inválido.');
+  const item = kind === 'source' ? store.db.prepare('SELECT *,deleted_at AS trashed FROM source_actions WHERE id=?').get(id) : kind === 'note' ? store.note(id) : kind === 'cut' ? store.cut(id) : store.db.prepare('SELECT title,deleted_at AS trashed FROM pipeline_tasks WHERE id=?').get(id);
   if (!item || !item.trashed) throw new Error('Este item não está na lixeira.');
   const result = await dialog.showMessageBox(win, { type: 'warning', title: 'Excluir definitivamente?', message: `Excluir “${item.title || 'Sem título'}”?`, detail: 'Esta ação não pode ser desfeita.', buttons: ['Cancelar', 'Excluir definitivamente'], defaultId: 0, cancelId: 0, noLink: true });
   if (result.response !== 1) return null;
-  const state = store.dispatch(kind + ':purge', { id }); media.collect(); saveFailed = false; services.scheduleRelated(); return state;
+  if (kind === 'task') pipelines.purgeTask({ taskId: id }); else store.dispatch(kind + ':purge', { id });
+  media.collect(); pipelines.collectImages(); saveFailed = false; services.scheduleRelated(); return store.snapshot();
 });
 ipcMain.handle('cuts:image', (_event, input) => {
   const note = store.note(input.noteId, 'notes'); if (note.trashed) throw new Error('Restaure a nota primeiro.');
@@ -273,7 +283,7 @@ ipcMain.on('notebook:move', (event, phase) => {
 module.exports = { testHook: {
   ready,
   configure: overrides => Object.assign(services, overrides),
-  context: () => ({ win, store, media, related }),
+  context: () => ({ win, store, media, related, pipelines }),
   dispatchHistory,
   setObservedDay: day => { observedDay = day; },
 } };

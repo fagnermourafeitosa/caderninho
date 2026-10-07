@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+const { createPipelineUseCases } = require('../src/main/pipelines/compose.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -71,13 +72,14 @@ function downgradeToPreBoards(file) {
 test('an existing database gains the boards type and tables without losing pages, links or constraints', t => {
   const { store, open, boards } = fixture(t);
   const listId = store.dispatch('note:create', { type: 'tasks', title: 'Compras' }).selected.tasks;
-  store.dispatch('item:create', { noteId: listId, title: 'Pão' });
+  createPipelineUseCases({ store }).createTask({ pipelineId: listId, title: 'Pão' });
   store.dispatch('category:attach', { noteId: listId, name: 'casa' });
-  const before = store.snapshot().notes.map(({ id, type, title, items, categories }) => ({ id, type, title, items: items.map(item => item.title), categories: categories.map(category => category.name) }));
+  const pages = state => state.notes.map(({ id, type, title, categories }) => ({ id, type, title, tasks: (state.pipelines.find(pipeline => pipeline.id === id)?.tasks || []).map(task => task.title), categories: categories.map(category => category.name) }));
+  const before = pages(store.snapshot());
   store.close();
   downgradeToPreBoards(path.join(store.directory, 'notebook.sqlite'));
   const migrated = open();
-  assert.deepEqual(migrated.snapshot().notes.map(({ id, type, title, items, categories }) => ({ id, type, title, items: items.map(item => item.title), categories: categories.map(category => category.name) })), before);
+  assert.deepEqual(pages(migrated.snapshot()), before);
   const boardId = createBoard(migrated);
   assert.equal(boards(migrated).open({ noteId: boardId }).version, 0);
   assert.throws(() => migrated.db.prepare("UPDATE notes SET notebook_id=NULL WHERE id=?").run(listId), /caderno/);

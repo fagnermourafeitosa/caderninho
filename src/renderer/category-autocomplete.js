@@ -9,7 +9,7 @@ function categoryCompletionContext(){
  const focused=document.activeElement;
  if(!currentNote()||!focused)return null;
  let element,text,offset;
- if(focused.matches('textarea#note-body,#task-input,[data-item-text]')){
+ if(focused.matches('textarea#note-body')){
   if(focused.selectionStart!==focused.selectionEnd)return null;
   element=focused;text=element.value;offset=element.selectionStart;
  }else if(focused.closest('#note-body')){

@@ -4,11 +4,11 @@ async function runNativeEditorSmoke(win){
   const key=(keyCode,modifiers=[])=>{keyCode=({ArrowDown:'Down',ArrowUp:'Up',ArrowRight:'Right',ArrowLeft:'Left'})[keyCode]||keyCode;win.webContents.sendInputEvent({type:'keyDown',keyCode,modifiers});win.webContents.sendInputEvent({type:'keyUp',keyCode,modifiers});};
   await js("state=await window.notebook.action('note:create',{type:'notes',title:'Barra em nota nova'});view='notes';render();$('#note-body').focus();");
   win.webContents.sendInputEvent({type:'char',keyCode:'/'});await pause();
-  if(!await js("!$('#block-menu').hidden&&document.querySelectorAll('[data-insert-block]').length===13"))throw new Error('Native slash in new textarea did not open commands');
+  if(!await js("!$('#block-menu').hidden&&document.querySelectorAll('[data-insert-block]').length===12"))throw new Error('Native slash in new textarea did not open commands');
   key('Escape');
   await js("state=await window.notebook.action('note:create',{type:'notes',title:'Teclado real'});view='notes';render();ensureRichEditor();const editor=$('#note-body');editor.focus();const r=document.createRange();r.selectNodeContents(editor);r.collapse(false);getSelection().removeAllRanges();getSelection().addRange(r);");
   win.webContents.sendInputEvent({type:'char',keyCode:'/'});await pause();
-  if(!await js("!$('#block-menu').hidden&&document.querySelectorAll('[data-insert-block]').length===13"))throw new Error('Native slash at page boundary did not open commands');
+  if(!await js("!$('#block-menu').hidden&&document.querySelectorAll('[data-insert-block]').length===12"))throw new Error('Native slash at page boundary did not open commands');
   for(const letter of 'tit'){win.webContents.sendInputEvent({type:'char',keyCode:letter});await pause();}
   if(!await js("document.querySelectorAll('[data-insert-block]').length===3"))throw new Error('Native slash search did not filter');
   key('Escape');await pause();

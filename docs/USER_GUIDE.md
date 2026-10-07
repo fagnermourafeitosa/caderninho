@@ -6,51 +6,51 @@ Os nomes de botões e menus aparecem em negrito, exatamente como estão no app.
 
 ## Comece por aqui
 
-Abra o **Caderninho.app**. A primeira tela, **Caderninho**, reúne suas tarefas pendentes, os lembretes de hoje, as últimas notas e uma prévia da nota atualizada mais recentemente no caderno, com o grafo de conexões dela.
+Abra o **Caderninho.app**. A primeira tela, **Caderninho**, mostra em faixas a nota atualizada mais recentemente no caderno (com o grafo de conexões dela), o kanban do pipeline mais recente, os lembretes de hoje e as últimas notas.
 
 Para escrever, abra **Notas**: a seção abre na lista das suas notas. Clique numa nota para abri-la, ou em **+ Nova nota** para começar uma. Dê um título e comece. As mudanças são salvas automaticamente no seu computador. Se algo falhar, o app mostra um aviso.
 
 ## Buscar em todos os cadernos
 
-Clique na **lupa no topo**, logo depois do botão principal, ou pressione **⌘F**. O campo abre e busca em títulos e conteúdo de notas, listas e lembretes de todos os cadernos, seja qual for a seção aberta. A busca ignora diferenças de acentos e maiúsculas; páginas na lixeira ficam de fora.
+Clique na **lupa no topo**, logo depois do botão principal, ou pressione **⌘F**. O campo abre e busca em títulos e conteúdo de notas, pipelines, tarefas (título, descrição e comentários) e lembretes de todos os cadernos, seja qual for a seção aberta. A busca ignora diferenças de acentos e maiúsculas; páginas na lixeira ficam de fora.
 
-Cada resultado mostra o tipo de página, o caderno e um trecho do conteúdo. Clique para abrir, ou use **↑/↓** e **Enter**. **Escape** recolhe o campo.
+Cada resultado mostra o tipo, o caderno e um trecho do conteúdo. Clique para abrir; uma tarefa abre o pipeline com a tarefa aberta, ou use **↑/↓** e **Enter**. **Escape** recolhe o campo.
 
 ## Cadernos
 
 **Cadernos**, o segundo item do menu, é onde você cria, abre, edita e remove cadernos. Cada um tem um nome, uma descrição opcional e uma cor escolhida na paleta.
 
-Sempre existe pelo menos um caderno. Na primeira abertura, **Meu caderno** recebe as páginas que você já tinha. Toda nota, lista de tarefas ou lembrete pertence a um caderno, e as páginas novas são criadas no caderno selecionado.
+Sempre existe pelo menos um caderno. Na primeira abertura, **Meu caderno** recebe as páginas que você já tinha. Toda nota, pipeline ou lembrete pertence a um caderno, e as páginas novas são criadas no caderno selecionado.
 
 As abas à direita trocam de caderno. Ao passar o mouse, a aba se abre e mostra o nome na vertical. A aba selecionada fica aberta, indicando em qual caderno você está. A última aba, **+**, abre o formulário de criação.
 
-Na própria página, o nome do caderno abaixo do título, ao lado das datas, permite mover uma nota, lista ou lembrete para outro caderno. Ao remover um caderno, você escolhe outro para receber todas as páginas dele, inclusive as da lixeira. Nenhuma página é apagada nessa operação, e o último caderno não pode ser removido.
+Na própria página, o nome do caderno abaixo do título, ao lado das datas, permite mover uma nota, pipeline ou lembrete para outro caderno; um pipeline leva as tarefas junto. Ao remover um caderno, você escolhe outro para receber todas as páginas dele, inclusive as da lixeira. Nenhuma página é apagada nessa operação, e o último caderno não pode ser removido.
 
 ## O que você pode guardar
 
 | Seção | Para quê |
 | --- | --- |
-| **Caderninho** | Visão do dia, reunindo tarefas, lembretes e últimas notas de todos os cadernos. |
+| **Caderninho** | Visão do dia: última nota, kanban do pipeline mais recente, lembretes e últimas notas. |
 | **Cadernos** | Criar, editar, abrir e remover cadernos. |
-| **Notas** | Texto livre, categorias, caixas de seleção, imagens e cartões de link. |
-| **Tarefas** | Várias listas independentes, com título, datas e itens marcados ou pendentes. |
+| **Notas** | Texto livre, categorias, imagens, cartões de link e tarefas criadas a partir do texto. |
+| **Tarefas** | Pipelines: quadros kanban com colunas configuráveis, onde cada tarefa é um card. |
 | **Lembretes** | Notas agendadas para um dia e horário, que tocam um alerta sonoro. |
 | **Quadros** | Um papel sem fim para post-its, formas, setas, frames, imagens e texto solto. |
-| **Lixeira** | Páginas, tarefas e mídias removidas, separadas por tipo e recuperáveis. |
+| **Lixeira** | Páginas, pipelines, tarefas e mídias removidas, separadas por tipo e recuperáveis. |
 
 **Notas**, **Tarefas** e o calendário de **Lembretes** mostram o caderno selecionado. A visão do dia e a lixeira reúnem todos os cadernos. Os alertas continuam funcionando mesmo quando você está em outro caderno.
 
 ### Página do dia
 
-Veja as tarefas pendentes, os itens concluídos hoje, os alertas de hoje e as últimas notas. Marcar uma tarefa aqui atualiza a página original. Clique num título para abrir a página correspondente.
+A página de hoje é feita de faixas, de cima para baixo: **Última nota** (com o grafo), o **kanban** do pipeline criado mais recentemente no caderno, **Lembretes** e **Últimas notas**. A seta à esquerda de cada faixa a recolhe ou abre, e o app lembra essa escolha. No kanban da home você arrasta cards entre colunas e clica num card para abrir a tarefa, como na página do pipeline; **Abrir pipeline** leva ao quadro inteiro. Sem pipelines, a faixa oferece **+ Novo pipeline**.
 
-No topo da página de hoje, a nota mais recente do caderno aparece com a formatação e as mídias dela. Quando ela tem conexões, **Ideias por perto** as mostra ao lado, como um grafo. Use **Continuar nesta nota** para editá-la, ou clique numa conexão para abrir outra página. No dia seguinte, o resumo da página anterior continua disponível no seletor de datas. Os dias anteriores são somente leitura; escolha **Hoje** para voltar ao dia atual.
+No topo da página de hoje, a nota mais recente do caderno aparece com a formatação e as mídias dela. Quando ela tem conexões, **Ideias por perto** as mostra ao lado, como um grafo. Use **Continuar nesta nota** para editá-la, ou clique numa conexão para abrir outra página. No dia seguinte, o resumo da página anterior (lembretes e últimas notas) continua disponível no seletor de datas. Os dias anteriores são somente leitura; escolha **Hoje** para voltar ao dia atual.
 
 ### Categorias
 
 Abaixo do título, clique em **+ Categoria** para usar uma categoria existente ou criar uma nova. A mesma categoria pode ser usada em vários cadernos e tipos de página.
 
-Digite `#trabalho` ou `#ideias` no texto de uma nota para criar uma pílula e associar a categoria à página. Termine a palavra com espaço ou pontuação, ou saia do editor, para registrá-la. Hashtags em itens de tarefa também associam categorias à lista.
+Digite `#trabalho` ou `#ideias` no texto de uma nota para criar uma pílula e associar a categoria à página. Termine a palavra com espaço ou pontuação, ou saia do editor, para registrá-la.
 
 Quando você digita `#` e a primeira letra, aparecem sugestões das categorias existentes, encontradas sem diferenciar acentos ou maiúsculas. Use **↑/↓** para escolher e **Enter** ou **Tab** para completar, ou clique na categoria. **Escape** fecha as sugestões sem alterar o texto. Elas abrem com um pequeno salto, desativado quando você prefere movimento reduzido.
 
@@ -60,11 +60,26 @@ O **×** num selo remove uma associação feita pelo seletor. Se a categoria tam
 
 Os nomes aceitam letras, acentos, números, hífens e sublinhados; espaços viram hífens. Hashtags escapadas, dentro de código ou dentro de endereços de link não criam categorias.
 
-### Listas de tarefas
+### Pipelines
 
-Em **Tarefas**, clique em **+ Nova lista**. Dê um título, escreva um item no campo de baixo e pressione **Enter** ou **+ Adicionar**. Você pode editar os itens e marcá-los conforme conclui.
+Em **Tarefas**, cada pipeline é um quadro kanban com título. Clique em **+ Novo pipeline**: ele nasce com as colunas **Backlog**, **Ready to Dev**, **Doing**, **Review** e **Done**. **Tarefas** abre no índice dos seus pipelines, com quantas tarefas estão finalizadas (por exemplo, **3 finalizados de 12**); clique num pipeline para abrir o quadro. A seta no canto superior esquerdo volta ao índice.
 
-**Tarefas** abre no índice das suas listas; busque ali pelo conteúdo e clique numa lista para abri-la. A seta no canto superior esquerdo volta ao índice. Cada lista guarda os próprios itens, estados de conclusão e datas. O indicador de progresso mostra quantos itens foram concluídos.
+**Colunas.** O **⋯** de cada coluna permite **Renomear coluna**, **Mover para a esquerda**, **Mover para a direita** e **Remover coluna…**. Para remover uma coluna com tarefas, escolha para qual coluna elas vão. O **+** tracejado adiciona uma coluna. Todo pipeline tem pelo menos duas colunas.
+
+**Coluna final.** A última coluna marca a tarefa como concluída, seja qual for o nome dela, e mostra o selo **finalizada**. Ela pode ser renomeada, mas não pode ser removida nem movida, e nenhuma coluna fica depois dela.
+
+**Tarefas.** **+ Nova tarefa** abre o formulário: título, pipeline, owner (opcional) e descrição. A tarefa nasce no topo da primeira coluna. O card mostra o título, a data de criação e, quando há comentários, um selo como **3 comentários**. Arraste o card para outra coluna ou para outra posição na mesma coluna; a ordem fica salva.
+
+**Abrir uma tarefa.** Clique no card (ou use **Enter**) para abrir a tarefa:
+
+- O título e o owner são editáveis; a descrição usa o mesmo editor das notas, com **`/`** para listas, títulos, tabelas e **Imagem**.
+- Arraste ou cole imagens na descrição ou num comentário. As miniaturas de todas as imagens da tarefa aparecem em **Imagens da tarefa**.
+- Em **Comentários**, escreva e clique em **Comentar**. O lápis edita um comentário (que passa a mostrar **editado em…**); a lixeira remove depois de confirmar, sem passar pela **Lixeira**.
+- Ao lado, **Coluna** move a tarefa; **Criada em** e **Histórico** mostram de onde e para onde ela foi, inclusive mudanças de posição.
+- O **⋯** manda a tarefa para a lixeira.
+- Ao fechar a tarefa com um comentário ainda não enviado, o app pergunta antes de descartá-lo. O título não pode ficar vazio: se você apagar tudo, o título anterior volta.
+
+As mudanças são salvas automaticamente. Ao criar uma tarefa, as imagens podem ser adicionadas depois, abrindo a tarefa.
 
 ### Lembretes e calendário
 
@@ -91,7 +106,7 @@ O quadro se salva sozinho enquanto você desenha. O texto dos elementos entra na
 
 ## Editor de notas
 
-Digite **`/`** no texto para inserir texto, **Título**, **Subtítulo**, **Título pequeno**, tarefas com caixa de seleção, listas com marcadores ou numeradas, citação, divisória, código, mídia ou tabela. A paleta agrupa os blocos em **Texto**, **Listas**, **Estrutura** e **Mídia**, com busca. Continue digitando depois da barra para filtrar: **`/tit`** mostra os três níveis de título. A busca aceita palavras sem acento. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
+Digite **`/`** no texto para inserir texto, **Título**, **Subtítulo**, **Título pequeno**, listas com marcadores ou numeradas, citação, divisória, código, mídia ou tabela. A paleta agrupa os blocos em **Texto**, **Listas**, **Estrutura** e **Mídia**, com busca. Continue digitando depois da barra para filtrar: **`/tit`** mostra os três níveis de título. A busca aceita palavras sem acento. Use as setas e **Enter** para escolher; **Escape** fecha o menu.
 
 Selecione um trecho para abrir a barra de formatação: **negrito, itálico, sublinhado, tachado, código no texto, link e marca-texto**. Selecionar com **Shift + setas** atravessa parágrafos. A formatação vale para todo o texto selecionado, inclusive em várias linhas ou células. **Backspace/Delete** apagam toda a seleção; ao lado de uma divisória, removem o bloco. No início de um título, citação ou lista, Backspace volta para texto normal sem perder o conteúdo. O marca-texto tem uma paleta de seis cores. Para abrir um link no texto, use **⌘/Ctrl + clique**.
 
@@ -111,16 +126,7 @@ Escreva uma data como `amanhã às 14h`, `hoje às 18h30`, `depois de amanhã à
 
 Cada nota pode ter um alerta. **Reagendar** troca o horário; o **×** ao lado do agendamento o cancela. As datas seguem o fuso horário do computador e, depois de agendadas, ficam fixas.
 
-Comece uma linha com `[]` ou `[ ]` para criar uma caixa de seleção dentro da nota:
-
-- Clique para marcar ou desmarcar.
-- **Enter** cria a próxima caixa.
-- **Enter** num item vazio volta para texto normal.
-- **Backspace** no início do item remove a caixa e mantém o texto.
-- Cole várias linhas com `[ ]` para criar vários itens.
-- Use `\[]` para manter os colchetes como texto.
-
-Esses itens pertencem à nota e não criam uma lista separada em **Tarefas**.
+Comece uma linha com `[]` ou `[ ]` seguido de espaço para criar uma **tarefa** num pipeline: abre **Nova tarefa** com o resto da linha como título; escolha o pipeline e confirme. A linha passa a mostrar o título da tarefa com o selo da coluna em que ela está; clique para abrir a tarefa. Se você cancelar, os colchetes saem e a linha fica como texto normal. Colar texto com `[]` não cria tarefas.
 
 ## Imagens, PDFs e links
 
@@ -136,9 +142,9 @@ Imagens e PDFs importados são copiados para a pasta de dados do app. Você pode
 
 ## Exportar em PDF
 
-Abra uma nota, lista de tarefas ou lembrete e escolha **Exportar PDF** no menu **⋯** no topo da página, ou pressione **⇧⌘E**. Escolha o nome e a pasta na janela do Mac.
+Abra uma nota ou lembrete e escolha **Exportar PDF** no menu **⋯** no topo da página, ou pressione **⇧⌘E**. Escolha o nome e a pasta na janela do Mac.
 
-O PDF em A4 inclui título, caderno, categorias, datas, texto formatado, tabelas, caixas de seleção, imagens, cartões de link, PDFs anexados e ações ligadas à página. Páginas longas continuam nas folhas seguintes, com numeração. A exportação salva as últimas mudanças antes de gerar o arquivo e funciona localmente, sem internet.
+O PDF em A4 inclui título, caderno, categorias, datas, texto formatado, tabelas, linhas de tarefa, imagens, cartões de link, PDFs anexados e lembretes ligados à página. Pipelines não são exportados em PDF. Páginas longas continuam nas folhas seguintes, com numeração. A exportação salva as últimas mudanças antes de gerar o arquivo e funciona localmente, sem internet.
 
 ## Teclado e janela
 
@@ -156,7 +162,7 @@ O PDF em A4 inclui título, caderno, categorias, datas, texto formatado, tabelas
 
 As ações da página também ficam no menu **Nota** da barra de menus, habilitadas quando a página aberta as oferece.
 
-Nas notas, o histórico de desfazer inclui título, texto, pílulas e caixas de seleção, guardado por página durante a sessão. Ele recomeça quando você fecha o app. Mover mídias e agendar alertas não fazem parte desse histórico.
+Nas notas, o histórico de desfazer inclui título, texto, pílulas e linhas de tarefa, guardado por página durante a sessão. Na tarefa aberta, a descrição e cada comentário têm o próprio desfazer. Ele recomeça quando você fecha o app. Mover mídias, agendar alertas e mover cards ou colunas não fazem parte desse histórico.
 
 Arraste uma área não editável do caderno para mover a janela, e arraste a borda do caderno para redimensioná-la. A janela usa os botões do próprio Mac: o vermelho fecha, o amarelo minimiza e o verde aumenta a janela até a altura disponível, com largura de até 1.200 pixels. Um clique duplo no topo também aumenta ou restaura a janela.
 
@@ -164,15 +170,15 @@ A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fic
 
 ## Datas e lixeira
 
-As páginas mostram quando foram criadas e atualizadas. As tarefas registram quando foram marcadas e desmarcadas; itens removidos guardam a data de exclusão até serem restaurados. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
+As páginas mostram quando foram criadas e atualizadas. As tarefas registram quando foram criadas e cada mudança de coluna ou posição; itens removidos guardam a data de exclusão até serem restaurados. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
 
-**Mover para a lixeira**, no menu **⋯** no topo da página ou com **⇧⌘⌫**, manda a página para a lixeira e a mantém recuperável. Itens de tarefa e mídias também podem ser restaurados na **Lixeira**, separados por tipo. Restaurar mantém conteúdo, caderno, categorias e estados das tarefas. Um lembrete vencido precisa ser agendado de novo.
+**Mover para a lixeira**, no menu **⋯** no topo da página ou com **⇧⌘⌫**, manda a página para a lixeira e a mantém recuperável. Tarefas e mídias também podem ser restauradas na **Lixeira**, separadas por tipo (**Pipelines** e **Tarefas** ficam em abas próprias). Uma tarefa restaurada volta ao topo da coluna em que estava, ou da primeira coluna se aquela não existir mais. Restaurar um pipeline mantém colunas, tarefas e caderno. Um lembrete vencido precisa ser agendado de novo.
 
-**Excluir definitivamente** pede confirmação e apaga o item para sempre. Imagens e PDFs continuam no disco enquanto outra página ou mídia recuperável ainda os usa.
+**Excluir definitivamente** pede confirmação e apaga o item para sempre. Imagens e PDFs continuam no disco enquanto outra página ou mídia recuperável ainda os usa. Excluir uma tarefa apaga as imagens dela.
 
 ## Seus dados ficam no seu computador
 
-O app usa **SQLite** para guardar notas, cadernos, listas, categorias e lembretes. Imagens e PDFs ficam numa pasta de mídia local. Não há conta, envio de páginas para servidor nem sincronização na nuvem.
+O app usa **SQLite** para guardar notas, cadernos, pipelines, tarefas, categorias e lembretes. Imagens e PDFs das notas ficam numa pasta de mídia local; as imagens das tarefas ficam em `pipelines/<pipeline>/`, numeradas na ordem em que foram anexadas (`01-foto.png`, `02-planta.jpg`…). Não há conta, envio de páginas para servidor nem sincronização na nuvem.
 
 No Mac, os dados ficam em:
 
@@ -184,7 +190,7 @@ Para fazer um backup completo:
 
 1. Espere aparecer **Salvo às…** e feche o app.
 2. Copie a pasta `caderninho` inteira para o local do backup.
-3. Mantenha `notebook.sqlite` e a pasta `media` juntos: o banco sozinho não contém as imagens.
+3. Mantenha `notebook.sqlite` e as pastas `media` e `pipelines` juntos: o banco sozinho não contém as imagens.
 
 Para restaurar, feche o app, guarde uma cópia da pasta atual e substitua-a pela pasta do backup antes de abrir o app de novo.
 
@@ -192,24 +198,23 @@ Se aparecer **Falha ao salvar**, verifique o espaço livre em disco e as permiss
 
 ## Ações ligadas à página
 
-Selecione um trecho numa nota e clique no **ícone de tarefa** no menu de formatação. Você também pode arrastar esse botão para a margem. Outro caminho é clicar com o botão direito no trecho e escolher **Tarefa** ou **Lembrete**: o formulário já abre com a opção escolhida. Sem texto selecionado, as duas opções aparecem desativadas. O mesmo menu traz **Recortar**, **Copiar**, **Colar** e **Selecionar tudo**. Em imagens e cartões de link, use o **ícone de tarefa** na faixa de controles da mídia.
+Selecione um trecho numa nota e clique no **ícone de tarefa** no menu de formatação. Você também pode arrastar esse botão para a margem. Outro caminho é clicar com o botão direito no trecho e escolher **Tarefa** ou **Lembrete**. Sem texto selecionado, as duas opções aparecem desativadas. O mesmo menu traz **Recortar**, **Copiar**, **Colar** e **Selecionar tudo**. Em imagens e cartões de link, use o **ícone de tarefa** na faixa de controles da mídia.
 
-Escolha **Tarefa** ou **Lembrete**, escreva o próximo passo e, no caso de lembrete, defina dia e horário. Criar a ação não altera o texto original nem cria uma segunda nota. Uma mesma página pode ter várias ações e vários alertas independentes.
+**Tarefa** abre **Nova tarefa** com o trecho (ou o título da mídia) como título. Escolha um dos pipelines do caderno da nota (o mais recente já vem selecionado) e confirme: a tarefa nasce no topo da primeira coluna desse pipeline. Se o caderno ainda não tem pipelines, o formulário oferece **+ Novo pipeline**.
 
-- Trechos com ações ganham um destaque tracejado suave e permanente. Concluir a tarefa deixa o destaque verde.
-- A margem guarda as ações junto com uma cópia do contexto. Use a seta ao lado de **Ações desta nota** para recolhê-la.
-- As tarefas também aparecem na página do dia e em **Tarefas**, em **Da margem das notas**, para o caderno atual.
-- Os lembretes aparecem no calendário e na página do dia agendado. O app precisa estar aberto para tocar o alerta.
-- **Ver origem** e **Voltar à origem** abrem a nota e destacam o trecho ou a mídia.
-- O lápis permite editar a tarefa ou reagendar o lembrete. A conclusão deixa um selo com a data; desmarcar mantém o histórico.
+**Lembrete** abre o formulário na margem: escreva o próximo passo e defina dia e horário. Criar a ação não altera o texto original nem cria uma segunda nota. Uma mesma página pode ter várias tarefas e vários alertas independentes.
+
+- Trechos com ações ganham um destaque tracejado suave e permanente. Quando a tarefa chega à coluna final, o destaque fica verde.
+- A margem mostra cada tarefa com o nome do pipeline e o selo da coluna em que ela está, junto com a cópia do trecho. O lápis abre a tarefa; o **×** manda a tarefa para a lixeira. Use a seta ao lado de **Ações desta nota** para recolher a margem.
+- Os lembretes aparecem no calendário e na página do dia agendado. O app precisa estar aberto para tocar o alerta. O lápis reagenda; o **×** manda o lembrete para a lixeira.
+- **Ver origem** e **Voltar à origem** abrem a nota e destacam o trecho ou a mídia do lembrete.
 - Se a origem mudar ou for removida, a cópia do trecho continua disponível e a margem avisa quando não consegue localizar o conteúdo.
-- O botão **×** manda a ação para a lixeira de tarefas ou de lembretes, onde pode ser restaurada. Remover a ação preserva a nota original.
 
-No formulário, **Esc** cancela e devolve a seleção de texto. Nada é criado até você confirmar com **Criar tarefa** ou **Agendar lembrete**.
+No formulário do lembrete, **Esc** cancela e devolve a seleção de texto. Nada é criado até você confirmar com **Criar tarefa** ou **Agendar lembrete**.
 
 ## Conexões entre páginas
 
-Depois do salvamento automático, o Caderninho procura relações entre notas, tarefas e lembretes do mesmo caderno. Até duas conexões aparecem suavemente no rodapé, depois de **Relacionados:**. Clique num título para abrir a página de origem. Quando não há relação relevante, o espaço fica vazio.
+Depois do salvamento automático, o Caderninho procura relações entre notas, pipelines e lembretes do mesmo caderno. Até duas conexões aparecem suavemente no rodapé, depois de **Relacionados:**. Clique num título para abrir a página de origem. Quando não há relação relevante, o espaço fica vazio.
 
 Use **Relacionados** no menu **⋯**, ou **⌥⌘R**, para abrir o grafo. A página atual fica no centro; conteúdos com mais afinidade ficam mais perto. Clique numa conexão para abrir a página de origem. Em janelas estreitas, o botão mostra só o ícone, com o nome ao passar o mouse.
 

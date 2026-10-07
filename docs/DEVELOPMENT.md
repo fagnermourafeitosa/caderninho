@@ -54,6 +54,14 @@ To validate only boards (spec 007): index, tool rail, post-it, contextual bar pe
 npm run test:app -- --boards-only
 ```
 
+To validate only pipelines (spec 008): default columns, adding, renaming, moving and removing columns, the final-column guard, new tasks on top of the first column, a native drag between columns, the task modal (title, owner, description with the slash menu, a table and a dropped image served by `caderno-pipeline://`, comments added, edited and removed, column change and history), tasks created from a note selection and from `[]`, the home strips, search by comment text, the unsent-comment and empty-title guards, and a window close that waits for the pending task save:
+
+```sh
+npm run test:app -- --pipelines-only
+```
+
+The smoke runner also works on Linux under a virtual display (`xvfb-run -a npx electron --no-sandbox tests/smoke/run.cjs --pipelines-only`). macOS-only checks (the New York font and native window buttons in the default suite, `Ctrl+A` in diagram code in `--native-only`/`--editor-only`, the native right-click in `--source-only`, focus in `--search-only` and PDF title extraction in `--pdf-cuts-only`) fail there and must be confirmed on a Mac.
+
 ## Boards (Excalidraw)
 
 `@excalidraw/excalidraw` 0.18.1, `react`/`react-dom` 19.3.0 and `esbuild` are pinned dev dependencies. `scripts/vendor-excalidraw.cjs` bundles the board UI (`src/renderer/boards/canvas/`) with Excalidraw and React into `src/renderer/vendor/excalidraw/board.js` and copies Excalidraw's stylesheet and fonts next to it (git-ignored). It runs before `npm start`, `npm run test:app` and `npm run package`. The page loads the bundle the first time a board opens. Excalidraw is never patched: the board customises it only through props, its imperative API, CSS and its own keyboard bindings and (hidden) properties panel, which the contextual bar drives. Pure board logic (bar content and placement, style patches, post-it defaults, grid, autosave timing) is unit-tested in `tests/board-ui.test.cjs`; the main-process context in `tests/boards*.test.cjs`.

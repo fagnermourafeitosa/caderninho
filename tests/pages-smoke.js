@@ -12,7 +12,7 @@
   }
   assert(!document.querySelector('#notes-drawer, #notes-open'), 'Gaveta de notas removida');
   // Notes and lists open on their index; a row opens the page; back returns.
-  for (const [name, back] of [['notes', 'Todas as notas'], ['tasks', 'Todas as listas']]) {
+  for (const [name, back] of [['notes', 'Todas as notas'], ['tasks', 'Todos os pipelines']]) {
     await go(name);
     if (!visibleNotes().length) { state = await window.notebook.action('note:create', { type: name, title: 'Exemplo' }); openIndex(); }
     const rows = document.querySelectorAll('#notes-index .note-index-row');

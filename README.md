@@ -29,20 +29,21 @@ O Caderninho mantém a tarefa presa à frase que a criou. Selecione um trecho, t
 
 Na maioria dos apps, a nota e a lista de tarefas são coisas separadas. Copie uma linha de uma para a outra e a lista perde o contexto.
 
-No Caderninho, você seleciona o trecho e cria a partir dele uma **tarefa** ou um **lembrete**. A ação vai para a margem da nota com uma cópia do trecho, e o trecho ganha um destaque tracejado que fica verde quando a tarefa é concluída. Imagens e cartões de link também podem originar ações.
+No Caderninho, você seleciona o trecho e cria a partir dele uma **tarefa** ou um **lembrete**. A tarefa entra num pipeline (um kanban com as suas colunas) e aparece na margem da nota com uma cópia do trecho e a coluna em que está; o trecho ganha um destaque tracejado que fica verde quando a tarefa chega à coluna final. Imagens e cartões de link também podem originar ações.
 
-- As tarefas aparecem em **Tarefas** e na página do dia; os lembretes aparecem no calendário e tocam um alerta no horário marcado.
-- **Ver origem**, na margem, ou **Voltar à origem**, nas listas e na página do dia, abre a nota e destaca o trecho.
+- As tarefas aparecem no kanban do pipeline em **Tarefas** e na página do dia; os lembretes aparecem no calendário e tocam um alerta no horário marcado.
+- Comece uma linha com `[]` para criar uma tarefa sem sair do texto.
+- **Ver origem**, na margem, ou **Voltar à origem**, na página do dia, abre a nota e destaca o trecho de um lembrete.
 - Uma nota pode ter várias tarefas e vários alertas independentes.
 - Se você reescrever ou apagar o trecho depois, a ação guarda a cópia e a margem avisa que não encontra mais o original.
 
 ## Uma página do dia que guarda o registro
 
-**Caderninho**, a primeira tela, mostra a nota editada mais recentemente no caderno, as páginas relacionadas a ela, as tarefas pendentes de todas as listas e margens de notas, e os lembretes de hoje.
+**Caderninho**, a primeira tela, mostra, em faixas que você pode recolher, a nota editada mais recentemente no caderno com as páginas relacionadas a ela, o kanban do pipeline mais recente, os lembretes de hoje e as últimas notas.
 
 ![Página do dia com a nota mais recente ao lado do grafo de páginas relacionadas, seguida de tarefas e lembretes](docs/images/pagina-do-dia.png)
 
-No dia seguinte começa uma página nova. Os dias anteriores continuam disponíveis no seletor de datas, somente para leitura, exatamente como estavam: o que estava pendente, o que foi feito e o que estava agendado. Funciona como um diário que você nunca precisou escrever.
+No dia seguinte começa uma página nova. Os dias anteriores continuam disponíveis no seletor de datas, somente para leitura, exatamente como estavam: o que estava agendado e as notas daquele dia. Funciona como um diário que você nunca precisou escrever.
 
 ## Feito em português desde o início
 
@@ -54,7 +55,7 @@ A interface, a leitura de datas e a busca foram construídas para o português, 
 
 ## O que mais ajuda
 
-**Páginas relacionadas, calculadas no seu Mac.** A cada salvamento, o Caderninho compara a página com as outras notas, listas e lembretes do mesmo caderno, por categorias em comum, palavras em comum e significado, incluindo o texto dentro de imagens. As duas páginas mais próximas aparecem no fim da nota, e o grafo (**⌥⌘R**) mostra o restante. Nenhum texto ou imagem sai do seu computador.
+**Páginas relacionadas, calculadas no seu Mac.** A cada salvamento, o Caderninho compara a página com as outras notas, pipelines e lembretes do mesmo caderno, por categorias em comum, palavras em comum e significado, incluindo o texto dentro de imagens. As duas páginas mais próximas aparecem no fim da nota, e o grafo (**⌥⌘R**) mostra o restante. Nenhum texto ou imagem sai do seu computador.
 
 ![Grafo de páginas relacionadas a uma nota de viagem: uma lista de bagagem, uma nota de trilha, um lembrete sobre o tempo e outras notas](docs/images/relacionados.png)
 
@@ -68,13 +69,13 @@ A interface, a leitura de datas e a busca foram construídas para o português, 
 
 ## Seus dados, numa pasta
 
-Notas, listas, lembretes, quadros e categorias ficam num banco SQLite; imagens e PDFs ficam ao lado dele:
+Notas, pipelines e tarefas, lembretes, quadros e categorias ficam num banco SQLite; imagens e PDFs ficam ao lado dele:
 
 ```text
 ~/Library/Application Support/caderninho/
 ```
 
-Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie essa pasta. Notas, listas e lembretes podem ser exportados em PDF (**⇧⌘E**) com a formatação, as imagens, os diagramas e as ações ligadas a eles; quadros, em PNG ou SVG.
+Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie essa pasta. Notas e lembretes podem ser exportados em PDF (**⇧⌘E**) com a formatação, as imagens, os diagramas e os lembretes ligados a eles; quadros, em PNG ou SVG.
 
 As únicas requisições de rede são as que você dispara: buscar a prévia de um link no site que você colou e baixar uma única vez o modelo usado pelas páginas relacionadas.
 

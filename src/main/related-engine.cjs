@@ -11,12 +11,10 @@ function documents(state,ocr={}) {
   const out=[];
   for(const n of state.notes.filter(n=>!n.trashed)) {
     const categories=(n.categories||[]).map(c=>c.id);
-    const text=[n.title,prose(n),...n.items.map(i=>i.title),...(n.cuts||[]).map(c=>[c.title,c.description,c.kind==='image'?ocr[c.blobId]||'':''].join('\n'))].filter(Boolean).join('\n');
+    const text=[n.title,prose(n),...(n.cuts||[]).map(c=>[c.title,c.description,c.kind==='image'?ocr[c.blobId]||'':''].join('\n'))].filter(Boolean).join('\n');
     out.push({id:'page:'+n.id,noteId:n.id,notebookId:n.notebookId,type:n.type,title:n.title||'Sem título',text,categories});
-    for(const i of n.items) out.push({id:'item:'+i.id,noteId:n.id,notebookId:n.notebookId,type:'tasks',title:i.title||'Tarefa sem título',text:i.title,categories});
-    for(const i of n.inlineTasks||[]) out.push({id:'inline:'+i.id,noteId:n.id,notebookId:n.notebookId,type:'tasks',title:i.title||'Tarefa sem título',text:i.title,categories});
   }
-  for(const a of state.sourceActions||[]) out.push({id:'source:'+a.id,noteId:a.noteId,sourceActionId:a.id,notebookId:a.notebookId,type:a.kind==='task'?'tasks':'reminders',title:a.title,text:[a.title,a.origin?.quote].filter(Boolean).join('\n'),categories:out.find(d=>d.id==='page:'+a.noteId)?.categories||[]});
+  for(const a of state.sourceActions||[]) out.push({id:'source:'+a.id,noteId:a.noteId,sourceActionId:a.id,notebookId:a.notebookId,type:'reminders',title:a.title,text:[a.title,a.origin?.quote].filter(Boolean).join('\n'),categories:out.find(d=>d.id==='page:'+a.noteId)?.categories||[]});
   return out.map(d=>({...d,hash:createHash('sha256').update(d.text).digest('hex')}));
 }
 function rank(source,docs,vectors,config=defaults) {
