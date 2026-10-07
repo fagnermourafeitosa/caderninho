@@ -1,15 +1,20 @@
 // SQLite persistence for boards (implements BoardRepositoryPort) and its schema migration.
+const PAGE_TYPES = ['notes', 'tasks', 'reminders', 'boards'];
 const EMPTY_SCENE = JSON.stringify({ elements: [], viewport: { scrollX: 0, scrollY: 0, zoom: 1 } });
 
 // The notes CHECK constraint cannot be altered in place: rebuild the table, keeping its indexes and triggers.
 function allowBoardPages(store) {
   const schema = store.db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='notes'").get().sql;
-  if (schema.includes("'boards'")) return;
+  if (/CHECK\s*\(\s*type\s+IN\s*\([^)]*'boards'/i.test(schema)) return;
   const dependents = store.db.prepare("SELECT sql FROM sqlite_master WHERE tbl_name='notes' AND type IN ('index','trigger') AND sql IS NOT NULL").all().map(row => row.sql);
   store.db.exec('PRAGMA foreign_keys = OFF');
   try {
     store.transaction(() => {
-      store.db.exec(schema.replace(/CREATE TABLE "?notes"?/i, 'CREATE TABLE notes_boards_migration').replace("'reminders')", "'reminders','boards')"));
+      // Rewrite the whole type list: databases from other builds carry other lists (e.g. an extra 'murals').
+      // Types already used by stored pages stay allowed so no row is rejected by the copy.
+      const stored = store.db.prepare('SELECT DISTINCT type FROM notes').all().map(row => row.type);
+      const types = [...new Set([...PAGE_TYPES, ...stored])].map(type => `'${String(type).replace(/'/g, "''")}'`).join(',');
+      store.db.exec(schema.replace(/CREATE TABLE "?notes"?/i, 'CREATE TABLE notes_boards_migration').replace(/CHECK\s*\(\s*type\s+IN\s*\([^)]*\)\s*\)/i, `CHECK(type IN (${types}))`));
       store.db.exec('INSERT INTO notes_boards_migration SELECT * FROM notes; DROP TABLE notes; ALTER TABLE notes_boards_migration RENAME TO notes');
       for (const sql of dependents) store.db.exec(sql);
       if (store.db.prepare('PRAGMA foreign_key_check').all().length) throw new Error('Migração dos quadros quebrou uma referência.');

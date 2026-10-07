@@ -254,3 +254,23 @@ test('related pages index a board by its title and extracted text', t => {
   assert.equal(page.type, 'boards');
   assert.equal(page.text, 'Roteiro da viagem\nTrilha curta até o mirante');
 });
+
+// A database from another build can carry a different type list (here an extra 'murals').
+test('the migration adds boards whatever type list the existing notes CHECK has', t => {
+  const { store, open, boards } = fixture(t);
+  const noteId = store.dispatch('note:create', { type: 'notes', title: 'Nota antiga' }).selected.notes;
+  store.close();
+  const { DatabaseSync } = require('node:sqlite');
+  const db = new DatabaseSync(path.join(store.directory, 'notebook.sqlite'));
+  const schema = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='notes'").get().sql;
+  const dependents = db.prepare("SELECT sql FROM sqlite_master WHERE tbl_name='notes' AND type IN ('index','trigger') AND sql IS NOT NULL").all().map(row => row.sql);
+  db.exec('PRAGMA foreign_keys = OFF; DROP TABLE board_files; DROP TABLE boards; BEGIN');
+  db.exec(schema.replace(/CREATE TABLE "?notes"?/i, 'CREATE TABLE notes_old').replace(/CHECK\(type IN \([^)]*\)\)/, "CHECK(type IN ('notes','tasks','reminders','murals'))"));
+  db.exec('INSERT INTO notes_old SELECT * FROM notes; DROP TABLE notes; ALTER TABLE notes_old RENAME TO notes');
+  for (const sql of dependents) db.exec(sql);
+  db.exec('COMMIT'); db.close();
+  const migrated = open();
+  const boardId = createBoard(migrated);
+  assert.equal(boards(migrated).open({ noteId: boardId }).version, 0);
+  assert.ok(migrated.snapshot().notes.some(note => note.id === noteId && note.title === 'Nota antiga'));
+});
