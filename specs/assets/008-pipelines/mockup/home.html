@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Home mockup</title><link rel="stylesheet" href="mock.css">
+<style>
+.date{font-family:Excalifont;font-size:19px;color:var(--muted)}
+.strip{border-top:1px solid var(--hair);padding:10px 0 12px}
+.sh{display:flex;align-items:center;gap:10px;height:34px}
+.sh h2{font-size:19px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sh h2 svg.i{width:18px;height:18px}
+.sh .sp{flex:1}
+.sh .n{font-size:12px;color:var(--muted)}
+.sh .fold-btn{width:24px;height:24px;display:grid;place-items:center;border-radius:6px}
+.latest{display:flex;gap:24px;height:128px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent)}
+.latest .txt{flex:1;font-size:15px;line-height:1.6}
+.latest .txt strong{display:block;font-size:17px;margin-bottom:4px}
+.graph{width:330px;flex:none}
+.kanban.mini .col{padding:6px;gap:6px}
+.kanban.mini .ch{height:24px}.kanban.mini .ch b{font-size:13px}
+.kanban.mini .card{padding:6px 8px}
+.kanban.mini .card strong{font-size:12.5px}
+.kanban.mini .card .cm{margin-top:4px;font-size:10.5px}
+.kanban.mini .pill{font-size:10.5px}
+.rem{display:flex;gap:28px;font-size:14px}
+.rem div{display:flex;gap:10px;align-items:baseline}
+.rem time{color:#8a5a2b;font-size:13px;border-bottom:1px dashed #c9a27a}
+.rem small{display:block;font-size:11px;color:var(--muted)}
+.link{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-top:6px}
+</style></head>
+<body><script src="icons.js"></script><script>
+document.body.insertAdjacentHTML('beforeend', chrome('Caderninho', `
+ <div class="vt"><div class="field" style="display:flex;align-items:center;gap:6px;border:1px solid var(--hair);border-radius:8px;height:32px;padding:0 10px;font-size:14px;background:#f6ead0">Hoje · 07/10/2026 ${I('down','style="width:12px;height:12px"')}</div><span class="sp"></span><div class="btn primary">${I('plus')}Nova nota</div><div class="ib">${I('search','style="width:18px;height:18px"')}</div></div>
+ <div style="display:flex;align-items:baseline"><h1>Página do dia</h1><span class="sp" style="flex:1"></span><span class="date">Quarta-feira, 7 de outubro</span></div>
+ <div class="meta" style="margin-bottom:12px">3 lembretes · 4 notas recentes</div>
+
+ <section class="strip"><div class="sh"><div class="fold-btn">${I('down','style="width:13px;height:13px"')}</div><h2>${I('note')}Última nota</h2><span class="sp"></span><span class="n">com conexões</span></div>
+  <div class="latest"><div class="txt"><strong>Um fim de semana na serra</strong>Um lugar para respirar, caminhar e voltar com boas histórias. Guardar as paisagens que quero conhecer. A viagem começa pelas referências…</div>
+  <div class="graph"><svg viewBox="0 0 330 128" width="330" height="128" style="font:11px serif"><g stroke="#8b7d5a" stroke-dasharray="3 3"><path d="M165 64H70M165 64H260M165 64V18"/></g><g fill="#f3e5c2" stroke="#303025" stroke-width="1.3"><circle cx="70" cy="64" r="15"/><circle cx="260" cy="64" r="15"/><circle cx="165" cy="18" r="13"/></g><circle cx="165" cy="64" r="19" fill="#f8d985" stroke="#303025" stroke-width="2"/><text x="70" y="98" text-anchor="middle">Trilhas e mirantes</text><text x="260" y="98" text-anchor="middle">Conferir o tempo</text><text x="165" y="104" text-anchor="middle" font-weight="700">Um fim de semana</text></svg></div></div>
+ </section>
+
+ <section class="strip"><div class="sh"><div class="fold-btn">${I('down','style="width:13px;height:13px"')}</div><h2>${I('kanban')}Reforma da cozinha</h2><span class="n">· último pipeline · 3 finalizados de 12</span><span class="sp"></span><span class="link">Abrir pipeline ${I('open','style="width:13px;height:13px"')}</span></div>
+  <div class="kanban mini" style="margin-top:6px">
+   <div class="col"><div class="ch"><b>Backlog</b><span class="n">4</span></div>${card('Pedir dois orçamentos','06/10/2026',3)}${card('Escolher a cor dos armários','05/10/2026',0)}<div class="add" style="font-size:11.5px">${I('plus','style="width:12px;height:12px"')}mais 2</div></div>
+   <div class="col"><div class="ch"><b>Ready to Dev</b><span class="n">2</span></div>${card('Comprar a cuba de inox','03/10/2026',0)}${card('Separar caixas','06/10/2026',0)}</div>
+   <div class="col"><div class="ch"><b>Doing</b><span class="n">2</span></div>${card('Tirar o azulejo antigo','01/10/2026',5)}${card('Trocar a fiação','01/10/2026',2)}</div>
+   <div class="col"><div class="ch"><b>Review</b><span class="n">1</span></div>${card('Conferir o nível do piso','30/09/2026',1)}</div>
+   <div class="col final"><div class="ch"><b>Done</b><span class="n">3</span><span class="pill done">${I('tick')}finalizada</span></div>${card('Definir o orçamento','28/09/2026',4)}<div class="add" style="font-size:11.5px">${I('plus','style="width:12px;height:12px"')}mais 2</div></div>
+  </div>
+ </section>
+
+ <section class="strip"><div class="sh"><div class="fold-btn">${I('down','style="width:13px;height:13px"')}</div><h2>${I('bell')}Lembretes</h2><span class="n">3 neste dia</span><span class="sp"></span><span class="link">Ver lembretes ${I('open','style="width:13px;height:13px"')}</span></div>
+  <div class="rem"><div><time>14:00</time><span>Revisar o planejamento<small>◷ Agendado</small></span></div><div><time>16:00</time><span>Revisar as referências<small>◷ Agendado</small></span></div><div><time>18:00</time><span>Pausa para caminhar<small>◷ Agendado</small></span></div></div>
+ </section>
+
+ <section class="strip"><div class="sh"><div class="fold-btn">${I('right','style="width:13px;height:13px"')}</div><h2>${I('note')}Últimas notas</h2><span class="n">4 · recolhida</span><span class="sp"></span></div></section>
+
+ <span class="callout" style="left:40px;top:160px">1</span>
+ <span class="callout" style="left:40px;top:316px">2</span>
+ <span class="callout" style="left:40px;top:596px">3</span>
+ <span class="callout" style="left:40px;top:686px">4</span>
+ <div class="legend">1 Última nota + grafo (uma faixa só) · 2 Kanban: último pipeline criado no caderno, arrasta cards e abre o modal; faixa toda a largura · 3 Lembretes · 4 Últimas notas recolhida (chevron). Todas recolhíveis, estado salvo.</div>
+`));
+</script></body></html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Tarefa mockup</title><link rel="stylesheet" href="mock.css">
+<style>
+.modal{position:absolute;z-index:12;left:40px;right:40px;top:28px;bottom:28px;display:flex;overflow:hidden}
+.mm{flex:1;min-width:0;padding:22px 26px;overflow:hidden}
+.ms{width:250px;flex:none;border-left:1px solid var(--hair);padding:22px 18px;background:#fbf3dc;border-radius:0 12px 12px 0;font-size:13px}
+.mh{display:flex;align-items:flex-start;gap:10px}
+.mh h2{flex:1;font-size:22px;font-weight:700;line-height:1.25}
+.lbl{font-size:12px;color:var(--muted);margin:16px 0 6px;display:flex;align-items:center;gap:6px}
+.lbl:first-child{margin-top:0}
+.desc{font-size:14.5px;line-height:1.55}
+.desc ul{margin:4px 0 8px 20px}
+.desc table{border-collapse:collapse;font-size:13px;margin:6px 0}
+.desc td,.desc th{border:1px solid var(--hair);padding:3px 8px;text-align:left}
+.desc th{background:var(--shade);font-weight:650}
+.photo{width:120px;height:74px;border-radius:4px;border:1px solid var(--hair);overflow:hidden;flex:none}
+.thumbs{display:flex;gap:8px}
+.thumbs .photo{width:64px;height:44px}
+.cmt{border-top:1px solid #b8a27855;padding:10px 0;font-size:14px;line-height:1.5}
+.cmt .ct{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin-bottom:3px}
+.cmt .ct .sp{flex:1}
+.cmt .ct .ib{width:22px;height:22px}
+.composer{border:1px solid var(--hair);background:var(--sheet);border-radius:9px;padding:9px 10px;font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:8px;margin-top:6px}
+.composer .sp{flex:1}
+.field{display:flex;align-items:center;gap:8px;border:1px solid var(--hair);background:var(--sheet);border-radius:8px;height:32px;padding:0 10px;font-size:13px}
+.field .sp{flex:1}
+.hist{list-style:none;font-size:12px;line-height:1.45}
+.hist li{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed #b8a27866}
+.hist time{color:var(--muted);flex:none;width:66px}
+.drop{position:absolute;left:0;right:0;top:0;bottom:0;border:2px dashed #8b7d5a;border-radius:9px;background:#f8d98533;display:grid;place-items:center;font-size:13px}
+</style></head>
+<body><script src="icons.js"></script><script>
+const photo = (a,b,c) => `<svg viewBox="0 0 120 74" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"><rect width="120" height="74" fill="${a}"/><path d="M0 60L35 30 60 50 85 25 120 55V74H0z" fill="${b}"/><circle cx="95" cy="18" r="8" fill="${c}"/></svg>`;
+document.body.insertAdjacentHTML('beforeend', chrome('Tarefas', `
+ <div class="vt"><div class="ib">${I('back','style="width:18px;height:18px"')}</div><span class="sp"></span><div class="btn primary">${I('plus')}Nova tarefa</div></div>
+ <h1>Reforma da cozinha</h1>
+ <div class="scrim"></div>
+ <div class="sheet modal">
+  <div class="mm">
+   <div class="mh"><h2>Pedir dois orçamentos de marcenaria</h2><div class="ib">${I('more')}</div><div class="ib">${I('x')}</div></div>
+   <div class="lbl">Descrição</div>
+   <div class="desc">
+    Falar com marceneiros indicados pela Ana. Pedir prazo e forma de pagamento.
+    <ul><li>Armários altos até o teto</li><li>Nicho para o micro-ondas</li></ul>
+    <table><tr><th>Marceneiro</th><th>Prazo</th><th>Valor</th></tr><tr><td>Oficina Silva</td><td>30 dias</td><td>R$ 9.800</td></tr><tr><td>Madeira & Cia</td><td>45 dias</td><td>—</td></tr></table>
+    <div style="display:flex;gap:10px;margin-top:6px"><div class="photo">${photo('#e8dcc0','#b9a27a','#f6d77a')}</div></div>
+   </div>
+   <div class="lbl">${I('image','style="width:13px;height:13px"')}Imagens da tarefa · 4</div>
+   <div class="thumbs"><div class="photo">${photo('#e8dcc0','#b9a27a','#f6d77a')}</div><div class="photo">${photo('#c9d8df','#7f9aa6','#fff')}</div><div class="photo">${photo('#cfdcbc','#8ea474','#f4c6c0')}</div><div class="photo">${photo('#f4c6c0','#b98479','#fff3b0')}</div></div>
+   <div class="lbl">${I('comment','style="width:13px;height:13px"')}Comentários · 3</div>
+   <div class="cmt"><div class="ct"><span>06/10/2026, 14:10</span><span class="sp"></span><div class="ib">${I('pencil','style="width:13px;height:13px"')}</div><div class="ib">${I('del','style="width:13px;height:13px"')}</div></div>
+    Oficina Silva mandou o orçamento por e-mail. Foto do projeto:
+    <div class="thumbs" style="margin-top:6px"><div class="photo">${photo('#c9d8df','#7f9aa6','#fff')}</div><div class="photo">${photo('#cfdcbc','#8ea474','#f4c6c0')}</div></div></div>
+   <div class="cmt"><div class="ct"><span>07/10/2026, 09:02 · editado em 07/10/2026, 09:15</span><span class="sp"></span><div class="ib">${I('pencil','style="width:13px;height:13px"')}</div><div class="ib">${I('del','style="width:13px;height:13px"')}</div></div>
+    Madeira &amp; Cia pediu para visitar sábado.</div>
+   <div class="composer" style="position:relative;height:48px">Escreva um comentário… (arraste imagens aqui)<span class="sp"></span><div class="btn primary" style="height:28px;font-size:13px;padding:0 12px">Comentar</div></div>
+  </div>
+  <div class="ms">
+   <div class="lbl">Coluna</div>
+   <div class="field"><span class="pill">Ready to Dev</span><span class="sp"></span>${I('down','style="width:12px;height:12px"')}</div>
+   <div class="lbl">${I('user','style="width:13px;height:13px"')}Owner</div>
+   <div class="field">Fagner</div>
+   <div class="lbl">${I('clock','style="width:13px;height:13px"')}Criada em</div>
+   <div>06/10/2026, 10:24</div>
+   <div class="lbl">Pipeline</div>
+   <div>Reforma da cozinha</div>
+   <div class="lbl">${I('history','style="width:13px;height:13px"')}Histórico</div>
+   <ul class="hist">
+    <li><time>07/10 09:30</time><span>Backlog → <b>Ready to Dev</b></span></li>
+    <li><time>06/10 18:02</time><span>Reordenada em Backlog (3ª → 1ª)</span></li>
+    <li><time>06/10 10:24</time><span>Criada em <b>Backlog</b></span></li>
+   </ul>
+  </div>
+ </div>
+ <span class="callout" style="left:30px;top:140px;z-index:31">1</span>
+ <span class="callout" style="left:30px;top:410px;z-index:31">2</span>
+ <span class="callout" style="left:30px;top:495px;z-index:31">3</span>
+ <span class="callout" style="left:30px;top:693px;z-index:31">4</span>
+ <span class="callout" style="left:690px;top:62px;z-index:31">5</span>
+ <span class="callout" style="left:690px;top:298px;z-index:31">6</span>
+ <div class="legend">1 descrição rich text (listas, tabela, imagem) · 2 miniaturas de todas as imagens (descrição + comentários) · 3 comentários: editar/remover, “editado em” · 4 novo comentário com arrastar-e-soltar de imagens · 5 coluna (mover daqui também), owner opcional, criada em · 6 histórico de movimentação</div>
+`));
+</script></body></html>

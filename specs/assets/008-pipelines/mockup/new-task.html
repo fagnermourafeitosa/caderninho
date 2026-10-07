@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Nova tarefa mockup</title><link rel="stylesheet" href="mock.css">
+<style>
+.dlg{position:absolute;z-index:12;left:50%;top:120px;transform:translateX(-50%);width:520px;padding:22px 24px}
+.dlg h2{font-size:20px;font-weight:700;margin-bottom:14px}
+.lbl{font-size:12px;color:var(--muted);margin:12px 0 5px}
+.field{display:flex;align-items:center;gap:8px;border:1px solid var(--hair);background:#fff;border-radius:8px;min-height:34px;padding:0 10px;font-size:14px}
+.field.area{align-items:flex-start;padding:8px 10px;height:110px;color:var(--muted);font-size:13.5px}
+.field .sp{flex:1}
+.row2{display:flex;gap:12px}.row2>div{flex:1}
+.act{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+</style></head>
+<body><script src="icons.js"></script><script>
+document.body.insertAdjacentHTML('beforeend', chrome('Notas', `
+ <div class="vt"><span class="sp"></span><div class="btn primary">${I('plus')}Nova nota</div></div>
+ <h1>Visita da arquiteta</h1>
+ <div style="font-size:17px;line-height:1.75;margin-top:24px;max-width:640px">A arquiteta sugeriu manter a pia onde está. Antes de fechar o projeto, <span style="background:#f8d985">precisamos de dois orçamentos de marcenaria</span> para comparar prazo e preço.</div>
+ <div class="scrim"></div>
+ <div class="sheet dlg">
+  <h2>Nova tarefa</h2>
+  <div class="lbl">Título</div><div class="field">precisamos de dois orçamentos de marcenaria</div>
+  <div class="row2"><div><div class="lbl">Pipeline</div><div class="field">${I('kanban','style="width:14px;height:14px"')}Reforma da cozinha<span class="sp"></span>${I('down','style="width:12px;height:12px"')}</div></div>
+  <div><div class="lbl">Owner (opcional)</div><div class="field" style="color:var(--muted)">Quem cuida disso?</div></div></div>
+  <div class="lbl">Descrição</div><div class="field area">Escreva com / para listas, tabela, imagem…</div>
+  <div class="lbl" style="display:flex;align-items:center;gap:6px">Nasce em <span class="pill">Backlog</span> no topo</div>
+  <div class="act"><div class="btn ghost" style="height:34px;font-size:14px">Cancelar</div><div class="btn primary">Criar tarefa</div></div>
+ </div>
+ <span class="callout" style="left:212px;top:206px;z-index:31">1</span>
+ <span class="callout" style="left:212px;top:268px;z-index:31">2</span>
+ <div class="legend">Mesmo modal de “Nova tarefa” do kanban. Vindo da nota (seleção, margem ou []): 1 título já preenchido com o trecho · 2 escolhe o pipeline (no kanban, já vem o pipeline aberto)</div>
+`));
+</script></body></html>

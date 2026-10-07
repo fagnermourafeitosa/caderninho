@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Pipeline mockup</title><link rel="stylesheet" href="mock.css"></head>
+<body><script src="icons.js"></script><script>
+document.body.insertAdjacentHTML('beforeend', chrome('Tarefas', `
+ <div class="vt"><div class="ib">${I('back','style="width:18px;height:18px"')}</div><span class="sp"></span>
+  <div class="btn primary">${I('plus')}Nova tarefa</div><div class="ib">${I('search','style="width:18px;height:18px"')}</div><div class="ib">${I('more','style="width:18px;height:18px"')}</div></div>
+ <h1>Reforma da cozinha</h1>
+ <div class="meta"><span>3 finalizados de 12</span>·<span class="pill">Pessoal</span>·<span>criado em 01/10/2026</span></div>
+ <div class="kanban" style="margin-top:20px;position:relative">
+  <div class="col"><div class="ch"><b>Backlog</b><span class="n">4</span><span class="sp"></span><div class="ib">${I('more')}</div></div>
+   ${card('Pedir dois orçamentos de marcenaria','06/10/2026',3)}
+   ${card('Escolher a cor dos armários','05/10/2026',0)}
+   ${card('Medir a parede da pia','04/10/2026',1)}
+   ${card('Ver tomadas extras com o eletricista','02/10/2026',0)}
+   <div class="add">${I('plus')}Nova tarefa</div></div>
+  <div class="col"><div class="ch"><b>Ready to Dev</b><span class="n">2</span><span class="sp"></span><div class="ib">${I('more')}</div></div>
+   ${card('Comprar a cuba de inox','03/10/2026',0)}
+   <div class="card ghost"></div></div>
+  <div class="col"><div class="ch"><b>Doing</b><span class="n">2</span><span class="sp"></span><div class="ib" style="background:var(--hover);border-radius:6px">${I('more')}</div></div>
+   ${card('Tirar o azulejo antigo','01/10/2026',5)}
+   ${card('Trocar a fiação da bancada','01/10/2026',2)}</div>
+  <div class="col"><div class="ch"><b>Review</b><span class="n">1</span><span class="sp"></span><div class="ib">${I('more')}</div></div>
+   ${card('Conferir o nível do piso','30/09/2026',1)}</div>
+  <div class="newcol">${I('plus')}</div>
+  <div class="col final"><div class="ch"><b>Done</b><span class="n">3</span><span class="pill done">${I('tick')}finalizada</span><span class="sp"></span></div>
+   ${card('Definir o orçamento total','28/09/2026',4)}
+   ${card('Escolher a bancada','27/09/2026',0)}
+   ${card('Tirar fotos do antes','26/09/2026',0)}</div>
+  <div style="position:absolute;left:250px;top:105px;width:170px;z-index:8">${card('Separar caixas para mudança','06/10/2026',0,'drag')}</div>
+  <div class="sheet menu" style="left:470px;top:34px"><div class="on">${I('pencil')}Renomear coluna</div><div>${I('back')}Mover para a esquerda</div><div>${I('right')}Mover para a direita</div><hr><div>${I('del')}Remover coluna…</div></div>
+ </div>
+ <span class="callout" style="left:300px;top:262px">1</span>
+ <span class="callout" style="left:548px;top:150px">2</span>
+ <span class="callout" style="left:757px;top:365px">3</span>
+ <span class="callout" style="left:905px;top:150px">4</span>
+ <span class="callout" style="left:205px;top:300px">5</span>
+ <div class="legend">1 card sendo arrastado (fica salvo: coluna e ordem; entra no histórico) · 2 menu da coluna · 3 “+” adiciona coluna antes da final · 4 coluna final: pill “finalizada”, só renomeia · 5 card: título, data, pill de comentários</div>
+`));
+</script></body></html>
