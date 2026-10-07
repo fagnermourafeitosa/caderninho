@@ -37,12 +37,12 @@ function renderBoardPage() {
   const note = currentNote();
   if (!note) { openIndex(); return; }
   const header = `<input id="note-title" class="note-title" type="text" maxlength="160" aria-label="Título do quadro" placeholder="Sem título" value="${escape(note.title)}"><div class="note-categories"><div id="category-badges" class="category-badges" aria-label="Categorias da página"></div></div><p class="note-provenance">${notebookAssociation(note)}<span class="provenance-dot" aria-hidden="true">·</span><span id="note-dates" class="list-date">${noteDates(note)}</span></p>`;
-  const canvas = `<div class="board-frame"><div id="board-host" class="board-host" data-title="${escape(note.title || 'Sem título')}"></div><button id="board-exit-fullscreen" class="board-exit-fullscreen" type="button" hidden><svg class="small-icon" aria-hidden="true"><use href="#icon-collapse"/></svg><span>Sair da tela cheia</span><kbd>esc</kbd></button></div>`;
+  const canvas = `<div class="board-frame"><div id="board-host" class="board-host"></div><button id="board-exit-fullscreen" class="board-exit-fullscreen" type="button" hidden><svg class="small-icon" aria-hidden="true"><use href="#icon-collapse"/></svg><span>Sair da tela cheia</span><kbd>esc</kbd></button></div>`;
   $('#page-content').innerHTML = boardToolbar() + header + canvas;
   bindMoreMenu();
   $('#back-to-index').onclick = async () => { await leaveBoard(); state = await window.notebook.state(); openIndex(); };
   $('#new-note').onclick = createNote;
-  $('#note-title').oninput = () => { $('#board-host').dataset.title = $('#note-title').value || 'Sem título'; action('note:update', { id: note.id, title: $('#note-title').value }); };
+  $('#note-title').oninput = () => action('note:update', { id: note.id, title: $('#note-title').value });
   $('#board-export-png').onclick = () => exportCurrentBoard('png');
   $('#board-export-svg').onclick = () => exportCurrentBoard('svg');
   $('#board-fullscreen').onclick = () => setBoardFullScreen(!boardFullScreen);
@@ -52,7 +52,7 @@ function renderBoardPage() {
   updateTemporalLabels(); renderCategoryBadges(); wireNotebookAssociation(note); ensurePageHistory(note); syncNoteCommands();
   const host = $('#board-host');
   loadBoardBundle().then(() => host.isConnected && window.CaderninhoBoard.mount(host, {
-    noteId: note.id, api: window.notebook,
+    noteId: note.id, api: window.notebook, title: () => $('#note-title')?.value.trim() || 'Sem título',
     onSaved: () => saved(), onError: reportBoardError, onSearch: openGlobalSearch,
     onIdleEscape: () => { if (boardFullScreen) setBoardFullScreen(false); },
   })).catch(error => reportBoardError(error.message));

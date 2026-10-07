@@ -99,6 +99,17 @@
     },
     count: () => Number(text('.board-count').split(' ')[0]),
     title: () => document.querySelector('#note-title').value,
+    // Typing in the board title and undoing it with the page history (not the canvas).
+    async titleUndo() {
+      const title = document.querySelector('#note-title'), before = title.value;
+      title.focus(); title.value = before + ' x'; title.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: ' x' }));
+      await until(() => !pending, 'título salvo');
+      title.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, ctrlKey: !/Mac/.test(navigator.platform), bubbles: true, cancelable: true }));
+      await wait(400); await undoQueue;
+      assert(!document.querySelector('#save-state').classList.contains('failed'), 'Desfazer no título falhou: ' + document.querySelector('#toast').textContent);
+      assert(title.value === before && currentNote().title === before, 'Desfazer não restaurou o título: ' + title.value);
+      return true;
+    },
     async footer(direction) { document.querySelector(`.board-canvas [data-testid="button-${direction}"]`).click(); await wait(200); return true; },
     exitButtonSize() { const button = document.querySelector('#board-exit-fullscreen').getBoundingClientRect(), icon = document.querySelector('#board-exit-fullscreen svg').getBoundingClientRect(); return { width: Math.round(button.width), height: Math.round(button.height), icon: [Math.round(icon.width), Math.round(icon.height)] }; },
     fullScreen: () => document.body.classList.contains('board-full-screen') && !document.querySelector('#board-exit-fullscreen').hidden && !document.querySelector('.sidebar').checkVisibility() && !document.querySelector('#note-title').checkVisibility(),

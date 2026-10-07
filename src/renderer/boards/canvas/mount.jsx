@@ -34,7 +34,7 @@ async function mount(element, options) {
   const binaryFiles = await loadFiles(api, noteId, opened.files, options.onError);
   if (ticket !== generation) return false;
   const root = createRoot(element);
-  const entry = { root, element, noteId, api, onError: options.onError, controller: null };
+  const entry = { root, element, noteId, api, title: options.title, onError: options.onError, controller: null };
   const bridge = {
     api, onSaved: options.onSaved, onError: options.onError,
     exportFrame: frame => exportImage('png', frame),
@@ -62,7 +62,7 @@ function unmount() {
 async function exportImage(format, frame = null) {
   const entry = current;
   if (!entry?.controller) return { saved: false };
-  const title = entry.element.dataset.title || 'Quadro';
+  const title = entry.title?.() || 'Quadro';
   const data = await exportData(entry.controller.api, format, frame);
   return entry.api.boardExport({ noteId: entry.noteId, format, name: frame?.name || title, data });
 }

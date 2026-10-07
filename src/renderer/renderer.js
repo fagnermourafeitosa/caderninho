@@ -262,7 +262,7 @@ let movingPointer = null;
 document.addEventListener('pointerdown', event => {
   const target = event.target;
   if (event.button !== 0 || !target.closest('.notebook, .sidebar')) return;
-  if (target.closest('input, textarea, button, select, a, [contenteditable], [data-resize], #global-search-control')) return;
+  if (target.closest('input, textarea, button, select, a, [contenteditable], [data-resize], #global-search-control, .board-frame')) return;
   const scroller = target.closest('.scroll-list, #notes-list');
   if (scroller && event.clientX >= scroller.getBoundingClientRect().left + scroller.clientWidth) return;
   event.preventDefault(); movingPointer = event.pointerId;

@@ -71,7 +71,9 @@ function editPageHistory(direction) {
       }
       updateDetail(); if (view === 'notes') renderSmartMargin(); restoreEditorSelection(restored.selection || selection);
     }
-    if (!await action('note:update', { id: noteId, title: restored.title, body: restored.body,editorDoc:restored.editorDoc }, { history: false })) {
+    // A board's text comes from its canvas: the page history only restores its title.
+    const update = currentNote()?.type === 'boards' ? { id: noteId, title: restored.title } : { id: noteId, title: restored.title, body: restored.body,editorDoc:restored.editorDoc };
+    if (!await action('note:update', update, { history: false })) {
       // Do not remove an edit made while the save was in flight.
       if (history.current.title === restored.title && history.current.body === restored.body) history.step(direction === 'undo' ? 'redo' : 'undo');
     }

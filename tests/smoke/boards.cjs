@@ -167,6 +167,7 @@ async function pageScenario({ win, board, step, key, drag, click, x, y }) {
   const { Menu } = require('electron');
   const { testHook } = require('../../src/main/main.cjs');
   const title = await step('title');
+  await step('titleUndo');
   await click({ x: x + 300, y: y + 200 });
   await key('r'); await drag({ x: x + 260, y: y + 60 }, { x: x + 330, y: y + 120 });
   const drawn = await step('count');
@@ -218,10 +219,16 @@ async function runBoardsSmoke(win, smokeScript) {
   const board = await step('openNewBoard');
   const { x, y } = board.canvas;
   // Rectangle by shortcut and drag; it autosaves without any explicit action. A click focuses the canvas first.
+  // Drawing must never start a window move (the app drags the window from empty paper).
+  const moves = [];
+  const countMoves = (_event, phase) => moves.push(phase);
+  require('electron').ipcMain.on('notebook:move', countMoves);
   await click({ x: x + 200, y: y + 150 });
   await key('r');
   await drag({ x: x - 160, y: y - 80 }, { x: x - 40, y: y + 10 });
   await step('elementCount', 1);
+  require('electron').ipcMain.off('notebook:move', countMoves);
+  if (moves.length) throw new Error('Desenhar no quadro moveu a janela: ' + moves.length + ' eventos');
   await wait(700);
   const saved = savedBoard(board.noteId);
   if (!saved.row || saved.row.version < 1 || !JSON.parse(saved.row.scene).elements.some(element => element.type === 'rectangle' && !element.isDeleted)) throw new Error('Retângulo não foi salvo: ' + JSON.stringify(saved.row?.version));
