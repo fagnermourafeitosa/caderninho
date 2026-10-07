@@ -4,7 +4,7 @@ const relatedGraphIcon='<svg viewBox="0 0 24 24" aria-hidden="true" stroke="curr
 function orderRelated(results){return [...results].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));}
 function refreshRelatedSoon(){clearTimeout(relatedTimer);relatedTimer=setTimeout(refreshRelated,300);}
 async function refreshRelated(){
- const request=++relatedRequest,note=['notes','tasks','reminders'].includes(view)?currentNote():null;
+ const request=++relatedRequest,note=['notes','tasks','reminders','boards'].includes(view)?currentNote():null;
  const footer=$('#footer-label');footer.classList.add('related-footer');
  if(!note||!$('#related-open')){footer.replaceChildren();delete footer.dataset.connections;if(view==='home')await refreshHomeRelated();return;}
  try {
@@ -12,7 +12,8 @@ async function refreshRelated(){
   data.results=orderRelated(data.results);
   if(request!==relatedRequest||currentNote()?.id!==note.id)return;
   const signature=JSON.stringify(data.results.map(d=>[d.id,d.title,d.score]));
-  if(footer.dataset.connections!==signature){
+  // On a board the footer would sit over the canvas controls: its connections show only in the dialog.
+  if(view!=='boards'&&footer.dataset.connections!==signature){
    footer.dataset.connections=signature;
    footer.innerHTML=data.results.length?'<span class="related-prefix">Relacionados:</span>'+data.results.slice(0,2).map(d=>`<button type="button" class="related-whisper" data-related-footer="${escape(d.id)}" aria-label="Abrir ${escape(d.title)}" title="${escape(d.title)}">${icon(d.type)}<span>${escape(d.title)}</span></button>`).join(''):'';
    footer.querySelectorAll('[data-related-footer]').forEach(button=>button.onclick=()=>openRelatedPage(data.results.find(d=>d.id===button.dataset.relatedFooter)));

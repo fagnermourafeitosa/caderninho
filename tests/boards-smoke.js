@@ -99,11 +99,21 @@
     },
     count: () => Number(text('.board-count').split(' ')[0]),
     title: () => document.querySelector('#note-title').value,
+    // Mais > Relacionados on a board answers (results or the no-connection text), never stays searching.
+    async relatedAnswers() {
+      document.querySelector('#related-open').click();
+      await until(() => !document.querySelector('#related-content').textContent.includes('À procura de conexões'), 'Relacionados respondeu no quadro', 3000);
+      const footer = document.querySelector('#footer-label').textContent;
+      document.querySelector('#related-dialog').close();
+      await wait(150); // the dialog gives focus back on its (asynchronous) close event
+      assert(!footer.includes('Relacionados'), 'Rodapé de relacionados sobre o quadro');
+      return true;
+    },
     // After a board save the renderer state (search, index) carries the new text, with no navigation.
     async stateHasText(noteId, value) { await until(() => state.notes.find(note => note.id === noteId)?.body.includes(value), 'estado com o texto ' + value, 3000); return true; },
     // A save that succeeds after a failure clears the failure label.
+    markFailed() { document.querySelector('#save-state').textContent = 'Falha ao salvar'; document.querySelector('#save-state').classList.add('failed'); return true; },
     async failedLabelClears() {
-      document.querySelector('#save-state').textContent = 'Falha ao salvar'; document.querySelector('#save-state').classList.add('failed');
       await until(() => !document.querySelector('#save-state').classList.contains('failed'), 'rótulo de falha limpo', 3000);
       return true;
     },

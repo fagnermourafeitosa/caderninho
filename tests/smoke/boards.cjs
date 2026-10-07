@@ -168,12 +168,12 @@ async function pageScenario({ win, board, step, key, drag, click, x, y }) {
   const { testHook } = require('../../src/main/main.cjs');
   const title = await step('title');
   await step('titleUndo');
+  await step('relatedAnswers');
   await click({ x: x + 300, y: y + 200 });
+  await step('markFailed');
   await key('r'); await drag({ x: x + 260, y: y + 60 }, { x: x + 330, y: y + 120 });
+  await step('failedLabelClears');
   const drawn = await step('count');
-  const clearing = step('failedLabelClears');
-  await key('z', [COMMAND]); await wait(100); await key('z', [COMMAND, 'shift']);
-  await clearing;
   await key('z', [COMMAND]); await wait(200);
   if (await step('count') !== drawn - 1) throw new Error('⌘Z não desfez no quadro');
   await step('footer', 'redo');
