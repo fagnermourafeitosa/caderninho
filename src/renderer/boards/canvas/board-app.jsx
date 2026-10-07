@@ -6,7 +6,7 @@ import { ContextBar } from './context-bar.jsx';
 import { gridBackground } from './grid.js';
 import { useBoardSession } from './use-board-session.js';
 
-const APP_STATE = { viewBackgroundColor: 'transparent', currentItemStrokeColor: '#303025', currentItemBackgroundColor: 'transparent', currentItemFillStyle: 'solid', currentItemStrokeWidth: 2, currentItemStrokeStyle: 'solid', currentItemRoughness: 1, currentItemFontFamily: FONT_FAMILY.Excalifont, currentItemFontSize: 20, currentItemOpacity: 100 };
+const APP_STATE = { viewBackgroundColor: 'transparent', currentItemStrokeColor: '#303025', currentItemBackgroundColor: 'transparent', currentItemFillStyle: 'solid', currentItemStrokeWidth: 2, currentItemStrokeStyle: 'solid', currentItemRoughness: 1, currentItemFontFamily: FONT_FAMILY.Excalifont, currentItemFontSize: 20, currentItemOpacity: 100, currentItemRoundness: 'sharp' };
 const UI_OPTIONS = { canvasActions: { changeViewBackgroundColor: false, clearCanvas: false, export: false, loadScene: false, saveToActiveFile: false, toggleTheme: false, saveAsImage: false }, tools: { image: true } };
 const TOOL_FOR = { postit: { type: 'custom', customType: 'postit' }, image: { type: 'image', insertOnCanvasDirectly: true } };
 const busy = appState => appState.cursorButton === 'down' || Boolean(appState.editingTextElement || appState.newElement || appState.resizingElement || appState.isRotating || appState.selectedElementsAreBeingDragged || appState.editingFrame);

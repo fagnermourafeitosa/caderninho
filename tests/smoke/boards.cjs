@@ -184,6 +184,8 @@ async function pageScenario({ win, board, step, key, drag, click, x, y }) {
   if (!menuItem().enabled) throw new Error('Nota > Tela cheia do quadro desabilitado');
   menuItem().click(); await wait(300);
   if (!await step('fullScreen')) throw new Error('Menu não abriu a tela cheia');
+  const exit = await step('exitButtonSize');
+  if (exit.height !== 36 || exit.width > 220 || exit.icon.join() !== '16,16') throw new Error('Botão Sair da tela cheia fora da medida: ' + JSON.stringify(exit));
   fs.writeFileSync(path.join(ROOT, 'artifacts', 'quadro-tela-cheia.png'), (await win.webContents.capturePage()).toPNG());
   await step('exitButton');
   if (await step('fullScreen')) throw new Error('Botão Sair da tela cheia não saiu');
@@ -223,6 +225,7 @@ async function runBoardsSmoke(win, smokeScript) {
   await wait(700);
   const saved = savedBoard(board.noteId);
   if (!saved.row || saved.row.version < 1 || !JSON.parse(saved.row.scene).elements.some(element => element.type === 'rectangle' && !element.isDeleted)) throw new Error('Retângulo não foi salvo: ' + JSON.stringify(saved.row?.version));
+  if (JSON.parse(saved.row.scene).elements.find(element => element.type === 'rectangle').roundness !== null) throw new Error('Retângulo novo deve ter cantos retos, como na referência');
   await step('railClicks');
   for (const [letter, tool] of [['h', 'hand'], ['r', 'rectangle'], ['d', 'diamond'], ['o', 'ellipse'], ['a', 'arrow'], ['l', 'line'], ['p', 'freedraw'], ['t', 'text'], ['n', 'postit'], ['f', 'frame'], ['e', 'eraser'], ['v', 'selection']]) {
     await key(letter);

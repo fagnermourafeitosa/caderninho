@@ -57,6 +57,12 @@
 .board-list button.on{background:var(--accent-soft)}
 .board-list-gap{width:16px;flex:none}
 
+/* Empty Quadros index: ink illustration and a plain "+ Novo quadro" text action (empty mockup). */
+.empty:has(.board-empty-create) svg{color:var(--ink)}
+.empty .board-empty-create{display:inline-flex;align-items:center;gap:6px;margin-top:20px;padding:4px 6px;background:transparent;border:0;border-radius:6px;font:13px var(--body-font);color:var(--ink)}
+.empty .board-empty-create:hover{background:var(--hover)}
+.empty .board-empty-create .small-icon{width:16px;height:16px;margin:0;opacity:1}
+
 /* Quadros index rows. */
 .board-index-row{display:flex;align-items:center;gap:14px}
 .board-thumbnail{flex:none;width:64px;height:40px;border-radius:4px;border:1px solid var(--hairline);background:var(--paper);overflow:hidden;box-sizing:border-box}
@@ -66,6 +72,7 @@
 /* Full screen: the book is the canvas; app chrome steps aside. */
 .board-exit-fullscreen{position:absolute;top:14px;right:14px;z-index:6;display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:10px;box-shadow:0 2px 6px rgba(54,53,42,.08);font:13px var(--body-font);color:var(--ink)}
 .board-exit-fullscreen[hidden]{display:none}
+.board-exit-fullscreen svg{width:16px;height:16px;flex:none}
 .board-exit-fullscreen kbd{font:11px -apple-system,'Helvetica Neue',sans-serif;color:var(--muted);border:1px solid var(--hairline);border-radius:4px;padding:1px 5px}
 body.board-full-screen .sidebar,body.board-full-screen .fold-tab,body.board-full-screen .paper-tabs,body.board-full-screen .book-header,body.board-full-screen .book-footer,body.board-full-screen #page-content>.view-toolbar,body.board-full-screen #note-title,body.board-full-screen .note-categories,body.board-full-screen .note-provenance{display:none!important}
 body.board-full-screen .app{grid-template-columns:0 minmax(0,1fr);gap:0}

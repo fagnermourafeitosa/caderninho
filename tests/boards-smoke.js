@@ -17,6 +17,9 @@
       assert(text('#page-content .view-description') === 'Nenhum quadro neste caderno', 'Contagem vazia');
       assert(text('.empty h2') === 'Um quadro em branco?' && text('.empty p') === 'Post-its, setas e imagens num papel sem fim.', 'Estado vazio');
       assert(text('#empty-create') === 'Novo quadro' && document.querySelector('#empty-create use').getAttribute('href') === '#icon-add', 'Botão do estado vazio');
+      const button = getComputedStyle(document.querySelector('#empty-create'));
+      assert(button.backgroundColor === 'rgba(0, 0, 0, 0)' && button.color === 'rgb(48, 48, 37)' && button.fontSize === '13px', 'Botão do estado vazio deve ser texto em tinta, como na referência: ' + [button.backgroundColor, button.color, button.fontSize]);
+      assert(getComputedStyle(document.querySelector('.empty svg')).color === 'rgb(48, 48, 37)', 'Ilustração do estado vazio em tinta');
       assert(document.querySelector('.empty use').getAttribute('href') === '#illus-boards', 'Ilustração do quadro');
       assert(!document.querySelector('#back-to-index') && text('#new-note') === 'Novo quadro', 'Barra do índice');
       return true;
@@ -97,6 +100,7 @@
     count: () => Number(text('.board-count').split(' ')[0]),
     title: () => document.querySelector('#note-title').value,
     async footer(direction) { document.querySelector(`.board-canvas [data-testid="button-${direction}"]`).click(); await wait(200); return true; },
+    exitButtonSize() { const button = document.querySelector('#board-exit-fullscreen').getBoundingClientRect(), icon = document.querySelector('#board-exit-fullscreen svg').getBoundingClientRect(); return { width: Math.round(button.width), height: Math.round(button.height), icon: [Math.round(icon.width), Math.round(icon.height)] }; },
     fullScreen: () => document.body.classList.contains('board-full-screen') && !document.querySelector('#board-exit-fullscreen').hidden && !document.querySelector('.sidebar').checkVisibility() && !document.querySelector('#note-title').checkVisibility(),
     async more(id) { document.querySelector('#page-more').click(); await wait(80); document.querySelector('#' + id).click(); await wait(300); return true; },
     async exitButton() { document.querySelector('#board-exit-fullscreen').click(); await wait(150); return true; },
