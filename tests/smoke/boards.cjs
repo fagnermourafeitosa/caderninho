@@ -171,6 +171,9 @@ async function pageScenario({ win, board, step, key, drag, click, x, y }) {
   await click({ x: x + 300, y: y + 200 });
   await key('r'); await drag({ x: x + 260, y: y + 60 }, { x: x + 330, y: y + 120 });
   const drawn = await step('count');
+  const clearing = step('failedLabelClears');
+  await key('z', [COMMAND]); await wait(100); await key('z', [COMMAND, 'shift']);
+  await clearing;
   await key('z', [COMMAND]); await wait(200);
   if (await step('count') !== drawn - 1) throw new Error('⌘Z não desfez no quadro');
   await step('footer', 'redo');
@@ -253,6 +256,7 @@ async function runBoardsSmoke(win, smokeScript) {
   const expected = { width: 140, height: 120, fillStyle: 'solid', strokeColor: 'transparent', roughness: 0, roundness: null, text: 'Cafe', textColor: '#303025', fontFamily: 5, fontSize: 20, textAlign: 'center', verticalAlign: 'middle' };
   const actual = note && label && { width: note.width, height: note.height, fillStyle: note.fillStyle, strokeColor: note.strokeColor, roughness: note.roughness, roundness: note.roundness, text: label.originalText, textColor: label.strokeColor, fontFamily: label.fontFamily, fontSize: label.fontSize, textAlign: label.textAlign, verticalAlign: label.verticalAlign };
   if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('Post-it diferente do especificado: ' + JSON.stringify(actual));
+  await step('stateHasText', board.noteId, 'Cafe');
   await contextBarScenario({ board, step, key, drag, click, x, y, note });
   await moreBarsScenario({ board, step, key, drag, click, x, y, note, contents: win.webContents });
   await pageScenario({ win, board, step, key, drag, click, x, y });

@@ -210,3 +210,17 @@ test('the thumbnail is sent after a successful save at most every 5 seconds', as
   await h.persistence.persist(); h.advance(4000); await h.persistence.persist(); h.advance(1000); await h.persistence.persist();
   assert.equal(h.calls.filter(call => call[0] === 'thumbnail').length, 2);
 });
+
+const { loadableScene } = require('../src/renderer/boards/canvas/persistence.js');
+
+test('elements the board does not support (pasted embeds) are left out of every save', async () => {
+  const h = persistenceHarness();
+  h.set({ elements: [el('t', 'text'), el('e', 'embeddable'), el('i', 'iframe'), el('m', 'magicframe')] });
+  await h.persistence.persist();
+  assert.deepEqual(h.calls.filter(call => call[0] === 'save'), [['save', 3, ['t']]]);
+});
+
+test('a board opens without the deleted elements of earlier sessions', () => {
+  const scene = { elements: [el('a', 'text'), el('b', 'rectangle', { isDeleted: true })], viewport: { scrollX: 0, scrollY: 0, zoom: 1 } };
+  assert.deepEqual(loadableScene(scene).elements.map(element => element.id), ['a']);
+});

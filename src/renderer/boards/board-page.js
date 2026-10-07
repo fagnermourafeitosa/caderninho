@@ -14,6 +14,15 @@ function loadBoardBundle() {
   });
   return boardBundle;
 }
+// After a board save the main process holds new page text, date and thumbnail: refresh the renderer copy
+// (search and the index read it) shortly after, without re-rendering the open board.
+let boardStateTimer = null;
+function boardSaved() {
+  $('#save-state').classList.remove('failed');
+  saved();
+  clearTimeout(boardStateTimer);
+  boardStateTimer = setTimeout(() => window.notebook.state().then(next => { state = next; }).catch(error => console.error('Estado após salvar o quadro:', error)), 300);
+}
 function reportBoardError(message) { $('#save-state').textContent = 'Falha ao salvar'; $('#save-state').classList.add('failed'); toast(message.replace(/^Error invoking remote method '[^']+': Error: /, ''), 8000); }
 // Leaving a board (another page, the index, a re-render) saves what is pending first.
 function leaveBoard() {
@@ -53,7 +62,7 @@ function renderBoardPage() {
   const host = $('#board-host');
   loadBoardBundle().then(() => host.isConnected && window.CaderninhoBoard.mount(host, {
     noteId: note.id, api: window.notebook, title: () => $('#note-title')?.value.trim() || 'Sem título',
-    onSaved: () => saved(), onError: reportBoardError, onSearch: openGlobalSearch,
+    onSaved: boardSaved, onError: reportBoardError, onSearch: openGlobalSearch,
     onIdleEscape: () => { if (boardFullScreen) setBoardFullScreen(false); },
   })).catch(error => reportBoardError(error.message));
 }

@@ -155,7 +155,8 @@ function checkReminders() {
   }
 }
 // Board use cases exist once SQLite is open; a storage failure there is reported like any other save.
-const boardCall = name => input => { try { return boards[name](input); } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
+// The renderer shows the board error itself; here it is logged and blocks quit like any failed save.
+const boardCall = name => input => { try { return boards[name](input); } catch (error) { if (/SQLITE/.test(error.code || '')) { console.error(error); saveFailed = true; } throw error; } };
 registerBoards(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['open', 'save', 'file', 'attachImage', 'thumbnail', 'readThumbnail', 'export'].map(name => [name, boardCall(name)])) });
 registerEditorContextMenu(ipcMain, { getWindow: liveWindow, open: request => openEditorContextMenu(services.contextMenu)(request) });
 ipcMain.handle('related:query', (_event,id) => related.query(id));

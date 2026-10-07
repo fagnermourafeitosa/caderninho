@@ -1,5 +1,10 @@
 // One board save: attach new image files, send the scene with its base version, then maybe a thumbnail.
 const THUMBNAIL_INTERVAL = 5000;
+// The element types a board stores (spec 007); anything else, like an embed pasted from Excalidraw, is not saved.
+const SAVED_TYPES = new Set(['rectangle', 'diamond', 'ellipse', 'arrow', 'line', 'freedraw', 'text', 'image', 'frame']);
+
+// Undo history does not survive a reload, so deleted elements from earlier sessions are dropped when a board opens.
+const loadableScene = scene => ({ ...scene, elements: scene.elements.filter(element => !element.isDeleted) });
 
 function createBoardPersistence({ api, noteId, version, attached, getState, thumbnail, now = Date.now, onSaved = () => {}, onRejectedFile = () => {}, onThumbnailError = error => console.error('Miniatura do quadro:', error) }) {
   const known = new Set(attached);
@@ -25,7 +30,7 @@ function createBoardPersistence({ api, noteId, version, attached, getState, thum
       const { elements, viewport, files } = getState();
       await attachNew(elements, files);
       // An image whose bytes are not attached yet waits for a later save instead of failing this one.
-      const saveable = elements.filter(element => element.type !== 'image' || known.has(element.fileId));
+      const saveable = elements.filter(element => SAVED_TYPES.has(element.type) && (element.type !== 'image' || known.has(element.fileId)));
       const result = await api.boardSave({ noteId, baseVersion, scene: { elements: saveable, viewport } });
       baseVersion = result.version;
       onSaved(result);
@@ -34,4 +39,4 @@ function createBoardPersistence({ api, noteId, version, attached, getState, thum
   };
 }
 
-module.exports = { createBoardPersistence, THUMBNAIL_INTERVAL };
+module.exports = { createBoardPersistence, loadableScene, THUMBNAIL_INTERVAL };

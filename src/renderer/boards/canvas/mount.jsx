@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BoardApp } from './board-app.jsx';
 import { exportData } from './export.js';
 import { runPanelAction } from './native-actions.js';
+import { loadableScene } from './persistence.js';
 
 let current = null, generation = 0, leaving = Promise.resolve();
 
@@ -43,7 +44,7 @@ async function mount(element, options) {
   element.addEventListener('keydown', guard, true);
   entry.dispose = () => element.removeEventListener('keydown', guard, true);
   current = entry;
-  await new Promise(resolve => root.render(<BoardApp board={{ ...opened, binaryFiles }} bridge={bridge} onReady={controller => { entry.controller = controller; resolve(); }} />));
+  await new Promise(resolve => root.render(<BoardApp board={{ ...opened, scene: loadableScene(opened.scene), binaryFiles }} bridge={bridge} onReady={controller => { entry.controller = controller; resolve(); }} />));
   return true;
 }
 

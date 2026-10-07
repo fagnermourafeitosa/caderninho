@@ -113,3 +113,7 @@ test('an image over 15 MB is rejected and an empty one too', () => {
   assert.throws(() => parseBoardImage({ mime: 'image/png', dataURL: dataURL('image/png', new Uint8Array(15 * 1024 * 1024 + 1)) }), { message: IMAGE_ERROR });
   assert.throws(() => parseBoardImage({ mime: 'image/png', dataURL: 'data:image/png;base64,' }), { message: IMAGE_ERROR });
 });
+
+test('board text is capped at 200,000 characters like any page body', () => {
+  assert.equal(sceneText([element('text', { text: 'x', originalText: 'x'.repeat(250_000) })]).length, 200_000);
+});

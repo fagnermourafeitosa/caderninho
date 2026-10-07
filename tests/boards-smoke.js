@@ -99,6 +99,14 @@
     },
     count: () => Number(text('.board-count').split(' ')[0]),
     title: () => document.querySelector('#note-title').value,
+    // After a board save the renderer state (search, index) carries the new text, with no navigation.
+    async stateHasText(noteId, value) { await until(() => state.notes.find(note => note.id === noteId)?.body.includes(value), 'estado com o texto ' + value, 3000); return true; },
+    // A save that succeeds after a failure clears the failure label.
+    async failedLabelClears() {
+      document.querySelector('#save-state').textContent = 'Falha ao salvar'; document.querySelector('#save-state').classList.add('failed');
+      await until(() => !document.querySelector('#save-state').classList.contains('failed'), 'rótulo de falha limpo', 3000);
+      return true;
+    },
     // Typing in the board title and undoing it with the page history (not the canvas).
     async titleUndo() {
       const title = document.querySelector('#note-title'), before = title.value;
