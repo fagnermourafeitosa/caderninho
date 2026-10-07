@@ -5,7 +5,8 @@ const actionLabel = (name, label) => `${icon(name)}<span>${escape(label)}</span>
 const labels = {
   notes: { singular: 'nota', plural: 'notas', create: 'Nova nota', heading: 'Suas notas' },
   tasks: { singular: 'lista', plural: 'listas', create: 'Nova lista', heading: 'Suas listas' },
-  reminders: { singular: 'lembrete', plural: 'lembretes', create: 'Novo lembrete', heading: 'Seus lembretes' }
+  reminders: { singular: 'lembrete', plural: 'lembretes', create: 'Novo lembrete', heading: 'Seus lembretes' },
+  boards: { singular: 'quadro', plural: 'quadros', create: 'Novo quadro', heading: 'Seus quadros' }
 };
 let state, view = 'home', trashType = 'notes', animationGeneration = 0, toastTimer, pending = 0;
 let reminderEditor = false;
@@ -36,7 +37,7 @@ async function action(name, input = {}, options = {}) {
     toast(error.message.replace(/^Error invoking remote method '[^']+': Error: /, ''), 8000); return false;
   }
 }
-const illustration = name => `<svg class="small-icon" aria-hidden="true"><use href="#${['home','notebooks','notes','tasks','reminders','archive'].includes(name) ? 'illus' : 'icon'}-${name}"/></svg>`;
+const illustration = name => `<svg class="small-icon" aria-hidden="true"><use href="#${['home','notebooks','notes','tasks','reminders','boards','archive'].includes(name) ? 'illus' : 'icon'}-${name}"/></svg>`;
 function empty(title, body, name = 'notes', button = '') { return `<div class="empty">${illustration(name)}<h2>${title}</h2><p>${body}</p>${button}</div>`; }
 function renderSidebar() {
   const collapsed = Boolean(state.sidebarCollapsed);
@@ -51,6 +52,7 @@ function renderSidebar() {
 }
 function render() {
   sourceDraft=null;
+  leaveBoard();
   hideEditorMenus();
   renderSidebar(); renderNotebookTabs();
   document.querySelectorAll('[data-view]').forEach(button => {
@@ -67,6 +69,7 @@ function render() {
 }
 function renderPage() {
   finishDiagramSession();
+  if (view === 'boards') { renderBoardPage(); return; }
   const notes = visibleNotes(), note = currentNote(), label = labels[view];
   const index = notes.findIndex(n => n.id === note?.id);
   const toolbar = `<div class="view-toolbar"><span class="toolbar-left">${view === 'reminders' ? `<button id="back-calendar" class="toolbar-back" aria-label="Calendário" title="Calendário">${icon('chevron')}</button>` : `<button id="back-to-index" class="toolbar-back" aria-label="${indexLabels[view].back}" title="${indexLabels[view].back}">${icon('chevron')}</button>`}</span><span class="toolbar-right"><button id="new-note" class="add-note toolbar-action toolbar-primary" aria-label="${label.create}" title="${label.create}">${icon('add')}<span class="toolbar-action-label">${label.create}</span></button>${note ? moreMenu([...(view === 'notes' ? [moreItem('add-cut','media','Adicionar mídia','⇧⌘M')] : []), moreItem('related-open','related','Relacionados','⌥⌘R'), moreItem('export-pdf','export','Exportar PDF','⇧⌘E'), '<hr>', moreItem('trash-note','trash','Mover para a lixeira','⇧⌘⌫',true)]) : ''}</span></div>`;
@@ -215,7 +218,7 @@ function renderTrash() {
   if (trashType === 'notes') rows.push(...(state.trashCuts || []).map(cut => ({ ...cut, kind: 'cut', detail: `Mídia da nota ${state.notes.find(note => note.id === cut.noteId)?.title || 'Sem título'}` })));
   rows.push(...(state.trashSourceActions||[]).filter(item=>item.kind===(trashType==='tasks'?'task':trashType==='reminders'?'reminder':'none')).map(item=>({...item,kind:'source',detail:'Ação da nota '+item.noteTitle})));
   const count = type => (state.trashSourceActions||[]).filter(item=>item.kind===(type==='tasks'?'task':type==='reminders'?'reminder':'none')).length + state.notes.filter(note => note.trashed && note.type === type).length + (type === 'tasks' ? state.trashItems.length : type === 'notes' ? (state.trashCuts || []).length : 0);
-  $('#page-content').innerHTML = `<div class="view-toolbar"><span class="toolbar-left"></span><span class="toolbar-right"><span class="subtle">${textFormat.plural(rows.length, 'item', 'itens')}</span></span></div><h1>Guardado por tipo</h1><p class="view-description">Restaure uma página ou exclua definitivamente.</p><div class="trash-tabs">${Object.entries(labels).map(([type]) => `<button data-trash-type="${type}" class="${trashType === type ? 'active' : ''}" aria-pressed="${trashType === type}">${actionLabel(type,`${{ notes: 'Notas', tasks: 'Tarefas', reminders: 'Lembretes' }[type]} (${count(type)})`)}</button>`).join('')}</div><div class="scroll-list">${rows.length ? rows.map(row => `<div class="archive-row"><div class="row-copy"><strong>${escape(row.title || 'Sem título')}</strong><small>${escape(row.detail)}</small></div><div class="trash-actions"><button data-restore-id="${escape(row.id)}" data-kind="${row.kind}">${actionLabel('restore','Restaurar')}</button><button class="purge" data-purge-id="${escape(row.id)}" data-kind="${row.kind}">${actionLabel('trash','Excluir definitivamente')}</button></div></div>`).join('') : empty('Lixeira vazia por aqui.', `As ${trashType === 'tasks' ? 'listas e tarefas removidas' : trashType === 'reminders' ? 'notas de lembrete removidas' : 'notas removidas'} ficam nesta seção.`, 'archive')}</div>`;
+  $('#page-content').innerHTML = `<div class="view-toolbar"><span class="toolbar-left"></span><span class="toolbar-right"><span class="subtle">${textFormat.plural(rows.length, 'item', 'itens')}</span></span></div><h1>Guardado por tipo</h1><p class="view-description">Restaure uma página ou exclua definitivamente.</p><div class="trash-tabs">${Object.entries(labels).map(([type]) => `<button data-trash-type="${type}" class="${trashType === type ? 'active' : ''}" aria-pressed="${trashType === type}">${actionLabel(type,`${{ notes: 'Notas', tasks: 'Tarefas', reminders: 'Lembretes', boards: 'Quadros' }[type]} (${count(type)})`)}</button>`).join('')}</div><div class="scroll-list">${rows.length ? rows.map(row => `<div class="archive-row"><div class="row-copy"><strong>${escape(row.title || 'Sem título')}</strong><small>${escape(row.detail)}</small></div><div class="trash-actions"><button data-restore-id="${escape(row.id)}" data-kind="${row.kind}">${actionLabel('restore','Restaurar')}</button><button class="purge" data-purge-id="${escape(row.id)}" data-kind="${row.kind}">${actionLabel('trash','Excluir definitivamente')}</button></div></div>`).join('') : empty('Lixeira vazia por aqui.', trashType === 'boards' ? 'Os quadros removidos ficam nesta seção.' : `As ${trashType === 'tasks' ? 'listas e tarefas removidas' : trashType === 'reminders' ? 'notas de lembrete removidas' : 'notas removidas'} ficam nesta seção.`, 'archive')}</div>`;
   document.querySelectorAll('[data-trash-type]').forEach(button => button.onclick = () => { trashType = button.dataset.trashType; renderTrash(); });
   document.querySelectorAll('[data-restore-id]').forEach(button => button.onclick = async () => { if (await turn(button.dataset.kind + ':restore', { id: button.dataset.restoreId })) toast('De volta ao caderno.'); });
   document.querySelectorAll('[data-purge-id]').forEach(button => button.onclick = async () => {

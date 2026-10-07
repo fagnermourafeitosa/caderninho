@@ -109,7 +109,7 @@ class MediaStore {
     return { title: data.title, description: data.description, blobId };
   }
   collect() {
-    const rows = this.store.db.prepare('SELECT * FROM media_blobs WHERE id NOT IN (SELECT blob_id FROM cuts WHERE blob_id IS NOT NULL)').all();
+    const rows = this.store.db.prepare('SELECT * FROM media_blobs WHERE id NOT IN (SELECT blob_id FROM cuts WHERE blob_id IS NOT NULL) AND id NOT IN (SELECT blob_id FROM board_files)').all();
     for (const row of rows) { try { fs.rmSync(path.join(this.directory, row.file), { force: true }); this.store.db.prepare('DELETE FROM media_blobs WHERE id=?').run(row.id); } catch {} }
   }
 }

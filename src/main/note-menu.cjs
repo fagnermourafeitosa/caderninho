@@ -1,9 +1,10 @@
-// "Nota" menu: page actions reachable from the menu bar, enabled for what the renderer shows.
+// "Nota" menu: page actions (notes and boards) reachable from the menu bar, enabled for what the renderer shows.
 const COMMANDS = [
   { id: 'new-note', label: 'Nova nota', accelerator: 'CommandOrControl+N' },
   { id: 'add-media', label: 'Adicionar mídia', accelerator: 'CommandOrControl+Shift+M' },
   { id: 'related', label: 'Relacionados', accelerator: 'CommandOrControl+Alt+R' },
   { id: 'export-pdf', label: 'Exportar PDF', accelerator: 'CommandOrControl+Shift+E' },
+  { id: 'board-fullscreen', label: 'Tela cheia do quadro', accelerator: 'CommandOrControl+Shift+F' },
   // ⌘⌫ stays with the editor, where it deletes to the start of the line.
   { id: 'trash-page', label: 'Mover para a lixeira', accelerator: 'CommandOrControl+Shift+Backspace', separated: true },
 ];

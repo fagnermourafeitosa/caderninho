@@ -10,6 +10,7 @@ const installRendererErrors = trackRendererErrors();
 const { testHook } = require('../../src/main/main.cjs');
 const { Store } = require('../../src/main/store.cjs');
 const { runNativeEditorSmoke } = require('./native-editor.cjs');
+const { runBoardsSmoke } = require('./boards.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 let alarmCount = 0;
 const contextMenu = scriptedContextMenu();
@@ -20,6 +21,8 @@ testHook.configure({
   pdfDestination: title => { const directory = path.join(ROOT, 'artifacts', 'pdf'); fs.mkdirSync(directory, { recursive: true }); return { filePath: path.join(directory, title) }; },
   cursor: scriptedCursor(),
   contextMenu,
+  // The save dialog is native and blocking: board exports go straight to artifacts/board-export.
+  boardExportTarget: require('../../src/main/boards/infrastructure/dialog-export-target.cjs').dialogExportTarget({ showSaveDialog: async (_window, options) => ({ canceled: false, filePath: path.join(ROOT, 'artifacts', 'board-export', path.basename(options.defaultPath)) }) }, () => null, path.join(ROOT, 'artifacts', 'board-export')),
 });
 function smokeScript(file){const source=fs.readFileSync(path.join(ROOT,'tests',file),'utf8').trim().replace(/;$/, '');return `Promise.resolve(${source}).catch(error=>{throw new Error(${JSON.stringify(file)}+': '+(error.stack||error.message||String(error)));})`;}
 // Diagram blocks end to end: editor, clipboard, SQLite and the text printed in the PDF.
@@ -133,6 +136,7 @@ async function runSmoke() {
       }
       console.log('RELATED_RUNTIME_OK');app.quit();return;
     }
+    if(process.argv.includes('--boards-only')){await runBoardsSmoke(win,smokeScript);app.quit();return;}
     if(process.argv.includes('--pages-only')){await runPagesSmoke(win);app.quit();return;}
     if(process.argv.includes('--mac-shell-only')){await runMacShellSmoke(win);app.quit();return;}
     if(process.argv.includes('--diagram-only')){await runDiagramSmoke(win);app.quit();return;}

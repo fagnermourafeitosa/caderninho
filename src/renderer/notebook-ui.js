@@ -9,7 +9,7 @@ function renderNotebookTabs() {
 async function openNotebook(id) {
   cancelTurn();
   if(!await action('notebook:select',{id})) return;
-  if(!['notes','tasks','reminders'].includes(view)) {if(!await action('view:select',{view:'notes'})) return;}
+  if(!['notes','tasks','reminders','boards'].includes(view)) {if(!await action('view:select',{view:'notes'})) return;}
   view=state.activeView; reminderEditor=false; render();
 }
 function notebookAssociation(note) {

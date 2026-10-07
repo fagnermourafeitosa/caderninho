@@ -1,0 +1,72 @@
+/* Boards (spec 007): canvas frame, tool rail, contextual bar, popovers, footer, index rows and full screen.
+   Measurements come from specs/assets/007-board/mockup/*.html. */
+.board-frame{position:relative;flex:1;min-height:0;margin:18px -40px -46px -33px;border-top:1px solid var(--hairline);border-radius:0 0 16px 0;overflow:hidden}
+.board-host,.board-canvas{position:absolute;inset:0}
+.board-canvas{background-color:var(--paper);background-image:radial-gradient(#d6c497 1.1px,transparent 1.3px);background-size:22px 22px;background-position:6px 6px;user-select:none}
+.board-canvas .excalidraw{--color-selection:#303025;--color-primary:#303025;--color-primary-darker:#303025;--color-primary-darkest:#303025;--color-primary-light:#f3e5c2;--ui-font:'New York',serif;background:transparent}
+.board-canvas .excalidraw .excalidraw-container,.board-canvas .excalidraw canvas{background:transparent}
+
+/* Excalidraw chrome Caderninho replaces. The properties panel stays rendered (the bar drives it) but is never shown. */
+.board-canvas .App-toolbar-container,.board-canvas .App-menu_top__left,.board-canvas .layer-ui__wrapper__top-right,.board-canvas .main-menu-trigger,.board-canvas .dropdown-menu-button,.board-canvas .help-icon,.board-canvas .HintViewer,.board-canvas .layer-ui__wrapper__footer-right,.board-canvas .footer-center,.board-canvas .sidebar-trigger,.board-canvas .default-sidebar-trigger,.board-canvas .App-toolbar,.board-canvas .welcome-screen-center,.board-canvas .welcome-screen-decor,.board-canvas .ToolIcon__library,.board-canvas .mobile-misc-tools-container,.board-canvas .scroll-back-to-content{display:none!important}
+.board-canvas .App-menu__left,.board-canvas .App-bottom-bar{position:fixed!important;left:-10000px!important;top:0!important;visibility:hidden!important;pointer-events:none!important}
+
+/* Native footer: zoom (− 100% +) and undo/redo as raised sheets at 14px from the canvas corner. */
+.board-canvas .layer-ui__wrapper__footer{bottom:0}
+.board-canvas .layer-ui__wrapper__footer-left{position:absolute;left:14px;bottom:14px;display:flex;gap:8px;margin:0;padding:0}
+.board-canvas .layer-ui__wrapper__footer-left .Stack_horizontal{gap:8px}
+.board-canvas .zoom-actions,.board-canvas .undo-redo-buttons{display:flex;align-items:center;height:36px;padding:0 4px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:10px;box-shadow:0 2px 6px rgba(54,53,42,.08)}
+.board-canvas .zoom-actions .ToolIcon_type_button,.board-canvas .undo-redo-buttons .ToolIcon_type_button{width:30px;height:30px;min-width:30px;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--ink)}
+.board-canvas .zoom-actions .ToolIcon__icon svg,.board-canvas .undo-redo-buttons .ToolIcon__icon svg{width:16px;height:16px;color:var(--ink)}
+.board-canvas .zoom-actions .reset-zoom-button{min-width:44px;height:30px;padding:0;background:transparent!important;border:0!important;box-shadow:none!important;font:13px var(--body-font);color:var(--muted)}
+.board-count{position:absolute;right:16px;bottom:22px;z-index:3;font:12px var(--body-font);color:var(--muted);pointer-events:none}
+
+/* Tool rail. */
+.board-rail{position:absolute;left:14px;top:22px;z-index:4;display:flex;flex-direction:column;gap:2px;padding:6px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:12px;box-shadow:0 3px 10px rgba(54,53,42,.12)}
+.board-rail button{position:relative;display:grid;place-items:center;width:36px;height:34px;padding:0;border-radius:8px;color:var(--ink)}
+.board-rail button:hover{background:var(--hover)}
+.board-rail button.active{background:var(--accent-soft)}
+.board-rail small{position:absolute;right:3px;bottom:1px;font:8.5px -apple-system,'Helvetica Neue',sans-serif;color:var(--muted)}
+.board-rail hr{border:0;border-top:1px solid var(--hairline);margin:4px 6px}
+.board-icon{width:16px;height:16px;flex:none;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* Contextual bar and its popovers. */
+.board-context-bar{position:absolute;z-index:5;display:flex;align-items:center;gap:2px;height:42px;padding:0 6px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:11px;box-shadow:0 4px 14px rgba(54,53,42,.16);white-space:nowrap}
+.board-context-bar>button{display:flex;align-items:center;justify-content:center;gap:5px;height:32px;min-width:32px;padding:0 6px;border-radius:7px;font:13px var(--body-font);color:var(--ink)}
+.board-context-bar>button:hover,.board-context-bar>button.on{background:var(--hover)}
+.board-context-bar>button:disabled{opacity:.35}
+.board-separator{width:1px;height:22px;margin:0 4px;background:var(--hairline)}
+.board-swatch{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--edge);box-sizing:border-box;flex:none}
+.board-swatch.ring{border-width:3px;border-color:var(--edge);background:transparent}
+.board-swatch.hatched{background:repeating-linear-gradient(45deg,#fffaea 0 3px,#cdb88a 3px 4px)}
+.board-chevron{width:8px;height:8px;stroke:var(--muted)}
+.board-popover-anchor{position:absolute;top:48px}
+.board-popover{width:190px;padding:10px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:11px;box-shadow:0 4px 14px rgba(54,53,42,.16);font:12px var(--body-font);color:var(--muted);white-space:normal;box-sizing:border-box}
+.board-popover h3{margin:0;font:12px var(--body-font);color:var(--muted)}
+.board-swatches{display:grid;grid-template-columns:repeat(5,24px);gap:7px;margin:6px 0 10px}
+.board-swatches button{width:24px;height:24px;padding:0;border-radius:6px;border:1px solid var(--hairline)}
+.board-swatches button.selected{outline:2px solid var(--ink);outline-offset:1px}
+.board-swatches button.hatched{background:repeating-linear-gradient(45deg,#fffaea 0 3px,#cdb88a 3px 4px)}
+.board-segmented{display:flex;margin:6px 0 10px;border:1px solid var(--hairline);border-radius:8px;overflow:hidden}
+.board-segmented button{flex:1;padding:5px 0;font:12px var(--body-font);color:var(--ink)}
+.board-segmented button.on{background:var(--accent-soft)}
+.board-slider{width:100%;margin:10px 0 4px;accent-color:var(--edge)}
+.board-list{margin:0 0 4px}
+.board-list h3{margin-bottom:6px}
+.board-list button{display:flex;align-items:center;gap:10px;width:100%;height:30px;padding:0 8px;border-radius:7px;font:13px var(--body-font);color:var(--ink);text-align:left}
+.board-list button:hover{background:var(--hover)}
+.board-list button.on{background:var(--accent-soft)}
+.board-list-gap{width:16px;flex:none}
+
+/* Quadros index rows. */
+.board-index-row{display:flex;align-items:center;gap:14px}
+.board-thumbnail{flex:none;width:64px;height:40px;border-radius:4px;border:1px solid var(--hairline);background:var(--paper);overflow:hidden;box-sizing:border-box}
+.board-thumbnail img{display:block;width:100%;height:100%;object-fit:contain}
+.board-index-copy{min-width:0;flex:1}
+
+/* Full screen: the book is the canvas; app chrome steps aside. */
+.board-exit-fullscreen{position:absolute;top:14px;right:14px;z-index:6;display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:10px;box-shadow:0 2px 6px rgba(54,53,42,.08);font:13px var(--body-font);color:var(--ink)}
+.board-exit-fullscreen[hidden]{display:none}
+.board-exit-fullscreen kbd{font:11px -apple-system,'Helvetica Neue',sans-serif;color:var(--muted);border:1px solid var(--hairline);border-radius:4px;padding:1px 5px}
+body.board-full-screen .sidebar,body.board-full-screen .fold-tab,body.board-full-screen .paper-tabs,body.board-full-screen .book-header,body.board-full-screen .book-footer,body.board-full-screen #page-content>.view-toolbar,body.board-full-screen #note-title,body.board-full-screen .note-categories,body.board-full-screen .note-provenance{display:none!important}
+body.board-full-screen .app{grid-template-columns:0 minmax(0,1fr);gap:0}
+body.board-full-screen .board-frame{position:absolute;inset:-10px -40px -46px -33px;margin:0;border-top:0;border-radius:0 16px 16px 0}

@@ -7,7 +7,8 @@ const {installCategories,category,associate,detach,syncCategories,categoryState}
 const {COLORS,installNotebooks,getNotebook,activeNotebook,notebookCommand,notebookState}=require('./notebooks.cjs');
 const pageDocument=require('../shared/editor-document.js');
 const {installSourceActions,sourceActions,sourceCommand,dueSourceActions}=require('./source-actions.cjs');
-const TYPES = ['notes', 'tasks', 'reminders'];
+const {installBoards,createEmptyBoard,boardsWithThumbnail}=require('./boards/infrastructure/sqlite-board-repository.cjs');
+const TYPES = ['notes', 'tasks', 'reminders', 'boards'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
 const iso = value => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
 class Store {
@@ -26,7 +27,7 @@ class Store {
       PRAGMA busy_timeout = 5000;
       CREATE TABLE IF NOT EXISTS notes (
         id TEXT PRIMARY KEY,
-        type TEXT NOT NULL CHECK(type IN ('notes','tasks','reminders')),
+        type TEXT NOT NULL CHECK(type IN ('notes','tasks','reminders','boards')),
         title TEXT NOT NULL DEFAULT '',
         body TEXT NOT NULL DEFAULT '',
         created TEXT NOT NULL,
@@ -75,6 +76,7 @@ class Store {
     installCategories(this);
     installNotebooks(this);
     installSourceActions(this);
+    installBoards(this);
     if (!this.getSetting('initialized')) this.initialize();
     if (!this.getSetting('inline_initialized')) this.transaction(() => { for (const note of this.db.prepare("SELECT * FROM notes WHERE type='notes'").all()) syncInline(this,note,new Date(this.now()).toISOString(),true); this.setSetting('inline_initialized','1'); });
     if (!this.getSetting('categories_initialized')) this.transaction(()=>{ const stamp=new Date(this.now()).toISOString(); for(const note of this.db.prepare('SELECT id FROM notes').all()) syncCategories(this,note.id,stamp); this.setSetting('categories_initialized','1'); });
@@ -152,7 +154,7 @@ class Store {
     const reminders = notes.filter(note => note.scheduled_at && this.dayKey(note.scheduled_at) === day && (note.reminder_enabled || note.fired)).sort((a,b) => a.scheduled_at.localeCompare(b.scheduled_at)).map(note => ({ id: note.id, title: note.title, due: note.scheduled_at, fired: Boolean(note.fired), created:note.created,updated:note.updated,body: note.body.slice(0, 180) }));
     reminders.push(...linked.filter(item=>item.kind==='reminder'&&this.dayKey(item.due)===day).map(item=>({...item,id:item.noteId,sourceActionId:item.id,body:item.origin.quote})));
     reminders.sort((a,b)=>a.due.localeCompare(b.due));
-    const recentNotes = notes.filter(note => note.type === 'notes').slice(0, 4).map(note => ({ id: note.id, title: note.title, body: note.body.replace(/\s+/g, ' ').slice(0, 140), created:note.created,updated: note.updated }));
+    const recentNotes = notes.filter(note => note.type === 'notes' || note.type === 'boards').slice(0, 4).map(note => ({ id: note.id, title: note.title, body: note.body.replace(/\s+/g, ' ').slice(0, 140), created:note.created,updated: note.updated }));
     const overview = JSON.stringify({ tasks, reminders, recentNotes });
     this.db.prepare('INSERT INTO daily_pages(day,overview,created,updated) VALUES(?,?,?,?) ON CONFLICT(day) DO UPDATE SET overview=excluded.overview,updated=excluded.updated WHERE daily_pages.overview<>excluded.overview').run(day, overview, stamp, stamp);
     return day;
@@ -162,6 +164,7 @@ class Store {
     const items = this.db.prepare('SELECT * FROM task_items ORDER BY position,rowid').all();
     const notes = this.db.prepare('SELECT * FROM notes ORDER BY created,rowid').all().map(row => this.dto(row, items));
     const categories=categoryState(this,notes);
+    const thumbnails=boardsWithThumbnail(this); for (const note of notes) if (note.type === 'boards') note.hasThumbnail = thumbnails.has(note.id);
     const cuts = this.db.prepare('SELECT * FROM cuts ORDER BY created,rowid').all().map(row => ({ id: row.id, noteId: row.note_id, kind: row.kind, blobId: row.blob_id, url: row.url, title: row.title, description: row.description, status: row.status, side: row.side, anchor: row.anchor, width: row.width, trashed: Boolean(row.trashed), created: row.created, updated:row.updated_at, deletedAt:row.deleted_at }));
     notes.forEach(note => { note.inlineTasks = this.db.prepare('SELECT * FROM inline_tasks WHERE note_id=? AND deleted_at IS NULL ORDER BY line_index').all(note.id).map(taskDTO); note.cuts = cuts.filter(cut => cut.noteId === note.id && !cut.trashed); });
     const activeBook=activeNotebook(this);
@@ -270,11 +273,13 @@ class Store {
           if (!TYPES.includes(type)) throw new Error('Tipo inválido.');
           const count = this.db.prepare('SELECT count(*) AS total FROM notes').get().total;
           if (count >= 3000) throw new Error('Limite de 3.000 páginas atingido.');
-          const note = { id: randomUUID(), type, title: text(input.title || { notes: 'Nova nota', tasks: 'Nova lista', reminders: 'Novo lembrete' }[type], 160), body: '', notebookId:input.notebookId, created: stamp, updated: stamp };
-          this.insert(note); this.select(this.note(note.id)); break;
+          const note = { id: randomUUID(), type, title: text(input.title || { notes: 'Nova nota', tasks: 'Nova lista', reminders: 'Novo lembrete', boards: '' }[type], 160), body: '', notebookId:input.notebookId, created: stamp, updated: stamp };
+          this.insert(note); if (type === 'boards') createEmptyBoard(this, note.id, stamp);
+          this.select(this.note(note.id)); break;
         }
         case 'note:update': {
           const note = this.note(input.id);
+          if (note.type === 'boards' && (Object.hasOwn(input,'body') || Object.hasOwn(input,'editorDoc'))) throw new Error('O texto do quadro vem dos elementos do quadro.');
           let doc=Object.hasOwn(input,'editorDoc')?(input.editorDoc===null?null:pageDocument.normalize(input.editorDoc)):note.editor_document?JSON.parse(note.editor_document):null;
           if(Object.hasOwn(input,'editorDoc')&&doc&&note.type!=='notes') throw new Error('Blocos estão disponíveis nas notas.');
           const body=Object.hasOwn(input,'editorDoc')&&doc?pageDocument.text(doc):Object.hasOwn(input,'body')?text(input.body,200000):note.body;

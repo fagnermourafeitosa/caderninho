@@ -48,6 +48,16 @@ To validate only Mermaid diagram blocks (editor, undo, home preview, clipboard a
 npm run test:app -- --diagram-only
 ```
 
+To validate only boards (spec 007): index, tool rail, post-it, contextual bar per selection, arrow binding, images by paste and drop, undo/redo, full screen, search, PNG/SVG export, no network requests, and a window close that waits for the pending board save. It runs at 1280×860, the size of the reference images, and ends by closing the window:
+
+```sh
+npm run test:app -- --boards-only
+```
+
+## Boards (Excalidraw)
+
+`@excalidraw/excalidraw` 0.18.1, `react`/`react-dom` 19.3.0 and `esbuild` are pinned dev dependencies. `scripts/vendor-excalidraw.cjs` bundles the board UI (`src/renderer/boards/canvas/`) with Excalidraw and React into `src/renderer/vendor/excalidraw/board.js` and copies Excalidraw's stylesheet and fonts next to it (git-ignored). It runs before `npm start`, `npm run test:app` and `npm run package`. The page loads the bundle the first time a board opens. Excalidraw is never patched: the board customises it only through props, its imperative API, CSS and its own keyboard bindings and (hidden) properties panel, which the contextual bar drives. Pure board logic (bar content and placement, style patches, post-it defaults, grid, autosave timing) is unit-tested in `tests/board-ui.test.cjs`; the main-process context in `tests/boards*.test.cjs`.
+
 ## Mermaid diagrams
 
 `mermaid` is a pinned dev dependency. `scripts/vendor-mermaid.cjs` copies only its self-contained browser build to `src/renderer/vendor/` (git-ignored); it runs automatically before `npm start`, `npm run test:app` and `npm run package`, so the full npm package never enters the app. The drawing style (hand-drawn strokes, notebook palette and handwriting font) lives in `src/shared/diagram-style.js` and is shared by the editor and the PDF print view.

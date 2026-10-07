@@ -13,11 +13,14 @@ const { noteMenu, availableCommands } = require('./note-menu.cjs');
 const { nativeContextMenuPresenter } = require('./editor-context-menu/infrastructure/native-context-menu.cjs');
 const { openEditorContextMenu } = require('./editor-context-menu/application/open-editor-context-menu.cjs');
 const { registerEditorContextMenu } = require('./editor-context-menu/presentation/ipc.cjs');
+const { registerBoards } = require('./boards/presentation/ipc.cjs');
+const { createBoardUseCases } = require('./boards/compose.cjs');
+const { dialogExportTarget } = require('./boards/infrastructure/dialog-export-target.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
 let win, store, reminderInterval, saveFailed = false;
-let media, observedDay, related;
+let media, observedDay, related, boards;
 let resolveReady;
 const ready = new Promise(resolve => { resolveReady = resolve; });
 let restoreBounds = null, resizeSession = null, moveSession = null, noteCommands = [];
@@ -30,6 +33,7 @@ const services = {
   pdfDestination: title => dialog.showSaveDialog(win, { title: 'Exportar página para PDF', defaultPath: path.join(app.getPath('documents'), title), filters: [{ name: 'Documento PDF', extensions: ['pdf'] }], buttonLabel: 'Exportar' }),
   cursor: () => screen.getCursorScreenPoint(),
   contextMenu: nativeContextMenuPresenter(Menu, () => liveWindow()),
+  boardExportTarget: dialogExportTarget(dialog, () => liveWindow(), app.getPath('documents')),
 };
 const liveWindow = () => (win && !win.isDestroyed() ? win : null);
 function windowState() {
@@ -74,6 +78,7 @@ else {
     media = new MediaStore(store, nativeImage);
     related = new RelatedService(store, media, { ocrPath: app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(ROOT,'native','caderninho-ocr'), onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');} });
     services.scheduleRelated();
+    boards = createBoardUseCases({ store, media, events: { boardSaved: () => { saveFailed = false; services.scheduleRelated(); }, boardImageAttached: () => {} }, exportTarget: () => services.boardExportTarget });
   store.db.prepare("UPDATE cuts SET status='unavailable' WHERE status='loading'").run();
   media.collect();
     protocol.handle('caderno-media', request => {
@@ -149,6 +154,9 @@ function checkReminders() {
     });
   }
 }
+// Board use cases exist once SQLite is open; a storage failure there is reported like any other save.
+const boardCall = name => input => { try { return boards[name](input); } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
+registerBoards(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['open', 'save', 'file', 'attachImage', 'thumbnail', 'readThumbnail', 'export'].map(name => [name, boardCall(name)])) });
 registerEditorContextMenu(ipcMain, { getWindow: liveWindow, open: request => openEditorContextMenu(services.contextMenu)(request) });
 ipcMain.handle('related:query', (_event,id) => related.query(id));
 ipcMain.handle('related:retry', () => { services.scheduleRelated(); });

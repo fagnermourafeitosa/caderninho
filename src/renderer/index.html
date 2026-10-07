@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="controls.css">
   <link rel="stylesheet" href="excalifont.css">
   <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="boards/board.css">
   <script defer src="../shared/smart-text.js"></script>
   <script defer src="../shared/text-format.js"></script>
   <script defer src="../shared/category-text.js"></script>
@@ -36,6 +37,8 @@
   <script defer src="editor-context-menu.js"></script>
   <script defer src="related-ui.js"></script>
   <script defer src="global-search.js"></script>
+  <script defer src="boards/board-page.js"></script>
+  <script defer src="boards/board-index.js"></script>
 </head>
 <body>
   <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -64,12 +67,16 @@
       <symbol id="icon-more" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10h.01M10 10h.01M15.5 10h.01" stroke-width="2.6"/></g></symbol>
       <symbol id="icon-clock" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4.3l2.8 1.7"/></g></symbol>
       <symbol id="icon-related" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/><circle cx="10" cy="15" r="2.2"/><path d="M6.4 6.8l2.4 6.2M13.6 6.8l-2.4 6.2M7.2 5h5.6"/></g></symbol>
+      <symbol id="icon-boards" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="15" height="11" rx="1.5"/><path d="M10 14.5v3M6.5 17.5h7"/><rect x="5" y="6" width="4" height="4" rx=".5"/><path d="M11 8h4M11 11h3"/></g></symbol>
+      <symbol id="icon-fullscreen" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V3h5M12 3h5v5M3 12v5h5M17 12v5h-5"/></g></symbol>
+      <symbol id="icon-collapse" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v5H3M12 3v5h5M8 17v-5H3M12 17v-5h5"/></g></symbol>
       <symbol id="icon-search" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.3 12.3L17 17"/></g></symbol>
       <symbol id="illus-home" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13H55Q60 13 59 20L58 62H16Q11 62 11 56V20Q11 13 17 13Z" fill="#fff4d8"/><path d="M18 14V62M25 7V19M36 7V19M47 7V19M26 44H47M26 53H44"/><circle cx="42" cy="31" r="7" fill="#f6ba45"/><path d="M42 20V18M42 44V42M31 31H29M55 31H53"/></g></symbol>
       <symbol id="illus-notebooks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20L43 14L52 57L20 63Z" fill="#c5d3ae"/><path d="M23 12L55 8L61 54L29 59Z" fill="#deb9a7"/><path d="M29 12L34 57M37 22L51 20M38 30L51 28"/><path d="M12 20L19 21L27 62"/></g></symbol>
       <symbol id="illus-notes" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11L50 7Q55 6 55 12L59 52Q59 56 53 57L20 61Q15 62 15 55L11 18Q10 12 17 11Z" fill="#fff4d8"/><path d="M23 23L43 20M24 32L45 29M25 42L37 40"/><path d="M39 53L43 38L58 17Q61 13 65 17L68 20L51 43Z" fill="#f6ba45"/><path d="M43 38L51 43M58 17L66 23M39 53L42 44"/><path d="M7 52L3 56M64 51L69 54"/></g></symbol>
       <symbol id="illus-tasks" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16H56Q61 16 60 23L57 61H15L15 23Q15 17 18 16Z" fill="#fff4d8"/><path d="M28 12H33V7Q33 1 38 3Q43 4 41 11H47V21H27Z" fill="#c3d29a"/><path d="M25 39L34 49L49 31" stroke="#d55135" stroke-width="5"/></g></symbol>
       <symbol id="illus-reminders" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M31 15V10Q31 3 37 3Q44 3 42 14" fill="#f7b244"/><path d="M15 53Q24 40 24 29Q23 15 38 14Q52 15 52 30Q51 43 61 52Q42 63 15 53Z" fill="#de6945"/><path d="M31 57Q35 66 44 58" fill="#f6ba45"/><path d="M36 21Q32 30 34 45M12 16Q5 26 8 37M19 20Q14 25 15 32M58 18Q65 28 62 38M63 12Q73 23 69 40" fill="none"/></g></symbol>
+      <symbol id="illus-boards" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 14H60Q63 14 63 18V50Q63 54 59 54H13Q9 54 9 50V18Q9 14 12 14Z" fill="#fff4d8"/><path d="M36 54V64M26 64H46"/><rect x="17" y="21" width="15" height="13" fill="#f6d77a"/><rect x="40" y="31" width="15" height="13" fill="#c9d8df"/><path d="M32 28Q38 28 40 35"/></g></symbol>
       <symbol id="illus-archive" viewBox="0 0 72 72"><g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 27L58 25L57 62L15 64Z" fill="#e9ad39"/><path d="M9 17L59 13L64 24L12 29Z" fill="#f8cc65"/><path d="M12 29L64 24L63 32L12 36Z" fill="#e6a83e"/><path d="M28 44L45 43L45 49L28 50Z" fill="#fff4d8"/></g></symbol>
     </defs>
   </svg>
@@ -82,6 +89,7 @@
         <button data-view="notes" class="nav-item"><svg aria-hidden="true"><use href="#icon-notes"/></svg><span>Notas</span></button>
         <button data-view="tasks" class="nav-item"><svg aria-hidden="true"><use href="#icon-tasks"/></svg><span>Tarefas</span></button>
         <button data-view="reminders" class="nav-item"><svg aria-hidden="true"><use href="#icon-reminders"/></svg><span>Lembretes</span></button>
+        <button data-view="boards" class="nav-item"><svg aria-hidden="true"><use href="#icon-boards"/></svg><span>Quadros</span></button>
         <button data-view="archive" class="nav-item nav-group-start"><svg aria-hidden="true"><use href="#icon-archive"/></svg><span>Lixeira</span></button>
       </nav>
     </aside>

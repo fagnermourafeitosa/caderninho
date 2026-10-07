@@ -35,6 +35,7 @@ Na própria página, o nome do caderno abaixo do título, ao lado das datas, per
 | **Notas** | Texto livre, categorias, caixas de seleção, imagens e cartões de link. |
 | **Tarefas** | Várias listas independentes, com título, datas e itens marcados ou pendentes. |
 | **Lembretes** | Notas agendadas para um dia e horário, que tocam um alerta sonoro. |
+| **Quadros** | Um papel sem fim para post-its, formas, setas, frames, imagens e texto solto. |
 | **Lixeira** | Páginas, tarefas e mídias removidas, separadas por tipo e recuperáveis. |
 
 **Notas**, **Tarefas** e o calendário de **Lembretes** mostram o caderno selecionado. A visão do dia e a lixeira reúnem todos os cadernos. Os alertas continuam funcionando mesmo quando você está em outro caderno.
@@ -74,6 +75,19 @@ Clique em **+ Novo lembrete**, escreva a nota, escolha **Dia e horário** e cliq
 Mudar a data ou o horário desativa o agendamento anterior até você clicar em **Agendar** de novo.
 
 **O app precisa estar aberto para tocar o alerta; pode estar minimizado.** Fechar a janela encerra o app. Se o horário passar com o app fechado ou o computador em repouso, o alerta toca quando o app abrir ou o computador acordar. Cada alerta toca uma vez, usa o volume do sistema e mostra uma mensagem no app e uma notificação do sistema, quando disponível. Páginas na lixeira não disparam alertas.
+
+### Quadros
+
+**Novo quadro** abre um papel pontilhado sem fim, com o título, as categorias e o caderno no topo, como numa nota. O trilho à esquerda tem as ferramentas e os atalhos: Seleção (V), Mão (H), Retângulo (R), Losango (D), Elipse (O), Seta (A), Linha (L), Lápis (P), Texto (T), Post-it (N), Imagem (9), Frame (F) e Borracha (E).
+
+- **Post-it**: tecle N (ou clique no post-it do trilho) e clique no papel. O post-it aparece pronto para escrever.
+- **Setas** que começam ou terminam numa forma ficam presas a ela e acompanham quando você move a forma.
+- **Barra de contexto**: ao selecionar algo, uma barra aparece acima da seleção com cor, traço, espessura, estilo da linha, traço à mão, texto, camadas, duplicar e apagar. Com vários elementos, ela alinha, agrupa e envolve tudo num frame.
+- **Imagens**: cole, arraste para o papel ou use a ferramenta Imagem.
+- **Mais** (⋯): Exportar PNG, Exportar SVG, Tela cheia do quadro (**⇧⌘F**; **esc** sai) e Relacionados. Um frame selecionado também pode ser exportado em PNG.
+- **⌘Z** e **⇧⌘Z** desfazem e refazem no quadro; os botões no canto inferior esquerdo fazem o mesmo e ajustam o zoom.
+
+O quadro se salva sozinho enquanto você desenha. O texto dos elementos entra na busca e nas páginas relacionadas; hashtags escritas no quadro não viram categorias (use **+ Categoria**).
 
 ## Editor de notas
 

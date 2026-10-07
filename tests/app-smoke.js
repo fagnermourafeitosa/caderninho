@@ -16,7 +16,7 @@
   assert(document.querySelector('.view-toolbar #trash-note svg') && !document.querySelector('.note-bottom #trash-note'), 'Lixeira com ícone fica na toolbar');
   assert(document.querySelector('#trash-note').previousElementSibling.tagName === 'HR', 'Separador antes da lixeira');
   assert(!document.querySelector('#themes-open') && !document.querySelector('#pin'), 'Temas e Fixar removidos');
-  assert(document.querySelectorAll('.sidebar [data-view]').length === 6, 'Seis seções do menu');
+  assert(document.querySelectorAll('.sidebar [data-view]').length === 7, 'Sete seções do menu');
   assert(!document.querySelector('.face') && !document.querySelector('.arm'), 'Área de escrita livre do mascote');
   assert(!document.querySelector('.ribbon') && document.querySelector('.paper-tabs'), 'Marcador do topo removido');
   const widthBeforeFold = document.querySelector('#note-body').getBoundingClientRect().width;

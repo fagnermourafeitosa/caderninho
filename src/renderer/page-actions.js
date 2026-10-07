@@ -1,5 +1,5 @@
 /* Page actions shared by the "Mais" overflow and the native "Nota" menu, plus native window buttons. */
-const NOTE_COMMAND_TARGETS = { 'add-media': '#add-cut', related: '#related-open', 'export-pdf': '#export-pdf', 'trash-page': '#trash-note' };
+const NOTE_COMMAND_TARGETS = { 'add-media': '#add-cut', related: '#related-open', 'export-pdf': '#export-pdf', 'board-fullscreen': '#board-fullscreen', 'trash-page': '#trash-note' };
 const moreItem = (id, name, label, shortcut, danger = false) => `<button id="${id}" type="button" role="menuitem" class="${danger ? 'page-more-danger' : ''}">${icon(name)}<span>${escape(label)}</span><kbd>${shortcut}</kbd></button>`;
 // items: HTML from moreItem; a leading '<hr>' separates destructive actions.
 function moreMenu(items) {

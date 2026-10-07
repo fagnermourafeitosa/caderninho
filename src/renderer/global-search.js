@@ -24,7 +24,7 @@ function renderGlobalSearch() {
  searchResults.hidden = !query || !searchControl.classList.contains('open');
  searchInput.setAttribute('aria-expanded', String(!searchResults.hidden));
  searchInput.removeAttribute('aria-activedescendant');
- searchResults.innerHTML = searchMatches.length ? searchMatches.map(({note,book,snippet},index) => `<button type="button" role="option" aria-selected="false" id="global-result-${index}" data-search-index="${index}"><strong>${escape(note.title || 'Sem título')}</strong><small>${escape(({notes:'Nota',tasks:'Lista de tarefas',reminders:'Lembrete'})[note.type])} · ${escape(book?.name || 'Caderno')}</small><span>${escape(snippet || 'Página em branco')}</span></button>`).join('') : '<p role="status">Nenhuma página encontrada.</p>';
+ searchResults.innerHTML = searchMatches.length ? searchMatches.map(({note,book,snippet},index) => `<button type="button" role="option" aria-selected="false" id="global-result-${index}" data-search-index="${index}"><strong>${escape(note.title || 'Sem título')}</strong><small>${escape(({notes:'Nota',tasks:'Lista de tarefas',reminders:'Lembrete',boards:'Quadro'})[note.type])} · ${escape(book?.name || 'Caderno')}</small><span>${escape(snippet || 'Página em branco')}</span></button>`).join('') : '<p role="status">Nenhuma página encontrada.</p>';
  searchResults.querySelectorAll('[data-search-index]').forEach(button => button.onclick = () => selectGlobalResult(Number(button.dataset.searchIndex)));
 }
 function openGlobalSearch() {

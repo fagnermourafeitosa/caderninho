@@ -62,17 +62,19 @@ A interface, a leitura de datas e a busca foram construídas para o português, 
 
 ![Nota de viagem com uma paisagem à direita e um cartão de link à esquerda, com o texto contornando os dois](docs/images/colagem.png)
 
+**Quadros para pensar no papel.** Post-its, setas presas às formas, frames, imagens e texto solto num papel pontilhado sem fim, com traço de mão. O texto do quadro entra na busca.
+
 **Diagramas como texto.** Digite `/diagrama` para escrever um fluxograma, uma sequência, um mapa mental ou uma linha do tempo em [Mermaid](https://mermaid.js.org). O diagrama é desenhado com traço de mão dentro da nota, e a busca encontra as palavras dele.
 
 ## Seus dados, numa pasta
 
-Notas, listas, lembretes e categorias ficam num banco SQLite; imagens e PDFs ficam ao lado dele:
+Notas, listas, lembretes, quadros e categorias ficam num banco SQLite; imagens e PDFs ficam ao lado dele:
 
 ```text
 ~/Library/Application Support/caderninho/
 ```
 
-Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie essa pasta. Qualquer página pode ser exportada em PDF (**⇧⌘E**) com a formatação, as imagens, os diagramas e as ações ligadas a ela.
+Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie essa pasta. Notas, listas e lembretes podem ser exportados em PDF (**⇧⌘E**) com a formatação, as imagens, os diagramas e as ações ligadas a eles; quadros, em PNG ou SVG.
 
 As únicas requisições de rede são as que você dispara: buscar a prévia de um link no site que você colou e baixar uma única vez o modelo usado pelas páginas relacionadas.
 

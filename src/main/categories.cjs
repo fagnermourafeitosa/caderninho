@@ -28,6 +28,8 @@ function detach(store,noteId,categoryId,source,stamp) {
 }
 function syncCategories(store,noteId,stamp,pendingOffset=null) {
   const note=store.note(noteId);
+  // Board text is extracted from drawings: its hashtags are not inline categories (spec 007).
+  if(note.type==='boards') return;
   const source=note.editor_document?require('../shared/editor-document.js').text(JSON.parse(note.editor_document).map(block=>({...block,runs:block.runs?.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run),rows:block.rows?.map(row=>row.map(cell=>cell.map(run=>run.marks.code?{...run,text:' '.repeat(run.text.length)}:run)))}))):note.body;
   const text=source+(note.type==='tasks'?'\n'+store.db.prepare('SELECT title FROM task_items WHERE note_id=? AND trashed=0 ORDER BY position').all(noteId).map(item=>item.title).join('\n'):'');
   const keys=new Set(), ids=new Set();

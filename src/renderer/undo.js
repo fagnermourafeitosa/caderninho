@@ -80,8 +80,10 @@ function editPageHistory(direction) {
   return undoQueue;
 }
 function capturePageSelection() { const history = pageHistories.get(currentNote()?.id); if (history) history.current.selection = editorSelection(); }
+// The board canvas keeps Excalidraw's own history; the page history never handles its keys.
+const insideBoard = target => Boolean(target?.closest?.('.board-canvas'));
 document.addEventListener('beforeinput', event => {
-  if (!isPageHistoryTarget(event.target)) return;
+  if (insideBoard(event.target) || !isPageHistoryTarget(event.target)) return;
   if (event.inputType === 'historyUndo' || event.inputType === 'historyRedo') {
     event.preventDefault(); editPageHistory(event.inputType === 'historyUndo' ? 'undo' : 'redo'); return;
   }
@@ -89,7 +91,7 @@ document.addEventListener('beforeinput', event => {
 }, true);
 document.addEventListener('keydown', event => {
   const key = event.key.toLowerCase();
-  if (!(event.ctrlKey || event.metaKey) || event.altKey || !['z', 'y'].includes(key)) return;
+  if (!(event.ctrlKey || event.metaKey) || event.altKey || !['z', 'y'].includes(key) || insideBoard(event.target)) return;
   const direction = key === 'y' || event.shiftKey ? 'redo' : 'undo';
   if (isPageHistoryTarget(event.target)) {
     event.preventDefault(); event.stopImmediatePropagation(); editPageHistory(direction);
@@ -98,6 +100,7 @@ document.addEventListener('keydown', event => {
   }
 }, true);
 window.notebook.onHistory(direction => {
-  if (isPageHistoryTarget()) editPageHistory(direction);
+  if (view === 'boards' && window.CaderninhoBoard?.hasFocus()) window.CaderninhoBoard.history(direction);
+  else if (isPageHistoryTarget()) editPageHistory(direction);
   else document.execCommand(direction);
 });
