@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Quadro mockup</title>
+<style>
+@font-face{font-family:'New York';src:local('New York'), url('/System/Library/Fonts/NewYork.ttf') format('truetype');font-weight:100 1000}
+@font-face{font-family:'Excalifont';src:url('../../../../src/renderer/fonts/excalifont/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2') format('woff2')}
+:root{--paper:#fbf0d5;--shade:#efe0b9;--kraft:#e6d3a8;--sheet:#fffaea;--hover:#f3e5c2;--hair:#cdb88a;--ink:#303025;--muted:#6b624c;--edge:#36352a;--yellow:#f8d985}
+*{box-sizing:border-box;margin:0}
+body{background:#000;width:1280px;height:860px;font-family:'New York',Georgia,serif;color:var(--ink);padding:18px 40px 22px 18px;display:flex;gap:22px}
+svg.i{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.side{width:206px;background:linear-gradient(#e6d3a8,#e0cc9f);border:2px solid var(--edge);border-radius:16px;padding:26px 14px}
+.side h6{font-size:13px;letter-spacing:.08em;color:var(--muted);font-weight:650;margin:0 0 14px 12px}
+.row{display:flex;align-items:center;gap:14px;height:38px;padding:0 12px;border-radius:8px;font-size:15.5px;margin-bottom:4px}
+.row.on{background:var(--yellow);font-weight:650}
+.row.gap{margin-top:22px}
+.book{flex:1;position:relative;background:var(--paper);border:2px solid var(--edge);border-radius:18px;box-shadow:0 6px 0 -1px #e9d9b3,0 6px 0 1px var(--edge);display:flex;flex-direction:column;padding:0 30px 0 60px;overflow:visible}
+.book:before{content:"";position:absolute;left:14px;top:12px;bottom:12px;border-left:1.5px dashed #8b7d5a}
+.book:after{content:"";position:absolute;left:26px;top:0;bottom:0;border-left:1px solid var(--hair)}
+.fold{position:absolute;left:-12px;top:150px;width:18px;height:52px;background:var(--sheet);border:1.5px solid var(--edge);border-radius:6px;display:grid;place-items:center}
+.tabs{position:absolute;z-index:5;right:-30px;top:120px;display:flex;flex-direction:column;gap:12px}
+.tab{width:30px;border:1.5px solid var(--edge);border-left:none;border-radius:0 9px 9px 0}
+.tab.a{height:200px;background:#e6d3a8;font-family:Excalifont;writing-mode:vertical-rl;font-size:17px;padding:28px 0 0 2px}
+.tab.b{height:56px;background:#c9d8df}.tab.c{height:56px;background:#cfdcbc}
+.tab.d{height:44px;background:var(--sheet);display:grid;place-items:center;font-size:22px}
+.bar{height:68px;display:flex;align-items:center;gap:8px;flex:none}
+.bar .sp{flex:1}
+.btn{display:flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9px;font-size:15px;font-weight:650}
+.btn.primary{background:var(--ink);color:var(--paper)}.btn.primary svg{stroke:var(--paper)}
+.ib{width:34px;height:34px;display:grid;place-items:center}
+h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+.meta{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+.pill{border:1px solid var(--hair);background:#f1e4c4;border-radius:999px;padding:3px 10px;color:var(--ink)}
+.canvas{position:relative;flex:1;margin:18px -30px 0 -34px;border-top:1px solid var(--hair);border-radius:0 0 16px 0;overflow:hidden;
+  background-color:var(--paper);background-image:radial-gradient(#d6c497 1.1px,transparent 1.3px);background-size:22px 22px;background-position:6px 6px}
+.canvas>svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.rail{position:absolute;left:14px;top:22px;background:var(--sheet);border:1px solid var(--hair);border-radius:12px;box-shadow:0 3px 10px rgba(54,53,42,.12);padding:6px;display:flex;flex-direction:column;gap:2px}
+.rail .t{width:36px;height:34px;border-radius:8px;display:grid;place-items:center;position:relative}
+.rail .t.on{background:var(--yellow)}
+.rail .t small{position:absolute;right:3px;bottom:1px;font-size:8.5px;color:var(--muted);font-family:-apple-system,sans-serif}
+.rail hr{border:none;border-top:1px solid var(--hair);margin:4px 6px}
+.ctx{position:absolute;background:var(--sheet);border:1px solid var(--hair);border-radius:11px;box-shadow:0 4px 14px rgba(54,53,42,.16);height:42px;padding:0 6px;display:flex;align-items:center;gap:2px}
+.ctx .c{height:32px;min-width:32px;padding:0 6px;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:13px}
+.ctx .c.on{background:var(--hover)}
+.ctx .sep{width:1px;height:22px;background:var(--hair);margin:0 4px}
+.sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--edge)}
+.chev{width:8px;height:8px;stroke:var(--muted)!important}
+.pop{position:absolute;background:var(--sheet);border:1px solid var(--hair);border-radius:11px;box-shadow:0 4px 14px rgba(54,53,42,.16);padding:10px;font-size:12px;color:var(--muted)}
+.pop .grid{display:grid;grid-template-columns:repeat(5,24px);gap:7px;margin:6px 0 10px}
+.pop .grid span{width:24px;height:24px;border-radius:6px;border:1px solid var(--hair)}
+.pop .grid span.sel{outline:2px solid var(--ink);outline-offset:1px}
+.zoom{position:absolute;left:14px;bottom:14px;display:flex;gap:8px}
+.grp{background:var(--sheet);border:1px solid var(--hair);border-radius:10px;height:36px;display:flex;align-items:center;padding:0 4px;font-size:13px;box-shadow:0 2px 6px rgba(54,53,42,.08)}
+.grp .ib{width:30px;height:30px}
+.grp b{font-weight:400;min-width:44px;text-align:center;color:var(--muted)}
+.foot{position:absolute;right:16px;bottom:22px;font-size:12px;color:var(--muted)}
+.callout{position:absolute;font-family:-apple-system,'Helvetica Neue',sans-serif;font-size:11.5px;font-weight:600;color:#fff;background:#b2452f;border-radius:999px;width:20px;height:20px;display:grid;place-items:center;box-shadow:0 0 0 2px #fff}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="cal" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></symbol>
+  <symbol id="books" viewBox="0 0 20 20"><path d="M3 4v12M6.5 4v12M10 4.5l3.5 11.5M14 4l3 11"/></symbol>
+  <symbol id="note" viewBox="0 0 20 20"><path d="M10 3H4.5A1.5 1.5 0 0 0 3 4.5v11A1.5 1.5 0 0 0 4.5 17h11a1.5 1.5 0 0 0 1.5-1.5V10"/><path d="M15 2.5l2.5 2.5L10 12.5H7.5V10z"/></symbol>
+  <symbol id="check" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M6.5 10l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="bell" viewBox="0 0 20 20"><path d="M5 14V9a5 5 0 0 1 10 0v5l1.5 1.5h-13zM8.5 17.5h3"/></symbol>
+  <symbol id="board" viewBox="0 0 20 20"><rect x="2.5" y="3.5" width="15" height="11" rx="1.5"/><path d="M10 14.5v3M6.5 17.5h7"/><rect x="5" y="6" width="4" height="4" rx=".5"/><path d="M11 8h4M11 11h3"/></symbol>
+  <symbol id="trash" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="4" rx="1"/><path d="M4.5 8v7.5A1.5 1.5 0 0 0 6 17h8a1.5 1.5 0 0 0 1.5-1.5V8M8 11h4"/></symbol>
+  <symbol id="back" viewBox="0 0 20 20"><path d="M12.5 4l-6 6 6 6"/></symbol>
+  <symbol id="plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></symbol>
+  <symbol id="minus" viewBox="0 0 20 20"><path d="M4 10h12"/></symbol>
+  <symbol id="search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5L17 17"/></symbol>
+  <symbol id="more" viewBox="0 0 20 20"><path d="M4.5 10h.01M10 10h.01M15.5 10h.01" stroke-width="2.4"/></symbol>
+  <symbol id="cursor" viewBox="0 0 20 20"><path d="M5 3l10 6.5-4.3 1.2L8.5 15z"/></symbol>
+  <symbol id="hand" viewBox="0 0 20 20"><path d="M7 10V4.8a1.2 1.2 0 0 1 2.4 0V9M9.4 9V3.6a1.2 1.2 0 0 1 2.4 0V9M11.8 9V4.6a1.2 1.2 0 0 1 2.4 0V12a5 5 0 0 1-5 5h-.5a4.6 4.6 0 0 1-3.8-2L3.5 12a1.2 1.2 0 0 1 2-1.4L7 12"/></symbol>
+  <symbol id="rect" viewBox="0 0 20 20"><rect x="3.5" y="5" width="13" height="10" rx="1.5"/></symbol>
+  <symbol id="diamond" viewBox="0 0 20 20"><path d="M10 3l7 7-7 7-7-7z"/></symbol>
+  <symbol id="ellipse" viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="7" ry="5.5"/></symbol>
+  <symbol id="arrow" viewBox="0 0 20 20"><path d="M4 16L16 4M9.5 4H16v6.5"/></symbol>
+  <symbol id="line" viewBox="0 0 20 20"><path d="M4 16L16 4"/></symbol>
+  <symbol id="pencil" viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></symbol>
+  <symbol id="text" viewBox="0 0 20 20"><path d="M4.5 5V3.5h11V5M10 3.5v13M8 16.5h4"/></symbol>
+  <symbol id="postit" viewBox="0 0 20 20"><path d="M3.5 3.5h13v8.5l-4.5 4.5H3.5z"/><path d="M16.5 12H12v4.5"/></symbol>
+  <symbol id="image" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="1.5"/><circle cx="7.5" cy="8" r="1.3"/><path d="M3.5 14.5l4.5-4 3 2.5 2-1.5 3.5 3"/></symbol>
+  <symbol id="frame" viewBox="0 0 20 20"><path d="M6 2.5v15M14 2.5v15M2.5 6h15M2.5 14h15"/></symbol>
+  <symbol id="eraser" viewBox="0 0 20 20"><path d="M8 16.5L3.5 12a1.4 1.4 0 0 1 0-2l6.5-6.5a1.4 1.4 0 0 1 2 0L16.5 8a1.4 1.4 0 0 1 0 2L10 16.5zM16.5 16.5H8M6 9.5l5 5"/></symbol>
+  <symbol id="undo" viewBox="0 0 20 20"><path d="M7 5L3.5 8.5 7 12M3.5 8.5H12a4.5 4.5 0 0 1 0 9H9"/></symbol>
+  <symbol id="redo" viewBox="0 0 20 20"><path d="M13 5l3.5 3.5L13 12M16.5 8.5H8a4.5 4.5 0 0 0 0 9h3"/></symbol>
+  <symbol id="w1" viewBox="0 0 20 20"><path d="M3 10h14" stroke-width="1"/></symbol>
+  <symbol id="w2" viewBox="0 0 20 20"><path d="M3 10h14" stroke-width="2.5"/></symbol>
+  <symbol id="dash" viewBox="0 0 20 20"><path d="M3 10h14" stroke-dasharray="3.5 2.5"/></symbol>
+  <symbol id="rough" viewBox="0 0 20 20"><path d="M3 12c2-4 3 2 5-2s3 3 5-1 2 1 4-1"/></symbol>
+  <symbol id="layers" viewBox="0 0 20 20"><path d="M10 3l7 3.5-7 3.5-7-3.5zM3 10l7 3.5 7-3.5M3 13.5L10 17l7-3.5"/></symbol>
+  <symbol id="copy" viewBox="0 0 20 20"><rect x="6.5" y="6.5" width="10" height="10" rx="1.5"/><path d="M13.5 6.5V4.5A1.5 1.5 0 0 0 12 3H4.5A1.5 1.5 0 0 0 3 4.5V12a1.5 1.5 0 0 0 1.5 1.5h2"/></symbol>
+  <symbol id="del" viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M5.5 6l.8 10.5h7.4L14.5 6"/></symbol>
+  <symbol id="font" viewBox="0 0 20 20"><path d="M3 16l4.5-12L12 16M4.7 12h5.6M13 16v-5.5M13 12.5a2.3 2.3 0 1 1 4.5 0v1a2.3 2.3 0 1 1-4.5 0"/></symbol>
+  <symbol id="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5 8 3.5"/></symbol>
+ </defs>
+</svg>
+
+<aside class="side">
+ <h6>PESSOAL</h6>
+ <div class="row"><svg class="i"><use href="#cal"/></svg>Caderninho</div>
+ <div class="row"><svg class="i"><use href="#books"/></svg>Cadernos</div>
+ <div class="row"><svg class="i"><use href="#note"/></svg>Notas</div>
+ <div class="row"><svg class="i"><use href="#check"/></svg>Tarefas</div>
+ <div class="row"><svg class="i"><use href="#bell"/></svg>Lembretes</div>
+ <div class="row on"><svg class="i"><use href="#board"/></svg>Quadros</div>
+ <div class="row gap"><svg class="i"><use href="#trash"/></svg>Lixeira</div>
+</aside>
+
+<main class="book">
+ <div class="fold"><svg class="i" style="width:10px"><use href="#back"/></svg></div>
+ <div class="tabs"><div class="tab a">Pessoal</div><div class="tab b"></div><div class="tab c"></div><div class="tab d">+</div></div>
+
+ <div class="bar">
+  <div class="ib"><svg class="i"><use href="#back"/></svg></div>
+  <div class="sp"></div>
+  <div class="btn primary"><svg class="i"><use href="#plus"/></svg>Novo quadro</div>
+  <div class="ib"><svg class="i" style="width:18px;height:18px"><use href="#search"/></svg></div>
+  <div class="ib"><svg class="i" style="width:18px;height:18px"><use href="#more"/></svg></div>
+ </div>
+ <h1>Roteiro da viagem</h1>
+ <div class="meta"><span class="pill">#viagem ×</span><span>+ Categoria</span><span>·</span><span style="color:var(--ink)">Pessoal ⌄</span><span>· Criado em 05/10/2026 · Atualizado em 06/10/2026, 09:12</span></div>
+
+ <section class="canvas" id="canvas">
+  <svg class="scene" id="scene" viewBox="0 0 1000 600" preserveAspectRatio="xMinYMin meet"></svg>
+
+  <nav class="rail">
+   <div class="t on"><svg class="i"><use href="#cursor"/></svg><small>V</small></div>
+   <div class="t"><svg class="i"><use href="#hand"/></svg><small>H</small></div>
+   <hr>
+   <div class="t"><svg class="i"><use href="#rect"/></svg><small>R</small></div>
+   <div class="t"><svg class="i"><use href="#diamond"/></svg><small>D</small></div>
+   <div class="t"><svg class="i"><use href="#ellipse"/></svg><small>O</small></div>
+   <div class="t"><svg class="i"><use href="#arrow"/></svg><small>A</small></div>
+   <div class="t"><svg class="i"><use href="#line"/></svg><small>L</small></div>
+   <div class="t"><svg class="i"><use href="#pencil"/></svg><small>P</small></div>
+   <div class="t"><svg class="i"><use href="#text"/></svg><small>T</small></div>
+   <hr>
+   <div class="t"><svg class="i"><use href="#postit"/></svg><small>N</small></div>
+   <div class="t"><svg class="i"><use href="#image"/></svg><small>9</small></div>
+   <div class="t"><svg class="i"><use href="#frame"/></svg><small>F</small></div>
+   <hr>
+   <div class="t"><svg class="i"><use href="#eraser"/></svg><small>E</small></div>
+  </nav>
+
+  <div class="ctx" id="ctx" style="left:168px;top:100px">
+   <div class="c on" title="Preenchimento"><span class="sw" style="background:#f6d77a"></span><svg class="i chev"><use href="#chev"/></svg></div>
+   <div class="c" title="Traço"><span class="sw" style="background:transparent;border-width:3px"></span><svg class="i chev"><use href="#chev"/></svg></div>
+   <div class="sep"></div>
+   <div class="c" title="Espessura"><svg class="i"><use href="#w2"/></svg><svg class="i chev"><use href="#chev"/></svg></div>
+   <div class="c" title="Estilo da linha"><svg class="i"><use href="#dash"/></svg><svg class="i chev"><use href="#chev"/></svg></div>
+   <div class="c" title="Traço à mão"><svg class="i"><use href="#rough"/></svg></div>
+   <div class="sep"></div>
+   <div class="c" title="Texto"><svg class="i"><use href="#font"/></svg>M<svg class="i chev"><use href="#chev"/></svg></div>
+   <div class="sep"></div>
+   <div class="c" title="Camada"><svg class="i"><use href="#layers"/></svg></div>
+   <div class="c" title="Duplicar"><svg class="i"><use href="#copy"/></svg></div>
+   <div class="c" title="Apagar"><svg class="i"><use href="#del"/></svg></div>
+   <div class="c" title="Mais"><svg class="i"><use href="#more"/></svg></div>
+  </div>
+
+
+  <div class="zoom">
+   <div class="grp"><div class="ib"><svg class="i"><use href="#minus"/></svg></div><b>100%</b><div class="ib"><svg class="i"><use href="#plus"/></svg></div></div>
+   <div class="grp"><div class="ib"><svg class="i"><use href="#undo"/></svg></div><div class="ib"><svg class="i"><use href="#redo"/></svg></div></div>
+  </div>
+  <div class="foot">14 elementos</div>
+ </section>
+</main>
+
+<script>
+// Deterministic hand-drawn strokes (a tiny rough.js stand-in for the mockup only).
+let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647 - 0.5);
+const NS = 'http://www.w3.org/2000/svg';
+const scene = document.getElementById('scene');
+function el(tag, attrs, parent = scene) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+function wob(points, j = 1.4) { return points.map(([x, y]) => [x + rnd() * j, y + rnd() * j]); }
+function polyPath(pts, close) { let d = `M${pts[0][0]},${pts[0][1]}`; for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x, y] = pts[i]; d += ` Q${(x0 + x) / 2 + rnd() * 2},${(y0 + y) / 2 + rnd() * 2} ${x},${y}`; } return close ? d + ' Z' : d; }
+function rough(pts, { stroke = '#303025', width = 1.6, close = true, dash, fill } = {}) {
+  if (fill) el('path', { d: polyPath(pts, true), fill, stroke: 'none' });
+  for (let k = 0; k < 2; k++) el('path', { d: polyPath(wob(close ? [...pts, pts[0]] : pts), false), fill: 'none', stroke, 'stroke-width': width, 'stroke-linecap': 'round', ...(dash ? { 'stroke-dasharray': dash } : {}), opacity: k ? .8 : 1 });
+}
+const rect = (x, y, w, h, o) => rough([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], o);
+function txt(x, y, s, { size = 17, anchor = 'middle', fill = '#303025', family = 'Excalifont' } = {}) { String(s).split('\n').forEach((line, i) => el('text', { x, y: y + i * size * 1.2, 'font-family': family, 'font-size': size, 'text-anchor': anchor, fill }).textContent = line); }
+function postit(x, y, color, label, rot = 0) {
+  const g = el('g', { transform: `rotate(${rot} ${x + 70} ${y + 60})` });
+  el('rect', { x, y, width: 140, height: 120, fill: color }, g);
+  const lines = label.split('\n'); lines.forEach((l, i) => { const t = el('text', { x: x + 70, y: y + 62 - (lines.length - 1) * 11 + i * 22, 'font-family': 'Excalifont', 'font-size': 18, 'text-anchor': 'middle', fill: '#303025' }, g); t.textContent = l; });
+}
+function arrow(pts, { dash, head = true } = {}) {
+  rough(pts, { close: false, width: 1.6, dash });
+  if (!head) return;
+  const [x0, y0] = pts[pts.length - 2], [x, y] = pts[pts.length - 1], a = Math.atan2(y - y0, x - x0);
+  for (const s of [-1, 1]) rough([[x, y], [x - 13 * Math.cos(a + s * .45), y - 13 * Math.sin(a + s * .45)]], { close: false, width: 1.6 });
+}
+
+// Frame "Roteiro" (frames are clean hairline sheets with a label, like Excalidraw frames).
+el('rect', { x: 120, y: 175, width: 560, height: 330, rx: 8, fill: 'none', stroke: '#bbbbbb', 'stroke-width': 2 });
+txt(122, 166, 'Roteiro · sábado', { size: 13, anchor: 'start', family: '-apple-system, Helvetica, sans-serif', fill: '#999999' });
+
+postit(150, 215, '#f6d77a', 'Sair cedo\n7h da pousada');
+postit(345, 205, '#c9d8df', 'Trilha curta\naté o mirante');
+postit(520, 330, '#cfdcbc', 'Café na vila');
+rect(170, 395, 150, 70, { fill: '#f4c6c0' }); txt(245, 428, 'Chuva?', { size: 18 }); txt(245, 450, 'plano B', { size: 14, fill: '#6b624c' });
+
+arrow([[292, 268], [343, 262]]);
+arrow([[485, 268], [560, 268], [586, 326]]);
+arrow([[322, 428], [470, 428], [518, 392]], { dash: '7 6' });
+txt(400, 418, 'se chover', { size: 14, fill: '#6b624c' });
+
+// Selection on the blue post-it (ink dashed box + handles).
+const sx = 339, sy = 199, sw = 152, sh = 132;
+el('rect', { x: sx, y: sy, width: sw, height: sh, fill: 'none', stroke: '#303025', 'stroke-width': 1 });
+for (const [hx, hy] of [[sx, sy], [sx + sw, sy], [sx, sy + sh], [sx + sw, sy + sh]]) el('rect', { x: hx - 4, y: hy - 4, width: 8, height: 8, fill: '#ffffff', stroke: '#303025', 'stroke-width': 1, rx: 2 });
+el('circle', { cx: sx + sw / 2, cy: sy - 18, r: 4.5, fill: '#fffaea', stroke: '#303025', 'stroke-width': 1.2 });
+
+// Image element outside the frame.
+const ix = 730, iy = 150;
+el('rect', { x: ix, y: iy, width: 220, height: 150, fill: '#c9d8df' });
+el('path', { d: `M${ix},${iy + 150} L${ix + 60},${iy + 70} L${ix + 100},${iy + 110} L${ix + 150},${iy + 50} L${ix + 220},${iy + 125} V${iy + 150} Z`, fill: '#8fa58a' });
+el('path', { d: `M${ix},${iy + 150} L${ix + 50},${iy + 105} L${ix + 120},${iy + 150} Z`, fill: '#6f8a6c' });
+el('circle', { cx: ix + 180, cy: iy + 38, r: 14, fill: '#f6d77a' });
+txt(ix + 110, iy + 172, 'foto do mirante', { size: 15, fill: '#6b624c' });
+arrow([[497, 236], [600, 200], [725, 210]], { dash: '2 6' });
+
+// Loose shapes: diamond + ellipse on the right.
+rough([[840, 340], [910, 400], [840, 460], [770, 400]], { fill: '#fff3b0' }); txt(840, 406, 'Volta\n18h?', { size: 16 });
+rough(Array.from({ length: 30 }, (_, i) => [835 + 105 * Math.cos(i / 30 * 2 * Math.PI), 540 + 32 * Math.sin(i / 30 * 2 * Math.PI)]), { fill: '#e3d4ef' });
+txt(835, 546, 'Orçamento R$ 300', { size: 16 });
+arrow([[840, 462], [836, 504]]);
+
+// Free text + pencil scribble.
+txt(150, 545, 'levar: protetor, água, capa de chuva', { size: 17, anchor: 'start' });
+rough([[150, 557], [190, 560], [240, 555], [300, 561], [380, 556]], { close: false, width: 1.3 });
+</script>
+</body>
+</html>

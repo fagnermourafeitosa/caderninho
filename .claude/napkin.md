@@ -42,6 +42,10 @@
 7. **[2026-10-04] Native menus block, so smoke tests script them**
    Do instead: put menu presenters in main `services` and queue answers via `scriptedContextMenu()` in tests/smoke/sandbox.cjs. A native right-click from `sendInputEvent` on an unselected word only places a caret in the hidden smoke window (no macOS word selection); don't assert word selection there.
 
+## Boards (spec 007)
+1. **[2026-10-06] Excalidraw 0.18.1 limits decide what the UI can look like**
+   Do instead: customise only via props/API/CSS (patching prohibited). Canvas-drawn bits are fixed: frame (#bbb, r8, #999 name), no post-it fold/shadow, no image border, solid selection; selection colour via CSS `--color-selection`. No undo in the imperative API (use native footer, CSS-restyled). Bound labels inherit strokeColor, so transparent-stroke post-its need explicit text colour. `I` = eyedropper, image only `9`, `N` free. Bundle needs esbuild + React and local `EXCALIDRAW_ASSET_PATH`. Spike before promising pixel fidelity.
+
 ## Documentation
 1. **[2026-10-04] User-facing README and landing page speak PT-BR, product voice**
    Do instead: README and any landing page are in Portuguese (specs/docs stay English per AGENTS.md); lead with ONE idea (notes that turn into tasks without losing context, docs/PRODUCT.md Positioning), then daily history and Portuguese-first, with related pages/collage/diagrams grouped as support; state limits plainly; real screenshots with fictional data. A landing page must look like the app (DESIGN.md tokens, New York/serif stack, Excalifont only as accent, margin action cards) and reuse README wording, not a planning doc full of "pending decisions". Approved direction (2026-10-04): no generic LP grid (split hero, card rows, icon+title columns); a pinned app-drawn notebook driven by scroll that performs the product (select passage -> margin card -> upward page flip to Tarefas -> Voltar à origem -> green done -> daily page/yesterday read-only -> live PT typing), then real screenshots and plain-prose fine print. Draft lived in the session scratchpad (lp/index.html).

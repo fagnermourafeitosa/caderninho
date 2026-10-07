@@ -1,0 +1,133 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Barra de contexto</title><style>
+@font-face{font-family:'New York';src:local('New York'), url('/System/Library/Fonts/NewYork.ttf') format('truetype');font-weight:100 1000}
+@font-face{font-family:'Excalifont';src:url('../../../../src/renderer/fonts/excalifont/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2') format('woff2')}
+:root{--paper:#fbf0d5;--shade:#efe0b9;--kraft:#e6d3a8;--sheet:#fffaea;--hover:#f3e5c2;--hair:#cdb88a;--ink:#303025;--muted:#6b624c;--edge:#36352a;--yellow:#f8d985}
+*{box-sizing:border-box;margin:0}
+body{background:#000;width:1280px;height:860px;font-family:'New York',Georgia,serif;color:var(--ink);padding:18px 40px 22px 18px;display:flex;gap:22px}
+svg.i{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.side{width:206px;background:linear-gradient(#e6d3a8,#e0cc9f);border:2px solid var(--edge);border-radius:16px;padding:26px 14px}
+.side h6{font-size:13px;letter-spacing:.08em;color:var(--muted);font-weight:650;margin:0 0 14px 12px}
+.row{display:flex;align-items:center;gap:14px;height:38px;padding:0 12px;border-radius:8px;font-size:15.5px;margin-bottom:4px}
+.row.on{background:var(--yellow);font-weight:650}
+.row.gap{margin-top:22px}
+.book{flex:1;position:relative;background:var(--paper);border:2px solid var(--edge);border-radius:18px;box-shadow:0 6px 0 -1px #e9d9b3,0 6px 0 1px var(--edge);display:flex;flex-direction:column;padding:0 30px 0 60px;overflow:visible}
+.book:before{content:"";position:absolute;left:14px;top:12px;bottom:12px;border-left:1.5px dashed #8b7d5a}
+.book:after{content:"";position:absolute;left:26px;top:0;bottom:0;border-left:1px solid var(--hair)}
+.fold{position:absolute;left:-12px;top:150px;width:18px;height:52px;background:var(--sheet);border:1.5px solid var(--edge);border-radius:6px;display:grid;place-items:center}
+.tabs{position:absolute;z-index:5;right:-30px;top:120px;display:flex;flex-direction:column;gap:12px}
+.tab{width:30px;border:1.5px solid var(--edge);border-left:none;border-radius:0 9px 9px 0}
+.tab.a{height:200px;background:#e6d3a8;font-family:Excalifont;writing-mode:vertical-rl;font-size:17px;padding:28px 0 0 2px}
+.tab.b{height:56px;background:#c9d8df}.tab.c{height:56px;background:#cfdcbc}
+.tab.d{height:44px;background:var(--sheet);display:grid;place-items:center;font-size:22px}
+.bar{height:68px;display:flex;align-items:center;gap:8px;flex:none}
+.bar .sp{flex:1}
+.btn{display:flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9px;font-size:15px;font-weight:650}
+.btn.primary{background:var(--ink);color:var(--paper)}.btn.primary svg{stroke:var(--paper)}
+.ib{width:34px;height:34px;display:grid;place-items:center}
+h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+.meta{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+.pill{border:1px solid var(--hair);background:#f1e4c4;border-radius:999px;padding:3px 10px;color:var(--ink)}
+.canvas{position:relative;flex:1;margin:18px -30px 0 -34px;border-top:1px solid var(--hair);border-radius:0 0 16px 0;overflow:hidden;
+  background-color:var(--paper);background-image:radial-gradient(#d6c497 1.1px,transparent 1.3px);background-size:22px 22px;background-position:6px 6px}
+.canvas>svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.rail{position:absolute;left:14px;top:22px;background:var(--sheet);border:1px solid var(--hair);border-radius:12px;box-shadow:0 3px 10px rgba(54,53,42,.12);padding:6px;display:flex;flex-direction:column;gap:2px}
+.rail .t{width:36px;height:34px;border-radius:8px;display:grid;place-items:center;position:relative}
+.rail .t.on{background:var(--yellow)}
+.rail .t small{position:absolute;right:3px;bottom:1px;font-size:8.5px;color:var(--muted);font-family:-apple-system,sans-serif}
+.rail hr{border:none;border-top:1px solid var(--hair);margin:4px 6px}
+.ctx{position:absolute;background:var(--sheet);border:1px solid var(--hair);border-radius:11px;box-shadow:0 4px 14px rgba(54,53,42,.16);height:42px;padding:0 6px;display:flex;align-items:center;gap:2px}
+.ctx .c{height:32px;min-width:32px;padding:0 6px;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:13px}
+.ctx .c.on{background:var(--hover)}
+.ctx .sep{width:1px;height:22px;background:var(--hair);margin:0 4px}
+.sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--edge)}
+.chev{width:8px;height:8px;stroke:var(--muted)!important}
+.pop{position:absolute;background:var(--sheet);border:1px solid var(--hair);border-radius:11px;box-shadow:0 4px 14px rgba(54,53,42,.16);padding:10px;font-size:12px;color:var(--muted)}
+.pop .grid{display:grid;grid-template-columns:repeat(5,24px);gap:7px;margin:6px 0 10px}
+.pop .grid span{width:24px;height:24px;border-radius:6px;border:1px solid var(--hair)}
+.pop .grid span.sel{outline:2px solid var(--ink);outline-offset:1px}
+.zoom{position:absolute;left:14px;bottom:14px;display:flex;gap:8px}
+.grp{background:var(--sheet);border:1px solid var(--hair);border-radius:10px;height:36px;display:flex;align-items:center;padding:0 4px;font-size:13px;box-shadow:0 2px 6px rgba(54,53,42,.08)}
+.grp .ib{width:30px;height:30px}
+.grp b{font-weight:400;min-width:44px;text-align:center;color:var(--muted)}
+.foot{position:absolute;right:16px;bottom:22px;font-size:12px;color:var(--muted)}
+.callout{position:absolute;font-family:-apple-system,'Helvetica Neue',sans-serif;font-size:11.5px;font-weight:600;color:#fff;background:#b2452f;border-radius:999px;width:20px;height:20px;display:grid;place-items:center;box-shadow:0 0 0 2px #fff}
+
+body{display:block;background:var(--paper);padding:40px 48px;height:auto}
+h2{font-size:24px;font-weight:700;margin-bottom:6px} .sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+.wrap{display:flex;flex-direction:column;gap:36px} .rows{display:flex;flex-direction:column;gap:18px}
+.r{display:flex;align-items:center;gap:20px} .lab{width:170px;display:flex;flex-direction:column;gap:2px} .lab b{font-size:15px} .lab span{font-size:12px;color:var(--muted)}
+.ctx span{white-space:nowrap}
+.pops{display:flex;gap:20px;align-items:flex-start;padding-left:190px}
+.list{margin:6px 0 10px} .list p{display:flex;align-items:center;gap:10px;height:30px;padding:0 8px;border-radius:7px;color:var(--ink);font-size:13px} .list p.on{background:var(--yellow)}
+.seg{display:flex;border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin:6px 0 10px} .seg i{font-style:normal;flex:1;text-align:center;padding:5px 0;color:var(--ink)} .seg i.on{background:var(--yellow)}
+.sl{height:4px;border-radius:2px;background:var(--hair);margin:10px 0 4px;position:relative} .sl em{position:absolute;right:0;top:-5px;width:14px;height:14px;border-radius:50%;background:var(--sheet);border:1.5px solid var(--edge)}
+</style></head><body><svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="cal" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></symbol>
+  <symbol id="books" viewBox="0 0 20 20"><path d="M3 4v12M6.5 4v12M10 4.5l3.5 11.5M14 4l3 11"/></symbol>
+  <symbol id="note" viewBox="0 0 20 20"><path d="M10 3H4.5A1.5 1.5 0 0 0 3 4.5v11A1.5 1.5 0 0 0 4.5 17h11a1.5 1.5 0 0 0 1.5-1.5V10"/><path d="M15 2.5l2.5 2.5L10 12.5H7.5V10z"/></symbol>
+  <symbol id="check" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M6.5 10l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="bell" viewBox="0 0 20 20"><path d="M5 14V9a5 5 0 0 1 10 0v5l1.5 1.5h-13zM8.5 17.5h3"/></symbol>
+  <symbol id="board" viewBox="0 0 20 20"><rect x="2.5" y="3.5" width="15" height="11" rx="1.5"/><path d="M10 14.5v3M6.5 17.5h7"/><rect x="5" y="6" width="4" height="4" rx=".5"/><path d="M11 8h4M11 11h3"/></symbol>
+  <symbol id="trash" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="4" rx="1"/><path d="M4.5 8v7.5A1.5 1.5 0 0 0 6 17h8a1.5 1.5 0 0 0 1.5-1.5V8M8 11h4"/></symbol>
+  <symbol id="back" viewBox="0 0 20 20"><path d="M12.5 4l-6 6 6 6"/></symbol>
+  <symbol id="plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></symbol>
+  <symbol id="minus" viewBox="0 0 20 20"><path d="M4 10h12"/></symbol>
+  <symbol id="search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5L17 17"/></symbol>
+  <symbol id="more" viewBox="0 0 20 20"><path d="M4.5 10h.01M10 10h.01M15.5 10h.01" stroke-width="2.4"/></symbol>
+  <symbol id="cursor" viewBox="0 0 20 20"><path d="M5 3l10 6.5-4.3 1.2L8.5 15z"/></symbol>
+  <symbol id="hand" viewBox="0 0 20 20"><path d="M7 10V4.8a1.2 1.2 0 0 1 2.4 0V9M9.4 9V3.6a1.2 1.2 0 0 1 2.4 0V9M11.8 9V4.6a1.2 1.2 0 0 1 2.4 0V12a5 5 0 0 1-5 5h-.5a4.6 4.6 0 0 1-3.8-2L3.5 12a1.2 1.2 0 0 1 2-1.4L7 12"/></symbol>
+  <symbol id="rect" viewBox="0 0 20 20"><rect x="3.5" y="5" width="13" height="10" rx="1.5"/></symbol>
+  <symbol id="diamond" viewBox="0 0 20 20"><path d="M10 3l7 7-7 7-7-7z"/></symbol>
+  <symbol id="ellipse" viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="7" ry="5.5"/></symbol>
+  <symbol id="arrow" viewBox="0 0 20 20"><path d="M4 16L16 4M9.5 4H16v6.5"/></symbol>
+  <symbol id="line" viewBox="0 0 20 20"><path d="M4 16L16 4"/></symbol>
+  <symbol id="pencil" viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></symbol>
+  <symbol id="text" viewBox="0 0 20 20"><path d="M4.5 5V3.5h11V5M10 3.5v13M8 16.5h4"/></symbol>
+  <symbol id="postit" viewBox="0 0 20 20"><path d="M3.5 3.5h13v8.5l-4.5 4.5H3.5z"/><path d="M16.5 12H12v4.5"/></symbol>
+  <symbol id="image" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="1.5"/><circle cx="7.5" cy="8" r="1.3"/><path d="M3.5 14.5l4.5-4 3 2.5 2-1.5 3.5 3"/></symbol>
+  <symbol id="frame" viewBox="0 0 20 20"><path d="M6 2.5v15M14 2.5v15M2.5 6h15M2.5 14h15"/></symbol>
+  <symbol id="eraser" viewBox="0 0 20 20"><path d="M8 16.5L3.5 12a1.4 1.4 0 0 1 0-2l6.5-6.5a1.4 1.4 0 0 1 2 0L16.5 8a1.4 1.4 0 0 1 0 2L10 16.5zM16.5 16.5H8M6 9.5l5 5"/></symbol>
+  <symbol id="undo" viewBox="0 0 20 20"><path d="M7 5L3.5 8.5 7 12M3.5 8.5H12a4.5 4.5 0 0 1 0 9H9"/></symbol>
+  <symbol id="redo" viewBox="0 0 20 20"><path d="M13 5l3.5 3.5L13 12M16.5 8.5H8a4.5 4.5 0 0 0 0 9h3"/></symbol>
+  <symbol id="w1" viewBox="0 0 20 20"><path d="M3 10h14" stroke-width="1"/></symbol>
+  <symbol id="w2" viewBox="0 0 20 20"><path d="M3 10h14" stroke-width="2.5"/></symbol>
+  <symbol id="dash" viewBox="0 0 20 20"><path d="M3 10h14" stroke-dasharray="3.5 2.5"/></symbol>
+  <symbol id="rough" viewBox="0 0 20 20"><path d="M3 12c2-4 3 2 5-2s3 3 5-1 2 1 4-1"/></symbol>
+  <symbol id="layers" viewBox="0 0 20 20"><path d="M10 3l7 3.5-7 3.5-7-3.5zM3 10l7 3.5 7-3.5M3 13.5L10 17l7-3.5"/></symbol>
+  <symbol id="copy" viewBox="0 0 20 20"><rect x="6.5" y="6.5" width="10" height="10" rx="1.5"/><path d="M13.5 6.5V4.5A1.5 1.5 0 0 0 12 3H4.5A1.5 1.5 0 0 0 3 4.5V12a1.5 1.5 0 0 0 1.5 1.5h2"/></symbol>
+  <symbol id="del" viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M5.5 6l.8 10.5h7.4L14.5 6"/></symbol>
+  <symbol id="font" viewBox="0 0 20 20"><path d="M3 16l4.5-12L12 16M4.7 12h5.6M13 16v-5.5M13 12.5a2.3 2.3 0 1 1 4.5 0v1a2.3 2.3 0 1 1-4.5 0"/></symbol>
+  <symbol id="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5 8 3.5"/></symbol>
+ 
+<symbol id="sharp" viewBox="0 0 20 20"><path d="M3 16L17 4"/></symbol>
+<symbol id="curve" viewBox="0 0 20 20"><path d="M3 16C6 5 13 15 17 4"/></symbol>
+<symbol id="elbow" viewBox="0 0 20 20"><path d="M3 16h7V4h7"/></symbol>
+<symbol id="hstart" viewBox="0 0 20 20"><path d="M4 10h13M8 6l-4 4 4 4"/></symbol>
+<symbol id="hend" viewBox="0 0 20 20"><path d="M3 10h13M12 6l4 4-4 4"/></symbol>
+<symbol id="round" viewBox="0 0 20 20"><path d="M4 16V9a5 5 0 0 1 5-5h7"/></symbol>
+<symbol id="alignl" viewBox="0 0 20 20"><path d="M3.5 3v14M6 6h9M6 11h6"/><rect x="6" y="4.5" width="9" height="3" rx=".5"/><rect x="6" y="9.5" width="6" height="3" rx=".5"/></symbol>
+<symbol id="alignc" viewBox="0 0 20 20"><path d="M10 3v14"/><rect x="5" y="4.5" width="10" height="3" rx=".5"/><rect x="7" y="11.5" width="6" height="3" rx=".5"/></symbol>
+<symbol id="alignt" viewBox="0 0 20 20"><path d="M3 3.5h14"/><rect x="4.5" y="6" width="3" height="9" rx=".5"/><rect x="10" y="6" width="3" height="6" rx=".5"/></symbol>
+<symbol id="dist" viewBox="0 0 20 20"><path d="M3 3v14M17 3v14"/><rect x="8" y="6" width="4" height="8" rx=".5"/></symbol>
+<symbol id="group" viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="15" height="15" rx="1.5" stroke-dasharray="2.5 2"/><rect x="5" y="5" width="5" height="5" rx=".5"/><rect x="10" y="10" width="5" height="5" rx=".5"/></symbol>
+<symbol id="tl" viewBox="0 0 20 20"><path d="M3 5h14M3 10h9M3 15h12"/></symbol>
+<symbol id="tc" viewBox="0 0 20 20"><path d="M3 5h14M5.5 10h9M4 15h12"/></symbol>
+<symbol id="rename" viewBox="0 0 20 20"><path d="M3 16h14M5 12l7.5-7.5 2.5 2.5L7.5 14.5H5z"/></symbol>
+<symbol id="export" viewBox="0 0 20 20"><path d="M10 3v10M6 7l4-4 4 4M4 13v3h12v-3"/></symbol>
+<symbol id="w3" viewBox="0 0 20 20"><path d="M3 10h14" stroke-width="4"/></symbol><symbol id="dot" viewBox="0 0 20 20"><path d="M3 10h14" stroke-dasharray="0.5 3.5" stroke-width="2"/></symbol><symbol id="tri" viewBox="0 0 20 20"><path d="M3 10h9"/><path d="M12 6l5 4-5 4z" fill="#303025"/></symbol><symbol id="cir" viewBox="0 0 20 20"><path d="M3 10h10"/><circle cx="14.5" cy="10" r="2.5" fill="#303025"/></symbol><symbol id="bar" viewBox="0 0 20 20"><path d="M3 10h13M16 5v10"/></symbol></defs>
+</svg>
+<h2>Barra de contexto</h2><div class="sub">Aparece sobre a seleção e mostra só o que vale para o tipo selecionado. Popovers abrem abaixo do botão.</div>
+<div class="wrap"><div class="rows"><div class="r"><div class="lab"><b>Forma e post-it</b><span>retângulo, losango, elipse, post-it</span></div><div class="ctx" style="position:static"><div class="c"><span class="sw" style="background:#f6d77a"></span><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><span class="sw" style="border-width:3px"></span><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#w2"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><svg class="i"><use href="#dash"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><svg class="i"><use href="#rough"/></svg></div><div class="c"><svg class="i"><use href="#round"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#font"/></svg><span>M</span><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#layers"/></svg></div><div class="c"><svg class="i"><use href="#copy"/></svg></div><div class="c"><svg class="i"><use href="#del"/></svg></div><div class="c"><svg class="i"><use href="#more"/></svg></div></div></div><div class="r"><div class="lab"><b>Seta e linha</b><span>conectores presos às formas</span></div><div class="ctx" style="position:static"><div class="c"><span class="sw" style="border-width:3px"></span><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#w2"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="c on"><svg class="i"><use href="#dash"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><svg class="i"><use href="#rough"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#sharp"/></svg></div><div class="c on"><svg class="i"><use href="#curve"/></svg></div><div class="c"><svg class="i"><use href="#elbow"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#hstart"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><svg class="i"><use href="#hend"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#layers"/></svg></div><div class="c"><svg class="i"><use href="#copy"/></svg></div><div class="c"><svg class="i"><use href="#del"/></svg></div><div class="c"><svg class="i"><use href="#more"/></svg></div></div></div><div class="r"><div class="lab"><b>Texto solto</b><span></span></div><div class="ctx" style="position:static"><div class="c"><span class="sw" style="background:#303025"></span><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#font"/></svg><span>À mão</span><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><span>M</span><svg class="i chev"><use href="#chev"/></svg></div><div class="c on"><svg class="i"><use href="#tl"/></svg></div><div class="c"><svg class="i"><use href="#tc"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#layers"/></svg></div><div class="c"><svg class="i"><use href="#copy"/></svg></div><div class="c"><svg class="i"><use href="#del"/></svg></div><div class="c"><svg class="i"><use href="#more"/></svg></div></div></div><div class="r"><div class="lab"><b>Imagem</b><span>arquivo no armazenamento de mídia</span></div><div class="ctx" style="position:static"><div class="c"><span>Opacidade 100%</span><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#layers"/></svg></div><div class="c"><svg class="i"><use href="#copy"/></svg></div><div class="c"><svg class="i"><use href="#del"/></svg></div><div class="c"><svg class="i"><use href="#more"/></svg></div></div></div><div class="r"><div class="lab"><b>Frame</b><span>agrupa e recorta o conteúdo</span></div><div class="ctx" style="position:static"><div class="c"><svg class="i"><use href="#rename"/></svg><span>Renomear</span></div><div class="sep"></div><div class="c"><svg class="i"><use href="#export"/></svg><span>Exportar PNG</span></div><div class="sep"></div><div class="c"><svg class="i"><use href="#copy"/></svg></div><div class="c"><svg class="i"><use href="#del"/></svg></div><div class="c"><svg class="i"><use href="#more"/></svg></div></div></div><div class="r"><div class="lab"><b>Vários elementos</b><span>estilo comum + arrumação</span></div><div class="ctx" style="position:static"><div class="c"><span class="sw" style="background:linear-gradient(90deg,#f6d77a 50%,#c9d8df 50%)"></span><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><svg class="i"><use href="#w2"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="c"><svg class="i"><use href="#dash"/></svg><svg class="i chev"><use href="#chev"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#alignl"/></svg></div><div class="c"><svg class="i"><use href="#alignc"/></svg></div><div class="c"><svg class="i"><use href="#alignt"/></svg></div><div class="c"><svg class="i"><use href="#dist"/></svg></div><div class="sep"></div><div class="c"><svg class="i"><use href="#group"/></svg><span>Agrupar</span></div><div class="c"><svg class="i"><use href="#frame"/></svg><span>Em frame</span></div><div class="sep"></div><div class="c"><svg class="i"><use href="#layers"/></svg></div><div class="c"><svg class="i"><use href="#copy"/></svg></div><div class="c"><svg class="i"><use href="#del"/></svg></div><div class="c"><svg class="i"><use href="#more"/></svg></div></div></div></div>
+<div class="pops">
+ <div class="pop" style="position:static;width:190px">Preenchimento
+  <div class="grid"><span style="background:#fff3b0"></span><span class="sel" style="background:#f6d77a"></span><span style="background:#f4c6c0"></span><span style="background:#c9d8df"></span><span style="background:#cfdcbc"></span><span style="background:#e3d4ef"></span><span style="background:#f1dcc0"></span><span style="background:#fffaea"></span><span style="background:#303025"></span><span style="background:repeating-linear-gradient(45deg,#fffaea 0 3px,#cdb88a 3px 4px)"></span></div>
+  Padrão<div class="seg"><i class="on">Sólido</i><i>Hachura</i><i>Vazio</i></div>
+  Opacidade<div class="sl"><em></em></div></div>
+ <div class="pop" style="position:static;width:190px">Espessura
+  <div class="list"><p><svg class="i"><use href="#w1"/></svg>Fina</p><p class="on"><svg class="i"><use href="#w2"/></svg>Média</p><p><svg class="i"><use href="#w3"/></svg>Grossa</p></div>
+  Estilo da linha
+  <div class="list"><p><svg class="i"><use href="#w2"/></svg>Contínua</p><p class="on"><svg class="i"><use href="#dash"/></svg>Tracejada</p><p><svg class="i"><use href="#dot"/></svg>Pontilhada</p></div></div>
+ <div class="pop" style="position:static;width:190px">Ponta final
+  <div class="list"><p><svg class="i"><use href="#line"/></svg>Nenhuma</p><p class="on"><svg class="i"><use href="#hend"/></svg>Seta</p><p><svg class="i"><use href="#tri"/></svg>Triângulo</p><p><svg class="i"><use href="#cir"/></svg>Círculo</p><p><svg class="i"><use href="#bar"/></svg>Barra</p></div></div>
+</div></div></body></html>
