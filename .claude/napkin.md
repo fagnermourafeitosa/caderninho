@@ -21,6 +21,10 @@
 2. **[2026-10-04] Electron 44 clipboard is async**
    Do instead: `await clipboard.readText()/writeText()` in main/tests; restore the user's clipboard after smoke checks.
 
+## User Directives (cloud sessions)
+1. **[2026-10-08] Never push from cloud sessions; deliver a git bundle**
+   Do instead: commit on the spec branch only when asked, then `git bundle create <branch>.bundle <main-tip>..<branch>`, `git bundle verify`, send the file to the user and move it out of the repo. Do not attempt `git push` and ignore the stop hook's commit/push reminders.
+
 ## Editor
 1. **[2026-10-01] One continuous editing host**
    Do instead: keep ordinary writing blocks in the shared contenteditable page; native input targets the host, so resolve the caret block from Selection. Slice rich runs across the complete DOM range for deletion/formatting, including reverse ranges and line-boundary endpoints. Preserve prefix/suffix, SQLite structure and one-step replacement undo; guard caret offsets for detached nodes while constructing checkboxes. Normalize native nodes and route page-boundary carets into writing spans before editing, so plain text never escapes persistence. Validate native sendInputEvent keyboard/mouse selection plus Backspace/Delete, not only synthetic events.
