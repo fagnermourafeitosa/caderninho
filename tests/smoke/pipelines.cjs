@@ -1,5 +1,5 @@
 // Pipelines scenario, main side: native pointer dragging, persistence checks and screenshots (spec 008).
-const { app } = require('electron');
+const { app, ipcMain } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Store } = require('../../src/main/store.cjs');
@@ -34,6 +34,14 @@ async function runPipelinesSmoke(win, smokeScript) {
   if (!await step('modalOpen')) throw new Error('Clique no card não abriu o modal');
   await step('closeModal');
   await shot('pipeline-kanban.png');
+  // While a modal is open the native window buttons leave the paper for the window corner, then come back (spec 009).
+  const buttons = [];
+  ipcMain.on('notebook:window-buttons', (_event, position) => buttons.push(position));
+  const paper = await run("(()=>{const sheet=document.querySelector('#sheet').getBoundingClientRect();return {x:Math.round(sheet.left+38),y:Math.round(sheet.top+12)};})()");
+  await run(`openTaskModal(${JSON.stringify(ids['Pedir orçamento'])})`); await wait(400);
+  if (JSON.stringify(buttons.at(-1)) !== JSON.stringify({ x: 16, y: 14 })) throw new Error('Botões da janela não foram para o canto com a tarefa aberta: ' + JSON.stringify(buttons));
+  await run("document.querySelector('.task-modal[open]').close()"); await wait(400);
+  if (JSON.stringify(buttons.at(-1)) !== JSON.stringify(paper)) throw new Error('Botões da janela não voltaram ao papel: ' + JSON.stringify(buttons));
   await step('modal', ids['Pedir orçamento']);
   await shot('pipeline-after-modal.png');
   const { noteId } = await step('noteTasks', pipelineId);

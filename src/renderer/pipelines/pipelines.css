@@ -44,11 +44,11 @@
 .kanban-menu button.forward .small-icon{transform:rotate(180deg)}
 .kanban-menu hr{border:none;border-top:1px solid var(--hairline);margin:4px 6px;width:calc(100% - 12px)}
 
-.task-modal{width:min(980px,calc(100vw - 48px));max-height:calc(100vh - 48px);padding:0;border:1px solid var(--hairline);border-radius:12px;background:var(--sheet-raised);color:var(--ink);box-shadow:0 18px 40px #3c2a1736;overflow:hidden}
+.task-modal{width:min(980px,calc(100vw - 48px));max-height:calc(100vh - 80px);padding:0;border:1px solid var(--hairline);border-radius:12px;background:var(--sheet-raised);color:var(--ink);box-shadow:0 18px 40px #3c2a1736;overflow:hidden}
 .task-modal[open]{display:grid;grid-template-columns:minmax(0,1fr) 250px}
 .task-modal::backdrop,.new-task-dialog::backdrop,.pipeline-dialog::backdrop{background:#30302547}
-.task-main{padding:22px 26px;overflow:auto;max-height:calc(100vh - 50px);scrollbar-width:thin}
-.task-side{border-left:1px solid var(--hairline);background:#fbf3dc;padding:22px 18px;overflow:auto;max-height:calc(100vh - 50px);font-size:13px}
+.task-main{padding:22px 26px;overflow:auto;max-height:calc(100vh - 82px);scrollbar-width:thin}
+.task-side{border-left:1px solid var(--hairline);background:#fbf3dc;padding:22px 18px;overflow:auto;max-height:calc(100vh - 82px);font-size:13px}
 .task-head{display:flex;align-items:flex-start;gap:8px}
 .task-head>button,.task-head .page-more>button{width:32px;height:32px;display:grid;place-items:center;border:none;background:none;border-radius:7px;cursor:pointer}
 .task-head>button:hover,.task-head .page-more>button:hover{background:var(--hover)}

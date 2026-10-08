@@ -44,11 +44,13 @@ function placeGlobalSearch() {
   else { const group = toolbar.querySelector('.toolbar-right') || toolbar; if (group.lastElementChild !== globalSearchNode) group.append(globalSearchNode); }
 }
 new MutationObserver(placeGlobalSearch).observe($('#page-content'), { childList: true });
-// Native traffic lights sit on the paper, right after the binding.
+// Native traffic lights sit on the paper, right after the binding. An open modal covers the paper,
+// so they move to the window corner, above it, until the modal closes.
 let windowButtonsAt = '';
+const WINDOW_CORNER = { x: 16, y: 14 };
 function placeWindowButtons() {
   const sheet = $('#sheet').getBoundingClientRect();
-  const position = { x: Math.round(sheet.left + 38), y: Math.round(sheet.top + 12) };
+  const position = document.querySelector('dialog:modal') ? WINDOW_CORNER : { x: Math.round(sheet.left + 38), y: Math.round(sheet.top + 12) };
   const key = position.x + ',' + position.y;
   if (key === windowButtonsAt) return;
   windowButtonsAt = key; window.notebook.windowButtons(position);
@@ -56,3 +58,5 @@ function placeWindowButtons() {
 new ResizeObserver(placeWindowButtons).observe($('#sheet'));
 $('.app').addEventListener('transitionend', placeWindowButtons);
 window.addEventListener('resize', placeWindowButtons);
+// showModal() and close() toggle the open attribute.
+new MutationObserver(placeWindowButtons).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });
