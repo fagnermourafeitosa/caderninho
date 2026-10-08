@@ -28,7 +28,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Caderninho",
-  "description": "Um caderno para o Mac, feito para quem escreve em português. Notas que viram tarefas e lembretes sem perder o contexto.",
+  "description": "Um caderno para o Mac, feito para quem escreve em português. Notas que viram tarefas num kanban simples e lembretes, sem perder o contexto, e quadros para pensar no papel.",
   "url": "https://fagnermourafeitosa.github.io/caderninho/",
   "image": "https://fagnermourafeitosa.github.io/caderninho/img/og.jpg",
   "applicationCategory": "ProductivityApplication",
@@ -76,7 +76,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 @media (max-width:520px){.top .btn-coffee .full{display:none}.top .btn-coffee .cup{display:block}}
 
 /* ---------- pinned scene ---------- */
-.scene{position:relative;height:calc(100vh + 9 * 75vh)}
+.scene{position:relative;height:calc(100vh + 11 * 75vh)}
 .stage{position:sticky;top:0;height:100vh;display:grid;grid-template-columns:minmax(240px,320px) minmax(0,980px);justify-content:center;align-items:center;gap:48px;padding:64px 32px 28px}
 
 .captions{position:relative;height:340px}
@@ -138,14 +138,13 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .margin .mh{display:flex;align-items:center;gap:8px;font-size:16px}
 .margin .mc{font-size:12px;color:var(--muted);margin:2px 0 14px}
 .card{background:var(--sheet);border:1px solid var(--hairline);border-radius:8px;padding:11px 13px;font-size:13px;opacity:0;transform:translateY(-16px) scale(.97);transition:opacity .45s,transform .45s cubic-bezier(.3,1.4,.5,1)}
-.card .ct{display:flex;align-items:center;gap:9px;font-weight:650;font-size:14px}
-.box{width:16px;height:16px;border:1.5px solid var(--ink);border-radius:4px;display:grid;place-items:center;flex:none;transition:background .3s,border-color .3s}
-.box svg{width:11px;height:11px;fill:none;stroke:var(--paper);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:14;stroke-dashoffset:14;transition:stroke-dashoffset .35s .15s}
-.box.done{background:var(--done);border-color:var(--done)}
-.box.done svg{stroke-dashoffset:0}
-.card .st{font-size:11px;color:var(--muted);margin:3px 0 8px 25px}
-.card .ex{border-left:2px solid var(--hairline);padding-left:9px;color:var(--muted);margin:0 0 8px}
-.card .vo{display:flex;align-items:center;gap:6px}
+.card .ck{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.card .ck svg{width:13px;height:13px}
+.card .ct{font-weight:650;font-size:14px;margin:3px 0 8px}
+.card .ex{border-left:2px solid var(--hairline);padding-left:9px;color:var(--muted);margin:0 0 10px}
+.tpill{white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-size:11px;line-height:1.6;border:1px solid var(--hairline);border-radius:999px;padding:0 9px;background:var(--shade);transition:background .4s,border-color .4s}
+.tpill svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tpill.done{background:var(--done-bg);border-color:#b9c9a0}
 .empty-hint{font-size:13px;color:var(--muted);font-style:italic;transition:opacity .3s}
 
 .src{position:relative;white-space:nowrap}
@@ -159,6 +158,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .st-sel .toolbar{opacity:1;transform:none;transition-delay:1.1s}
 .st-sel .toolbar span:first-child{animation:press .25s 2.4s both}
 @keyframes press{to{background:var(--select)}}
+.st-new .src .hl{transform:scaleX(1)}
 .st-linked .src .ul,.st-linked .src .bg{opacity:1}
 .st-linked .card{opacity:1;transform:none}
 .st-linked .empty-hint{opacity:0}
@@ -167,30 +167,97 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .st-flash .src .bg{animation:flash 1.6s .6s ease}
 @keyframes flash{0%,55%{background:var(--select);box-shadow:0 0 0 5px var(--select)}100%{box-shadow:0 0 0 5px transparent}}
 
-/* tarefas page */
-.list{margin-top:6px}
-.lr{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--shade)}
-.lr .box{margin-top:4px}
-.lr .t{font-size:16px}
-.lr .s{font-size:12px;color:var(--muted)}
-.lr.focus{background:linear-gradient(90deg,var(--hover),transparent);margin:0 -14px;padding:11px 14px;border-radius:8px;border-bottom-color:transparent}
-.lr .back{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:13px;border-bottom:1px dashed var(--hairline);white-space:nowrap;align-self:center;padding:2px 6px;border-radius:5px;transition:background .2s}
-.lr .back.press{background:var(--select)}
-.weeks{font-size:13px;color:var(--muted);margin:-2px 0 14px}
+/* modals drawn inside the book */
+.veil{position:absolute;inset:0;background:rgba(54,53,42,.28);opacity:0;pointer-events:none;transition:opacity .35s;z-index:6;border-radius:12px}
+.dlg{position:absolute;background:var(--sheet);border:1px solid var(--hairline);border-radius:14px;box-shadow:0 24px 48px -16px rgba(54,53,42,.45);opacity:0;transform:translateY(14px) scale(.98);transition:opacity .4s,transform .4s cubic-bezier(.3,1.3,.5,1);z-index:7;pointer-events:none}
+.st-new .veil,.st-modal .veil{opacity:1}
+.st-new .ntask,.st-modal .tmodal{opacity:1;transform:none}
+.ntask{left:50%;top:110px;width:min(400px,86%);margin-left:max(-200px,-43%);padding:20px 22px}
+.dlg h3{font-size:19px;font-weight:650;margin:0 0 14px}
+.fld{font-size:12px;color:var(--muted);margin:0 0 4px}
+.inp{border:1px solid var(--hairline);border-radius:8px;background:var(--paper);padding:8px 11px;font-size:15px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.inp .chev{color:var(--muted);font-size:11px}
+.ntask .born{font-size:12px;color:var(--muted);margin:-4px 0 14px}
+.ntask .go{display:flex;justify-content:flex-end}
+.ntask .go span{background:var(--ink);color:var(--paper);font-weight:600;font-size:13px;padding:8px 14px;border-radius:8px;transition:background .2s}
+.ntask .go span.press{background:#5a5a48}
+
+/* kanban page */
+.kmeta{font-size:13px;color:var(--muted);margin:-2px 0 16px}
+.kb{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;align-items:start}
+.kc{background:var(--shade);border:1px solid var(--hairline);border-radius:10px;padding:8px 7px 4px;min-height:250px}
+.kc.final{background:#e6ebd2;border-color:#c6d2ac}
+.kc h4{font-size:13px;font-weight:650;margin:0 2px 8px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.kc h4 i{font-style:normal;color:var(--muted);font-weight:400}
+.kc h4 .tpill{font-weight:400;font-size:10px;padding:0 6px}
+.kd{background:var(--sheet);border:1px solid var(--hairline);border-radius:8px;padding:7px 9px;font-size:13px;font-weight:600;margin-bottom:7px;line-height:1.3;position:relative}
+.kd small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:3px}
+.kd .tpill{margin-top:5px;font-weight:400;font-size:10px}
+.kd.lift{z-index:8;box-shadow:0 14px 24px -10px rgba(54,53,42,.45);transition:transform .9s cubic-bezier(.5,0,.25,1)}
+.kd.moved{animation:land .5s ease}
+@keyframes land{0%{background:var(--select)}}
+.tmodal{left:5%;right:5%;top:76px;bottom:28px;display:grid;grid-template-columns:minmax(0,1fr) 190px;overflow:hidden}
+.tmodal .main{padding:20px 22px;overflow:hidden}
+.tmodal .tside{border-left:1px solid var(--hairline);padding:18px 16px;background:var(--paper);font-size:13px}
+.tmodal h3{font-size:21px}
+.tmodal p{font-size:14px;margin:0 0 8px;line-height:1.55}
+.tmodal ul{margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.6}
+.tmodal .lbl{font-size:12px;color:var(--muted);margin:12px 0 5px;display:flex;align-items:center;gap:6px}
+.tmodal .cm{border-top:1px solid var(--hairline);padding-top:8px;font-size:13px}
+.tmodal .cm small{display:block;color:var(--muted);font-size:11px;margin-bottom:3px}
+.tmodal .tside .inp{font-size:13px;padding:6px 9px;margin-bottom:4px}
+.hist{list-style:none;padding:0;margin:0;font-size:12px}
+.hist li{display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed var(--hairline)}
+.hist time{color:var(--muted);white-space:nowrap}
+.hist li:first-child{animation:pop .45s .5s cubic-bezier(.3,1.6,.5,1) both}
 
 /* day pages */
 .dayhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:6px}
 .dayhead .date{font:clamp(18px,2vw,24px) var(--hand);color:var(--ink);text-align:right}
-.daysum{font-size:13px;color:var(--muted);margin-bottom:22px}
+.daysum{font-size:13px;color:var(--muted);margin-bottom:14px}
 .ro{display:inline-flex;align-items:center;font-size:12px;font-weight:400;border:1px dashed var(--muted);color:var(--muted);border-radius:4px;padding:1px 7px;margin-left:10px;vertical-align:5px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
-.cols h3{font-size:19px;font-weight:600;display:flex;align-items:center;gap:8px;margin:0 0 6px;padding-bottom:8px;border-bottom:1px solid var(--hairline)}
-.cols h3 svg{width:20px;height:20px}
-.rem{display:flex;gap:12px;padding:9px 0;font-size:15px}
+.strip{border-top:1px solid var(--hairline);padding:9px 0 12px}
+.strip h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.strip h3 .fold{font-size:10px;color:var(--muted);width:12px}
+.strip h3 svg{width:17px;height:17px}
+.strip h3 .aside{margin-left:auto;font-size:12px;font-weight:400;color:var(--muted)}
+.strip .last b{font-size:15px}
+.strip .last p{font-size:13px;color:var(--muted);margin:2px 0 0}
+.mini .kb{gap:6px}
+.mini .kc{min-height:0;padding:6px 5px 1px}
+.mini .kc h4{font-size:11px;margin-bottom:5px}
+.mini .kd{font-size:11px;padding:5px 7px;margin-bottom:5px}
+.mini .kd small{font-size:10px}
+.rem{display:flex;gap:12px;padding:5px 0;font-size:14px}
 .rem b{font-weight:400;color:#9a5b3c;border-bottom:1px dashed var(--hairline);height:fit-content}
-.cols .lr{padding:8px 0}
-.cols .lr .t{font-size:15px}
+.nrow{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--shade)}
+.nrow small{color:var(--muted);font-size:12px}
 .ink-stamp{position:absolute;right:46px;bottom:58px;font:20px var(--hand);color:var(--muted);transform:rotate(-4deg)}
+
+/* board page */
+.pg-board .canvas{position:absolute;left:14px;right:0;top:186px;bottom:0;background-image:radial-gradient(var(--hairline) 1.1px,transparent 1.2px);background-size:18px 18px;border-top:1px solid var(--hairline)}
+.rail{position:absolute;left:30px;top:20px;display:flex;flex-direction:column;gap:9px;background:var(--sheet);border:1px solid var(--hairline);border-radius:12px;padding:9px 7px}
+.rail i{display:block;width:16px;height:16px;border:1.5px solid var(--ink);border-radius:4px;opacity:.75}
+.rail i:nth-child(2){border-radius:50%}
+.rail i:nth-child(3){transform:rotate(45deg) scale(.8)}
+.rail i.on{background:var(--select);border-color:var(--select);box-shadow:0 0 0 4px var(--select)}
+.frame{position:absolute;left:12%;top:58px;width:78%;height:300px;border:1.5px solid #b8b0a0;border-radius:6px}
+.frame span{position:absolute;left:0;top:-22px;font-size:12px;color:var(--muted)}
+.bt{position:absolute;left:12%;top:4px;font:28px var(--hand)}
+.postit{position:absolute;width:22%;height:110px;display:grid;place-items:center;text-align:center;font:17px/1.25 var(--hand);padding:10px;box-shadow:0 3px 6px rgba(54,53,42,.12)}
+.arrow{position:absolute;left:0;top:0;width:100%;height:400px;overflow:visible;pointer-events:none}
+.arrow path{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.pg-board.on .postit{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}
+.pg-board.on .postit:nth-of-type(2){animation-delay:.35s}
+.pg-board.on .postit:nth-of-type(3){animation-delay:.7s}
+.pg-board.on .postit:nth-of-type(4){animation-delay:1.05s}
+.pg-board.on .arrow path{animation:draw .8s ease forwards}
+.pg-board.on .arrow path:nth-child(1){animation-delay:1.4s}
+.pg-board.on .arrow path:nth-child(2){animation-delay:1.8s}
+.pg-board.on .arrow path:nth-child(3){animation-delay:2.2s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.oval{position:absolute;left:66%;top:236px;width:21%;height:86px;border:2px solid var(--pending);border-radius:50%;display:grid;place-items:center;font:17px var(--hand);transform:rotate(-3deg)}
+.pg-board.on .oval{animation:pop .5s 2.6s cubic-bezier(.3,1.6,.5,1) both}
 
 /* pt page */
 .typed p{font-size:19px;line-height:2;margin:0 0 .4em;min-height:2em}
@@ -222,7 +289,10 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .shots{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
 .shots figure{margin:0}
 .shots img{filter:drop-shadow(0 16px 26px rgba(54,53,42,.18))}
+.shots+.shots{margin-top:56px}
 .shots figure:nth-child(2){margin-top:80px}
+.real .wide{max-width:720px;margin:56px auto 0}
+.real .wide img{filter:drop-shadow(0 16px 26px rgba(54,53,42,.18))}
 figcaption{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
 .fine{padding:72px 0 40px}
 .fine .cols2{display:grid;grid-template-columns:1fr 1fr;gap:64px}
@@ -266,9 +336,19 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
   .body p:last-child{display:none}
   .pg-hero h2{font-size:32px;margin-top:10px}
   .pg-hero .lede{font-size:18px}
-  .cols{grid-template-columns:1fr;gap:12px}
-  .cols>div:nth-child(2){display:none}
-  .lr .back span{display:none}
+  .kb{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .kc.k2,.kc.k4{display:none}
+  .tmodal{grid-template-columns:1fr;left:3%;right:3%}
+  .tmodal .tside{display:none}
+  .strip.st-last{display:none}
+  .postit{font-size:12px;height:76px;padding:6px}
+  .postit[style*="top:226px"]{top:186px!important}
+  .bt{font-size:20px}
+  .frame{height:230px}
+  .arrow{display:none}
+  .oval{top:196px;font-size:12px;height:56px}
+  .kd .tpill{display:none}
+  .rail{display:none}
   .ink-stamp{display:none}
   .shots,.fine .cols2{grid-template-columns:1fr;gap:32px}
   .shots figure:nth-child(2){margin-top:0}
@@ -294,6 +374,10 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-mac" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></symbol>
   <symbol id="i-check" viewBox="0 0 12 12"><path d="m2.5 6 2.3 2.3L9.5 3.5"/></symbol>
+  <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="4" y="4" width="4.5" height="15" rx="1"/><rect x="9.75" y="4" width="4.5" height="10" rx="1"/><rect x="15.5" y="4" width="4.5" height="12.5" rx="1"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 21h10M12 17v4"/><rect x="6.5" y="7" width="5" height="4.5" rx=".5"/><path d="M14 9h4M14 12h3"/></symbol>
+  <symbol id="i-comment" viewBox="0 0 24 24"><path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3.5V16H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8L4 8.5"/><path d="M4 4v4.5h4.5M12 8v4.5l3 2"/></symbol>
 </svg>
 
 <div class="top">
@@ -321,33 +405,42 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
       </div>
       <div class="cap" data-for="2">
         <p>Selecione o trecho e transforme em tarefa ou lembrete.</p>
-        <p class="small">Imagens e cartões de link também podem originar ações.</p>
+        <p class="small">Também pelo menu de contexto, pela margem ou começando a linha com <code>[]</code>. Imagens e cartões de link também podem originar ações.</p>
       </div>
       <div class="cap" data-for="3">
-        <p>A tarefa vai para a margem, presa à frase que a criou.</p>
-        <p class="small">O trecho ganha um destaque tracejado. Uma nota pode ter várias tarefas e vários alertas.</p>
+        <p>Escolha o pipeline. A tarefa nasce no topo da primeira coluna.</p>
+        <p class="small">O trecho vira o título, e o pipeline mais recente do caderno já vem escolhido.</p>
       </div>
       <div class="cap" data-for="4">
-        <div class="when">três semanas depois…</div>
-        <p>A tarefa está numa lista com outras coisas. Na maioria dos apps, ninguém lembraria de qual reforma era.</p>
+        <p>A tarefa vai para a margem, presa à frase que a criou.</p>
+        <p class="small">O selo mostra em que coluna ela está. Uma nota pode ter várias tarefas e vários alertas.</p>
       </div>
       <div class="cap" data-for="5">
-        <p><mark>Voltar à origem</mark> abre a nota e destaca o trecho.</p>
-        <p class="small">Se você reescrever o trecho depois, a ação guarda a cópia e a margem avisa.</p>
+        <div class="when">três semanas depois…</div>
+        <p>A tarefa anda num kanban simples. Arraste o card até a coluna final.</p>
+        <p class="small">As colunas são suas: renomeie, reordene, adicione ou remova. A última é sempre a final.</p>
       </div>
       <div class="cap" data-for="6">
-        <p>Concluída, o destaque fica verde.</p>
-        <p class="small">A nota continua contando o que foi feito, e por quê.</p>
+        <p>Cada tarefa guarda descrição, comentários e o histórico das mudanças.</p>
+        <p class="small">Listas, tabelas e imagens na descrição. Comentários editáveis, com a marca <i>editado em</i>.</p>
       </div>
       <div class="cap" data-for="7">
-        <p>Todo dia começa uma página nova.</p>
-        <p class="small">A nota mais recente, as tarefas pendentes de todas as listas e margens, e os lembretes de hoje.</p>
+        <p>De volta à nota, o destaque ficou verde.</p>
+        <p class="small">A nota continua contando o que foi feito, e por quê.</p>
       </div>
       <div class="cap" data-for="8">
-        <p>Os dias anteriores ficam exatamente como estavam.</p>
-        <p class="small">Somente leitura: o que estava pendente, o que foi feito, o que estava agendado. Um diário que você nunca precisou escrever.</p>
+        <p>Todo dia começa uma página nova.</p>
+        <p class="small">A última nota com as páginas relacionadas, o kanban mais recente e os lembretes de hoje, em faixas que se recolhem.</p>
       </div>
       <div class="cap" data-for="9">
+        <p>Os dias anteriores ficam exatamente como estavam.</p>
+        <p class="small">Somente leitura: o que estava agendado e as notas daquele dia. Um diário que você nunca precisou escrever.</p>
+      </div>
+      <div class="cap" data-for="10">
+        <p>Quadros para pensar no papel.</p>
+        <p class="small">Post-its, setas, frames e imagens num papel pontilhado sem fim, com traço de mão. O texto do quadro entra na busca.</p>
+      </div>
+      <div class="cap" data-for="11">
         <p>Feito em português desde o início, não traduzido.</p>
         <p class="small">Datas escritas na nota ganham um selo <b>Agendar</b>, e nada é agendado até você clicar. Hashtags viram categorias. A busca ignora acentos.</p>
       </div>
@@ -362,13 +455,14 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
         <div class="row" data-nav="notas"><svg class="i"><use href="#i-note"/></svg>Notas</div>
         <div class="row" data-nav="tarefas"><svg class="i"><use href="#i-task"/></svg>Tarefas</div>
         <div class="row"><svg class="i"><use href="#i-bell"/></svg>Lembretes</div>
+        <div class="row" data-nav="quadros"><svg class="i"><use href="#i-board"/></svg>Quadros</div>
         <div class="gap"></div>
         <div class="row"><svg class="i"><use href="#i-trash"/></svg>Lixeira</div>
       </div>
 
       <div class="paper">
         <div class="tabs"><i></i><i></i><i></i></div>
-        <div class="tbar"><svg class="i"><use href="#i-back"/></svg><div class="right"><span class="newnote"><svg class="i"><use href="#i-plus"/></svg>Nova nota</span><svg class="i"><use href="#i-search"/></svg></div></div>
+        <div class="tbar"><svg class="i"><use href="#i-back"/></svg><div class="right"><span class="newnote"><svg class="i"><use href="#i-plus"/></svg><span id="newLabel">Nova nota</span></span><svg class="i"><use href="#i-search"/></svg></div></div>
 
         <div class="pg pg-hero on" data-page="hero">
           <div class="prov">Pessoal · Criada agora</div>
@@ -393,64 +487,100 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
             <div class="mc" id="mc">nenhuma ação ainda</div>
             <div class="empty-hint">Selecione um trecho para criar uma tarefa.</div>
             <div class="card">
-              <div class="ct"><span class="box" id="cardBox"><svg><use href="#i-check"/></svg></span>Pedir dois orçamentos</div>
-              <div class="st" id="cardState">Tarefa pendente</div>
+              <div class="ck"><svg class="i"><use href="#i-kanban"/></svg>Tarefa · Reforma da cozinha</div>
+              <div class="ct">Pedir dois orçamentos</div>
               <p class="ex">pedir dois orçamentos</p>
-              <div class="vo"><svg class="i"><use href="#i-arrow"/></svg>Ver origem</div>
+              <span class="tpill" id="cardPill">Backlog</span>
             </div>
           </aside>
+          <div class="veil"></div>
+          <div class="dlg ntask">
+            <h3>Nova tarefa</h3>
+            <div class="fld">Título</div><div class="inp">Pedir dois orçamentos</div>
+            <div class="fld">Pipeline</div><div class="inp">Reforma da cozinha<span class="chev">▾</span></div>
+            <div class="born">Nasce no topo de <b>Backlog</b>.</div>
+            <div class="go"><span id="ntCreate">Criar tarefa</span></div>
+          </div>
         </div>
 
-        <div class="pg" data-page="tarefas">
-          <h2>Tarefas</h2>
-          <div class="weeks">6 pendentes, de todas as listas e margens</div>
-          <div class="list">
-            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Renovar o seguro do carro</div><div class="s">Lista · Casa</div></div></div>
-            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Mandar as fotos da viagem para a Bia</div><div class="s">Na margem · Um fim de semana na serra</div></div></div>
-            <div class="lr focus"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Pedir dois orçamentos</div><div class="s">Na margem · Reforma da cozinha</div></div><span class="back" id="backBtn"><svg class="i"><use href="#i-arrow"/></svg><span>Voltar à origem</span></span></div>
-            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Agendar a consulta de rotina</div><div class="s">Lista · Saúde</div></div></div>
-            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Trocar a resistência do chuveiro</div><div class="s">Lista · Casa</div></div></div>
-            <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Separar os livros para doar</div><div class="s">Na margem · Arrumar o escritório</div></div></div>
+        <div class="pg" data-page="kanban">
+          <h2>Reforma da cozinha</h2>
+          <div class="kmeta">1 finalizado de 6 · Pessoal</div>
+          <div class="kb" id="kb">
+            <div class="kc"><h4>Backlog <i>2</i></h4><div class="kd">Trocar o rejunte da pia<small>12/09</small></div><div class="kd">Escolher a torneira<small>14/09</small></div></div>
+            <div class="kc k2"><h4>Ready to Dev <i>1</i></h4><div class="kd">Comprar tomadas novas<small>11/09</small></div></div>
+            <div class="kc"><h4>Doing <i id="doingCount">1</i></h4><div id="doingList"><div class="kd" id="dragCard">Pedir dois orçamentos<small>10/09</small><span class="tpill"><svg><use href="#i-comment"/></svg>2 comentários</span></div></div></div>
+            <div class="kc k4"><h4>Review <i>1</i></h4><div class="kd">Medir a parede<small>10/09</small></div></div>
+            <div class="kc final"><h4>Done <i id="doneCount">1</i><span class="tpill done" title="Coluna final"><svg><use href="#i-check"/></svg></span></h4><div id="doneList"><span id="doneSlot"></span><div class="kd">Ligar para o eletricista<small>09/09</small></div></div></div>
+          </div>
+          <div class="veil"></div>
+          <div class="dlg tmodal">
+            <div class="main">
+              <h3>Pedir dois orçamentos</h3>
+              <div class="lbl">Descrição</div>
+              <p>Duas marcenarias, uma com gaveteiro e outra sem. Levar as medidas da parede.</p>
+              <ul><li>Bancada de 1,60 m em madeira clara</li><li>Prateleira acima da janela</li></ul>
+              <div class="lbl"><svg class="i"><use href="#i-comment"/></svg>Comentários · 2</div>
+              <div class="cm"><small>29/09, 09:10 · editado em 29/09, 11:45</small>A Madeira &amp; Cia faz sem gaveteiro por um preço menor.</div>
+            </div>
+            <div class="tside">
+              <div class="lbl">Coluna</div><div class="inp">Done<span class="chev">▾</span></div>
+              <div class="lbl">Owner</div><div class="inp">Ana</div>
+              <div class="lbl"><svg class="i"><use href="#i-history"/></svg>Histórico</div>
+              <ul class="hist"><li><time>hoje</time><span>Doing → <b>Done</b></span></li><li><time>12/09</time><span>Backlog → <b>Doing</b></span></li><li><time>10/09</time><span>Criada em <b>Backlog</b></span></li></ul>
+            </div>
           </div>
         </div>
 
         <div class="pg" data-page="hoje">
           <div class="dayhead"><h2>Página do dia</h2><div class="date">quinta-feira, 1 de outubro</div></div>
-          <div class="daysum">4 tarefas pendentes · 3 lembretes · 2 notas recentes</div>
-          <div class="cols">
-            <div>
-              <h3><svg class="i"><use href="#i-task"/></svg>Tarefas</h3>
-              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Escolher a trilha e ver a previsão</div><div class="s">Preparar a viagem à serra</div></div></div>
-              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Separar água, câmera e mochila</div><div class="s">Preparar a viagem à serra</div></div></div>
-              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Agendar a consulta de rotina</div><div class="s">Lista · Saúde</div></div></div>
-              <div class="lr"><span class="box done"><svg><use href="#i-check"/></svg></span><div><div class="t">Pedir dois orçamentos</div><div class="s">Na margem · Reforma da cozinha · concluída hoje</div></div></div>
+          <div class="daysum">3 lembretes · 4 notas recentes</div>
+          <div class="strip st-last"><h3><span class="fold">▾</span><svg class="i"><use href="#i-note"/></svg>Última nota<span class="aside">com conexões</span></h3><div class="last"><b>Reforma da cozinha</b><p>Conversei com a Ana sobre a bancada. A ideia é trocar o granito por madeira…</p></div></div>
+          <div class="strip mini"><h3><span class="fold">▾</span><svg class="i"><use href="#i-kanban"/></svg>Reforma da cozinha<span class="aside">último pipeline · 2 finalizados de 6</span></h3>
+            <div class="kb">
+              <div class="kc"><h4>Backlog <i>2</i></h4><div class="kd">Trocar o rejunte da pia<small>12/09</small></div><div class="kd">Escolher a torneira<small>14/09</small></div></div>
+              <div class="kc k2"><h4>Ready to Dev <i>1</i></h4><div class="kd">Comprar tomadas novas<small>11/09</small></div></div>
+              <div class="kc"><h4>Doing <i>0</i></h4></div>
+              <div class="kc k4"><h4>Review <i>1</i></h4><div class="kd">Medir a parede<small>10/09</small></div></div>
+              <div class="kc final"><h4>Done <i>2</i></h4><div class="kd">Pedir dois orçamentos<small>10/09</small></div><div class="kd">Ligar para o eletricista<small>09/09</small></div></div>
             </div>
-            <div>
-              <h3><svg class="i"><use href="#i-bell"/></svg>Lembretes</h3>
-              <div class="rem"><b>14:00</b>Revisar o planejamento</div>
-              <div class="rem"><b>16:00</b>Ligar para o eletricista</div>
-              <div class="rem"><b>18:00</b>Pausa para caminhar</div>
-            </div>
+          </div>
+          <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-bell"/></svg>Lembretes<span class="aside">3 neste dia</span></h3>
+            <div class="rem"><b>14:00</b>Revisar o planejamento</div>
+            <div class="rem"><b>16:00</b>Ligar para o eletricista</div>
+            <div class="rem"><b>18:00</b>Pausa para caminhar</div>
           </div>
         </div>
 
         <div class="pg" data-page="ontem">
-          <div class="dayhead"><h2>Página do dia<span class="ro">somente leitura</span></h2><div class="date">quarta-feira, 30 de setembro</div></div>
-          <div class="daysum">5 tarefas pendentes · 2 feitas · 1 lembrete</div>
-          <div class="cols">
-            <div>
-              <h3><svg class="i"><use href="#i-task"/></svg>Tarefas</h3>
-              <div class="lr"><span class="box done"><svg><use href="#i-check"/></svg></span><div><div class="t">Renovar a carteira de motorista</div><div class="s">Lista · Documentos · feita neste dia</div></div></div>
-              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Pedir dois orçamentos</div><div class="s">Na margem · Reforma da cozinha</div></div></div>
-              <div class="lr"><span class="box done"><svg><use href="#i-check"/></svg></span><div><div class="t">Devolver o livro da biblioteca</div><div class="s">Lista · Casa · feita neste dia</div></div></div>
-              <div class="lr"><span class="box"><svg><use href="#i-check"/></svg></span><div><div class="t">Agendar a consulta de rotina</div><div class="s">Lista · Saúde</div></div></div>
-            </div>
-            <div>
-              <h3><svg class="i"><use href="#i-bell"/></svg>Lembretes</h3>
-              <div class="rem"><b>10:30</b>Reunião do condomínio</div>
-            </div>
+          <div class="dayhead"><h2>Página anterior<span class="ro">somente leitura</span></h2><div class="date">quarta-feira, 30 de setembro</div></div>
+          <div class="daysum">1 lembrete · 3 notas do dia</div>
+          <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-bell"/></svg>Lembretes<span class="aside">1 neste dia</span></h3>
+            <div class="rem"><b>10:30</b>Reunião do condomínio</div>
+          </div>
+          <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-note"/></svg>Notas do dia</h3>
+            <div class="nrow">Reforma da cozinha<small>30/09, 09:40</small></div>
+            <div class="nrow">Livros para a próxima leitura<small>30/09, 08:15</small></div>
+            <div class="nrow">Uma ideia para o fim de semana<small>29/09, 21:02</small></div>
           </div>
           <div class="ink-stamp">exatamente como estava</div>
+        </div>
+
+        <div class="pg pg-board" data-page="quadro">
+          <div class="prov">Pessoal · Atualizado agora</div>
+          <h2>Ideias para a cozinha</h2>
+          <div class="pills"><span class="pill">#casa</span></div>
+          <div class="canvas">
+            <div class="rail"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+            <div class="bt">Uma cozinha para receber</div>
+            <div class="frame"><span>Primeira semana</span></div>
+            <div class="postit" style="left:15%;top:84px;background:#f6d77a">Luz natural de manhã</div>
+            <div class="postit" style="left:42%;top:84px;background:#c8d6b0">Bancada de madeira</div>
+            <div class="postit" style="left:69%;top:84px;background:#bccfd8">Prateleira acima da janela</div>
+            <div class="postit" style="left:42%;top:226px;background:#f3c6a5">Banquetas altas</div>
+            <svg class="arrow" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" vector-effect="non-scaling-stroke" d="M378 139H414M414 139l-9-7M414 139l-9 7"/><path pathLength="1" vector-effect="non-scaling-stroke" d="M648 139H684M684 139l-9-7M684 139l-9 7"/><path pathLength="1" vector-effect="non-scaling-stroke" d="M530 198V222M530 222l-5-8M530 222l5-8"/></svg>
+            <div class="oval">Verde-claro?</div>
+          </div>
         </div>
 
         <div class="pg" data-page="pt">
@@ -477,9 +607,14 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
     <h2>Esse é o app de verdade</h2>
     <p class="lead">A cena acima é uma recriação. Estas são capturas do Caderninho rodando, com exemplos fictícios.</p>
     <div class="shots">
-      <figure><img src="img/acoes-na-nota.webp" width="1440" height="1333" loading="lazy" alt="Uma nota com três trechos destacados e, na margem, as ações criadas a partir deles: uma tarefa pendente, uma concluída e um alerta."><figcaption>Uma nota com tarefas e um lembrete na margem.</figcaption></figure>
-      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1467" loading="lazy" alt="Página do dia com a nota mais recente ao lado do grafo de páginas relacionadas, seguida das tarefas e dos lembretes."><figcaption>A página do dia, com as páginas relacionadas.</figcaption></figure>
+      <figure><img src="img/acoes-na-nota.webp" width="1440" height="1333" loading="lazy" alt="Uma nota com três trechos destacados e, na margem, as ações criadas a partir deles: uma tarefa em Doing, uma concluída com o selo verde Done e um alerta."><figcaption>Uma nota com tarefas e um lembrete na margem.</figcaption></figure>
+      <figure><img src="img/kanban.webp" width="1440" height="926" loading="lazy" alt="Kanban Montar o ateliê com as colunas Backlog, Ready to Dev, Doing, Review e Done, e cards com data de criação e número de comentários."><figcaption>Um pipeline: o kanban com as suas colunas.</figcaption></figure>
     </div>
+    <div class="shots">
+      <figure><img src="img/tarefa.webp" width="1440" height="1333" loading="lazy" alt="Tarefa aberta com descrição em lista e tabela, miniatura da imagem, comentários (um deles editado) e, ao lado, coluna, owner, data de criação e histórico."><figcaption>A tarefa aberta, com comentários e histórico.</figcaption></figure>
+      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1543" loading="lazy" alt="Página do dia com a nota mais recente ao lado do grafo de páginas relacionadas, seguida do kanban do pipeline mais recente, dos lembretes e das últimas notas."><figcaption>A página do dia, com o kanban mais recente.</figcaption></figure>
+    </div>
+    <figure class="wide"><img src="img/quadro.webp" width="1440" height="1200" loading="lazy" alt="Quadro Ideias para o ateliê com post-its coloridos ligados por setas dentro de um frame, um título escrito à mão e o trilho de ferramentas à esquerda."><figcaption>Um quadro com post-its, setas e um frame.</figcaption></figure>
   </section>
 
   <section class="fine wrap">
@@ -490,14 +625,16 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
         <p>A cada salvamento, o Caderninho compara a página com as outras do mesmo caderno, por categorias, palavras e significado, inclusive o texto dentro de imagens. Nenhum texto sai do seu computador. <kbd>⌥⌘R</kbd> abre o grafo.</p>
         <h3>Referências ao lado da ideia</h3>
         <p>Imagens, PDFs e cartões de link ficam ao lado do parágrafo a que pertencem, e os links continuam funcionando sem internet.</p>
+        <h3>Um kanban simples por projeto</h3>
+        <p>Cada pipeline nasce com Backlog, Ready to Dev, Doing, Review e Done. Renomeie, reordene, adicione ou remova colunas; a última é sempre a final. A tarefa guarda descrição com listas, tabelas e imagens, comentários e o histórico de cada movimento.</p>
         <h3>Diagramas como texto</h3>
         <p>Digite <code>/diagrama</code> e escreva um fluxograma, uma sequência ou uma linha do tempo em Mermaid. Ele é desenhado com traço de mão dentro da nota.</p>
       </div>
       <div>
         <h2>Seus dados, numa pasta</h2>
-        <p>Notas, listas, lembretes e categorias ficam num banco SQLite, com imagens e PDFs ao lado:</p>
+        <p>Notas, pipelines e tarefas, lembretes, quadros e categorias ficam num banco SQLite, com imagens e PDFs ao lado:</p>
         <div class="path">~/Library/Application Support/caderninho/</div>
-        <p>Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie a pasta. Qualquer página vira PDF com <kbd>⇧⌘E</kbd>.</p>
+        <p>Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie a pasta. Notas e lembretes viram PDF com <kbd>⇧⌘E</kbd>; quadros, PNG ou SVG.</p>
         <p class="muted">As únicas requisições de rede são as que você dispara: a prévia de um link que você colou e o download, uma única vez, do modelo das páginas relacionadas.</p>
         <h3>Limites</h3>
         <ul class="limits">
@@ -505,6 +642,7 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
           <li>Os lembretes só tocam com o app aberto, mesmo minimizado. Um alerta perdido toca quando o app volta.</li>
           <li>Sem sincronização entre computadores e sem versão para celular.</li>
           <li>Ainda não importa notas de outros apps.</li>
+          <li>Pipelines não viram PDF, e tarefas não têm categorias próprias.</li>
         </ul>
       </div>
     </div>
@@ -531,29 +669,52 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
   const scene = $('#scene'), stage = $('#stage'), cursor = $('#cursor');
   const pages = Object.fromEntries([...document.querySelectorAll('.pg')].map(p => [p.dataset.page, p]));
   const caps = [...document.querySelectorAll('.cap')];
-  const order = ['hero', 'reforma', 'tarefas', 'hoje', 'ontem', 'pt'];
+  const order = ['hero', 'reforma', 'kanban', 'hoje', 'ontem', 'quadro', 'pt'];
 
-  // One entry per scroll step: page shown, active sidebar row, note state, scripted cursor.
+  // One entry per scroll step: page shown, active sidebar row, page states, scripted cursor.
   const plan = [
     { page: 'hero',    nav: 'notas' },
     { page: 'reforma', nav: 'notas' },
-    { page: 'reforma', nav: 'notas',   note: ['st-sel'],             cursor: '#tbTask', clickAt: 2300 },
+    { page: 'reforma', nav: 'notas',   note: ['st-sel'],   cursor: '#tbTask', clickAt: 2300 },
+    { page: 'reforma', nav: 'notas',   note: ['st-new'],   cursor: '#ntCreate', clickAt: 1300, onClick: () => $('#ntCreate').classList.add('press') },
     { page: 'reforma', nav: 'notas',   note: ['st-linked'] },
-    { page: 'tarefas', nav: 'tarefas', cursor: '#backBtn', clickAt: 1000, onClick: () => $('#backBtn').classList.add('press') },
+    { page: 'kanban',  nav: 'tarefas', cursor: '#dragCard', clickAt: 700, onClick: dragToDone },
+    { page: 'kanban',  nav: 'tarefas', board: ['st-modal'] },
     { page: 'reforma', nav: 'notas',   note: ['st-linked', 'st-flash'] },
-    { page: 'reforma', nav: 'notas',   note: ['st-linked'],          cursor: '#cardBox', clickAt: 1000, onClick: () => setDone(true) },
     { page: 'hoje',    nav: 'dia' },
     { page: 'ontem',   nav: 'dia' },
+    { page: 'quadro',  nav: 'quadros' },
     { page: 'pt',      nav: 'notas' },
   ];
   const STEPS = plan.length;
+  scene.style.height = `calc(100vh + ${STEPS - 1} * 75vh)`;
   const dots = $('#dots');
   for (let i = 0; i < STEPS; i++) dots.appendChild(document.createElement('i'));
 
+  const CHECK = '<svg><use href="#i-check"/></svg>';
   function setDone(done) {
     pages.reforma.classList.toggle('st-done', done);
-    $('#cardBox').classList.toggle('done', done);
-    $('#cardState').textContent = done ? 'Concluída · hoje' : 'Tarefa pendente';
+    $('#cardPill').classList.toggle('done', done);
+    $('#cardPill').innerHTML = done ? CHECK + 'Done' : 'Backlog';
+  }
+
+  // The card sits in Doing until the scripted drag carries it to the top of Done.
+  const card = $('#dragCard');
+  function placeCard(done) {
+    card.classList.remove('lift', 'moved'); card.style.transform = '';
+    if (done) $('#doneSlot').after(card); else $('#doingList').append(card);
+    $('#doingCount').textContent = done ? '0' : '1';
+    $('#doneCount').textContent = done ? '2' : '1';
+  }
+  function dragToDone() {
+    const from = card.getBoundingClientRect(), to = $('#doneSlot').getBoundingClientRect();
+    const dx = to.left - from.left, dy = to.top - from.top;
+    card.classList.add('lift');
+    requestAnimationFrame(() => { card.style.transform = `translate(${dx}px,${dy}px) rotate(-2deg)`; });
+    cursor.style.left = (parseFloat(cursor.style.left) + dx) + 'px';
+    cursor.style.top = (parseFloat(cursor.style.top) + dy) + 'px';
+    const n = step;
+    cursorTimers.push(setTimeout(() => { if (step !== n) return; placeCard(true); card.classList.add('moved'); cursor.classList.remove('click'); }, 950));
   }
 
   // ---------- typing ----------
@@ -663,18 +824,21 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
     $('#pgno').textContent = String(order.indexOf(s.page) + 1).padStart(2, '0');
 
     const note = pages.reforma;
-    note.classList.remove('st-sel', 'st-linked', 'st-flash');
+    note.classList.remove('st-sel', 'st-new', 'st-linked', 'st-flash');
     (s.note || []).forEach(c => note.classList.add(c));
-    setDone(n > 6 || (n === 6 && reduced));
-    $('#mc').textContent = n >= 3 ? '1 tarefa' : 'nenhuma ação ainda';
-    $('#backBtn').classList.remove('press');
+    pages.kanban.classList.toggle('st-modal', (s.board || []).includes('st-modal'));
+    setDone(n > 6);
+    placeCard(n > 5 || (n === 5 && reduced));
+    $('#mc').textContent = n >= 4 ? '1 tarefa' : 'nenhuma ação ainda';
+    $('#ntCreate').classList.remove('press');
+    $('#newLabel').textContent = { kanban: 'Nova tarefa', quadro: 'Novo quadro' }[s.page] || 'Nova nota';
 
     showPage(s.page);
     clearCursor();
     runCursor(s, n);
 
     if (n === 0) { prev === -1 && !heroTyped ? heroIntro() : heroTyped || heroStatic(); }
-    else if (n === 9) ptScene();
+    else if (n === STEPS - 1) ptScene();
     else { if (!heroTyped) heroStatic(); typeToken++; }
   }
 

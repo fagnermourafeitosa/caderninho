@@ -102,6 +102,18 @@ To generate only the linked actions and collage screenshots:
 npx electron scripts/capture-readme.cjs --features-only
 ```
 
+To generate only the task screenshots (note with tasks, kanban, open task, board and the day page):
+
+```sh
+npx electron scripts/capture-readme.cjs --pipelines-only
+```
+
+On a machine that cannot download the related-pages model, add `--lexical-related`: related pages are then ranked by categories and words in common only. Run the script in the São Paulo time zone (`TZ=America/Sao_Paulo`) so the fictional times match the data. The landing page uses WebP copies of `acoes-na-nota`, `kanban`, `tarefa`, `pagina-do-dia` and `quadro` in `site/img/`; regenerate them after a new capture:
+
+```sh
+node -e "const sharp=require('sharp');for(const n of ['acoes-na-nota','pagina-do-dia','kanban','tarefa','quadro'])sharp('docs/images/'+n+'.png').webp({quality:82}).toFile('site/img/'+n+'.webp')"
+```
+
 The script uses the real renderer with fictional data in a temporary database. Screenshots are written to `docs/images/`; the temporary folder is removed when it finishes. No personal note is accessed.
 
 Features not yet implemented are recorded in [ROADMAP.md](ROADMAP.md).
