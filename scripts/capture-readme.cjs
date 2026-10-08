@@ -84,14 +84,19 @@ app.whenReady().then(async()=>{
   registerBoards(ipcMain,{getWindow:()=>win,useCases:boards});
   win=new BrowserWindow({width:1080,height:900,frame:false,transparent:true,backgroundColor:'#00000000',show:false,webPreferences:{preload:path.join(root,'src','main','preload.cjs'),contextIsolation:true,sandbox:true,backgroundThrottling:false}});
   await win.loadFile(path.join(root,'src','renderer','index.html'));await installRendererErrors(win.webContents);await pause(900);
-  const capture=async(name,code,outputDirectory=path.join(root,'docs','images'))=>{
+  // only: a selector to capture alone, on a transparent background (an open dialog without the dimmed page behind it).
+  const capture=async(name,code,outputDirectory=path.join(root,'docs','images'),{only}={})=>{
     if(code)await win.webContents.executeJavaScript(code);
     await pause(500);
+    const rect=only?await win.webContents.executeJavaScript(`(()=>{const style=document.createElement('style');style.id='capture-only';style.textContent='body>*:not(dialog[open]){visibility:hidden!important}dialog::backdrop{background:transparent!important}';document.head.append(style);const box=document.querySelector(${JSON.stringify(only)}).getBoundingClientRect();return {x:Math.floor(box.left),y:Math.floor(box.top),width:Math.ceil(box.width),height:Math.ceil(box.height)};})()`):null;
     // A hidden window can keep stale pixels of a region that just stopped changing: repaint everything first.
     win.webContents.invalidate();
     await win.webContents.executeJavaScript('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
     const errors=await win.webContents.executeJavaScript('window.smokeErrors');if(errors.length)throw new Error(errors.join('\n'));
-    fs.writeFileSync(path.join(outputDirectory,name),(await win.webContents.capturePage()).resize({width:1440}).toPNG());
+    const scale=1440/win.getContentSize()[0];
+    const image=rect?(await win.webContents.capturePage(rect)).resize({width:Math.round(rect.width*scale)}):(await win.webContents.capturePage()).resize({width:1440});
+    fs.writeFileSync(path.join(outputDirectory,name),image.toPNG());
+    if(only)await win.webContents.executeJavaScript("document.querySelector('#capture-only')?.remove()");
   };
   const open=(id,extra='')=>`(async()=>{document.querySelector('dialog[open]')?.close();const type=${JSON.stringify(store.snapshot().notes.find(note=>note.id===id).type)};await window.notebook.action('view:select',{view:type});state=await window.notebook.action('note:select',{id:${JSON.stringify(id)}});view=type;render();getSelection().removeAllRanges();hideEditorMenus();${extra}})()`;
   const pipelinesOnly=flag('--pipelines-only'),featuresOnly=flag('--features-only');
@@ -139,7 +144,7 @@ app.whenReady().then(async()=>{
   win.setSize(1400,900);
   await capture('kanban.png',open(studio));
   win.setSize(1080,1000);
-  await capture('tarefa.png',open(studio,`openTaskModal(${JSON.stringify(budget)});await new Promise(resolve=>setTimeout(resolve,700));await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));document.activeElement?.blur();`));
+  await capture('tarefa.png',open(studio,`openTaskModal(${JSON.stringify(budget)});await new Promise(resolve=>setTimeout(resolve,700));await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));document.activeElement?.blur();`),undefined,{only:'.task-modal[open]'});
   if(!featuresOnly){
   win.setSize(1080,900);
   // A board drawn with post-its, an arrow between them and a hand-written title, all in the app's own palette.

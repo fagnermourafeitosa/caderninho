@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Caderninho · Notas que viram tarefas sem perder o contexto</title>
-<meta name="description" content="Um caderno para o Mac, feito para quem escreve em português. Selecione um trecho, transforme em tarefa ou lembrete, e a tarefa sempre sabe de onde veio.">
+<title>Caderninho · Suas notas, tarefas e quadros, tudo conectado</title>
+<meta name="description" content="Um caderno para o Mac, feito para quem escreve em português. A tarefa nasce da nota e continua ligada a ela, numa lista que mostra em que pé está cada coisa. Com quadros para as ideias que pedem espaço.">
 <link rel="canonical" href="https://fagnermourafeitosa.github.io/caderninho/">
 <link rel="icon" href="img/icon.png">
 <link rel="apple-touch-icon" href="img/icon.png">
@@ -13,14 +13,14 @@
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Caderninho">
 <meta property="og:url" content="https://fagnermourafeitosa.github.io/caderninho/">
-<meta property="og:title" content="Caderninho · Notas que viram tarefas sem perder o contexto">
-<meta property="og:description" content="Um caderno para o Mac, feito para quem escreve em português. Selecione um trecho, transforme em tarefa ou lembrete, e a tarefa sempre sabe de onde veio.">
+<meta property="og:title" content="Caderninho · Suas notas, tarefas e quadros, tudo conectado">
+<meta property="og:description" content="Um caderno para o Mac, feito para quem escreve em português. A tarefa nasce da nota e continua ligada a ela, numa lista que mostra em que pé está cada coisa. Com quadros para as ideias que pedem espaço.">
 <meta property="og:image" content="https://fagnermourafeitosa.github.io/caderninho/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Caderninho: notas que viram tarefas sem perder o contexto, ao lado de uma nota com tarefas na margem.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Caderninho · Notas que viram tarefas sem perder o contexto">
+<meta name="twitter:title" content="Caderninho · Suas notas, tarefas e quadros, tudo conectado">
 <meta name="twitter:description" content="Um caderno para o Mac, feito para quem escreve em português.">
 <meta name="twitter:image" content="https://fagnermourafeitosa.github.io/caderninho/img/og.jpg">
 <script type="application/ld+json">
@@ -28,7 +28,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Caderninho",
-  "description": "Um caderno para o Mac, feito para quem escreve em português. Notas, listas de tarefas, lembretes e quadros, tudo conectado.",
+  "description": "Um caderno para o Mac, feito para quem escreve em português. A tarefa nasce da nota e continua ligada a ela, numa lista que mostra em que pé está cada coisa. Com quadros para as ideias que pedem espaço.",
   "url": "https://fagnermourafeitosa.github.io/caderninho/",
   "image": "https://fagnermourafeitosa.github.io/caderninho/img/og.jpg",
   "applicationCategory": "ProductivityApplication",
@@ -312,6 +312,14 @@ code{font:14px ui-monospace,"SF Mono",Menlo,monospace;background:var(--shade);pa
 footer .coffee{display:inline-flex;align-items:center;gap:5px;vertical-align:bottom}
 footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--muted);padding:28px 0 36px;border-top:1px solid var(--hairline)}
 
+/* screenshot zoom */
+.real img{cursor:zoom-in}
+.zoom{border:0;padding:0;background:transparent;max-width:min(1440px,96vw);max-height:94vh;overflow:visible}
+.zoom::backdrop{background:rgba(48,48,37,.72)}
+.zoom img{display:block;max-width:min(1440px,96vw);max-height:86vh;width:auto;height:auto;cursor:zoom-out;border-radius:10px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.35))}
+.zoom button{position:fixed;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:1px solid var(--hairline);background:var(--sheet);color:var(--ink);font:22px/1 var(--serif);cursor:pointer}
+.zoom figcaption{color:var(--paper);font-size:14px;margin-top:10px;text-align:center}
+
 /* ---------- responsive ---------- */
 @media (max-width:1100px){
   .book{grid-template-columns:minmax(0,1fr)}
@@ -394,55 +402,55 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
 
     <div class="captions">
       <div class="cap" data-for="0">
-        <h1 class="sr">Caderninho: notas que viram tarefas sem perder o contexto</h1>
-        <p>Notas, listas de tarefas e quadros num caderno só, <mark>tudo conectado</mark>.</p>
+        <h1 class="sr">Caderninho: suas notas, tarefas e quadros, tudo conectado</h1>
+        <p>Um caderno para o Mac em que cada tarefa <mark>lembra de onde veio</mark>.</p>
         <div class="meta"><span>macOS · interface em português</span><span>Sem conta e sem nuvem</span></div>
         <div class="scroll"><span>↓</span> role para ver funcionando</div>
       </div>
       <div class="cap" data-for="1">
         <p>Você escreve “pedir dois orçamentos” numa nota sobre a reforma da cozinha.</p>
-        <p class="small">Uma nota comum, no meio de outras coisas que você pensou.</p>
+        <p class="small">Uma nota qualquer, no meio de outras coisas que você pensou.</p>
       </div>
       <div class="cap" data-for="2">
-        <p>Selecione o trecho e transforme em tarefa ou lembrete.</p>
-        <p class="small">Também pelo menu de contexto, pela margem ou começando a linha com <code>[]</code>. Imagens e cartões de link também podem originar ações.</p>
+        <p>Marque a frase e transforme em tarefa.</p>
+        <p class="small">Ou comece a linha com <code>[]</code>, sem parar de escrever. Imagens e links colados na nota também viram tarefas.</p>
       </div>
       <div class="cap" data-for="3">
         <p>Escolha em qual lista ela entra.</p>
-        <p class="small">O trecho vira o título, e a lista mais recente do caderno já vem escolhida.</p>
+        <p class="small">A frase vira o título, e a lista mais recente do caderno já vem escolhida.</p>
       </div>
       <div class="cap" data-for="4">
         <p>A tarefa fica ao lado da frase que a criou.</p>
-        <p class="small">A margem mostra em que etapa ela está. Uma nota pode ter várias tarefas e vários alertas.</p>
+        <p class="small">Dali dá para ver em que etapa ela está. Uma nota pode ter quantas tarefas e lembretes você quiser.</p>
       </div>
       <div class="cap" data-for="5">
         <div class="when">três semanas depois…</div>
-        <p>Na lista, cada coluna é uma etapa. Terminou? Arraste a tarefa para a última.</p>
-        <p class="small">Dá para ver de relance em que pé está cada coisa. As etapas são suas: renomeie, mude de lugar, crie ou remova.</p>
+        <p>Na lista, cada coluna é uma etapa. Andou? Arraste a tarefa para a frente.</p>
+        <p class="small">De relance, você vê em que pé está cada coisa. As etapas são suas: renomeie, reordene, crie ou remova.</p>
       </div>
       <div class="cap" data-for="6">
         <p>Cada tarefa guarda os detalhes, a conversa e o caminho que fez.</p>
-        <p class="small">Descrição com listas, tabelas e imagens, comentários, quem está cuidando e cada mudança de etapa.</p>
+        <p class="small">Listas, tabelas e imagens, comentários, quem está cuidando e cada etapa por onde passou.</p>
       </div>
       <div class="cap" data-for="7">
-        <p>De volta à nota, o destaque ficou verde.</p>
+        <p>Na nota, a frase ficou verde: está feito.</p>
         <p class="small">A nota continua contando o que foi feito, e por quê.</p>
       </div>
       <div class="cap" data-for="8">
-        <p>Todo dia começa uma página nova.</p>
-        <p class="small">A última nota com as páginas ligadas a ela, a lista de tarefas mais recente e os lembretes de hoje.</p>
+        <p>Todo dia começa com uma página que junta o que importa.</p>
+        <p class="small">A última nota e as páginas ligadas a ela, a lista de tarefas mais recente e os lembretes de hoje.</p>
       </div>
       <div class="cap" data-for="9">
-        <p>Os dias anteriores ficam exatamente como estavam.</p>
-        <p class="small">Somente leitura: o que estava agendado e as notas daquele dia. Um diário que você nunca precisou escrever.</p>
+        <p>Os dias anteriores ficam guardados como estavam.</p>
+        <p class="small">O que estava agendado e as notas daquele dia. Um diário que você nunca precisou escrever.</p>
       </div>
       <div class="cap" data-for="10">
         <p>E quadros para as ideias que pedem espaço.</p>
-        <p class="small">Um mural sem fim para post-its, setas, fluxos e organogramas, no mesmo caderno das notas e das tarefas. Tudo conectado.</p>
+        <p class="small">Um mural sem fim para post-its, setas e organogramas, no mesmo caderno das notas e das tarefas.</p>
       </div>
       <div class="cap" data-for="11">
-        <p>Feito em português desde o início, não traduzido.</p>
-        <p class="small">Datas escritas na nota ganham um selo <b>Agendar</b>, e nada é agendado até você clicar. Hashtags viram categorias. A busca ignora acentos.</p>
+        <p>Pensado em português, não traduzido.</p>
+        <p class="small">Escreva “amanhã às 14h” e aparece um botão <b>Agendar</b>. Hashtags viram categorias. A busca não se importa com acentos.</p>
       </div>
       <div class="dots" id="dots" aria-hidden="true"></div>
     </div>
@@ -604,45 +612,43 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
 
 <div class="sheet">
   <section class="real wrap">
-    <h2>Esse é o app de verdade</h2>
-    <p class="lead">A cena acima é uma recriação. Estas são capturas do Caderninho rodando, com exemplos fictícios.</p>
+    <h2>Este é o app de verdade</h2>
+    <p class="lead">A cena acima é uma recriação. Estas são telas do Caderninho funcionando, com exemplos inventados. Clique numa imagem para ampliar.</p>
     <div class="shots">
-      <figure><img src="img/acoes-na-nota.webp" width="1440" height="1333" loading="lazy" alt="Uma nota com três trechos destacados e, na margem, as ações criadas a partir deles: uma tarefa em Doing, uma concluída com o selo verde Done e um alerta."><figcaption>Uma nota com tarefas e um lembrete na margem.</figcaption></figure>
-      <figure><img src="img/kanban.webp" width="1440" height="926" loading="lazy" alt="Lista de tarefas Montar o ateliê organizada em cinco colunas, de Backlog a Done, com a data de criação e o número de comentários em cada tarefa."><figcaption>Uma lista de tarefas, com uma coluna para cada etapa.</figcaption></figure>
+      <figure><img src="img/acoes-na-nota.webp" width="1440" height="1333" loading="lazy" alt="Uma nota com três frases destacadas e, ao lado, o que nasceu delas: uma tarefa em andamento, uma concluída em verde e um lembrete."><figcaption>Uma nota com as tarefas e o lembrete que nasceram dela.</figcaption></figure>
+      <figure><img src="img/kanban.webp" width="1440" height="926" loading="lazy" alt="Lista de tarefas Montar o ateliê dividida em cinco colunas, com a data de criação e o número de comentários em cada tarefa."><figcaption>Uma lista de tarefas, com uma coluna para cada etapa.</figcaption></figure>
     </div>
     <div class="shots">
-      <figure><img src="img/tarefa.webp" width="1440" height="1333" loading="lazy" alt="Tarefa aberta com descrição em lista e tabela, miniatura da imagem, comentários (um deles editado) e, ao lado, a etapa, o responsável, a data de criação e o histórico."><figcaption>Uma tarefa aberta, com os detalhes e a conversa.</figcaption></figure>
-      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1543" loading="lazy" alt="Página do dia com a nota mais recente, seguida da lista de tarefas mais recente, dos lembretes e das últimas notas."><figcaption>A página do dia, com a lista de tarefas mais recente.</figcaption></figure>
+      <figure><img src="img/tarefa.webp" width="1306" height="1269" loading="lazy" alt="Tarefa aberta com detalhes em lista e tabela, uma imagem, comentários (um deles editado) e, ao lado, a etapa atual, o responsável, a data de criação e o histórico."><figcaption>Uma tarefa aberta, com os detalhes e a conversa.</figcaption></figure>
+      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1543" loading="lazy" alt="Página do dia com a última nota, a lista de tarefas mais recente, os lembretes de hoje e as últimas notas."><figcaption>A página do dia.</figcaption></figure>
     </div>
-    <figure class="wide"><img src="img/quadro.webp" width="1440" height="1200" loading="lazy" alt="Quadro Ideias para o ateliê com post-its coloridos ligados por setas, um título escrito à mão e as ferramentas de desenho à esquerda."><figcaption>Um quadro com post-its e setas.</figcaption></figure>
+    <figure class="wide"><img src="img/quadro.webp" width="1440" height="1200" loading="lazy" alt="Quadro Ideias para o ateliê com post-its coloridos ligados por setas e um título escrito à mão."><figcaption>Um quadro com post-its e setas.</figcaption></figure>
   </section>
 
   <section class="fine wrap">
     <div class="cols2">
       <div>
-        <h2>O que mais ajuda</h2>
-        <h3>Páginas relacionadas, calculadas no seu Mac</h3>
-        <p>A cada salvamento, o Caderninho compara a página com as outras do mesmo caderno, por categorias, palavras e significado, inclusive o texto dentro de imagens. Nenhum texto sai do seu computador. <kbd>⌥⌘R</kbd> abre o grafo.</p>
+        <h2>Mais coisas que ajudam</h2>
+        <h3>Páginas relacionadas</h3>
+        <p>Enquanto você escreve, o Caderninho encontra no mesmo caderno as notas, listas, quadros e lembretes que falam do mesmo assunto, inclusive pelo texto dentro de imagens. <kbd>⌥⌘R</kbd> mostra todas num mapa. Tudo é calculado no seu Mac.</p>
         <h3>Referências ao lado da ideia</h3>
-        <p>Imagens, PDFs e cartões de link ficam ao lado do parágrafo a que pertencem, e os links continuam funcionando sem internet.</p>
-        <h3>Quadros, no mesmo caderno</h3>
-        <p>Um mural sem fim para post-its, setas, fluxos e organogramas, com traço de mão. O texto do quadro aparece na busca e nas páginas relacionadas, e ele pode ser exportado em PNG ou SVG.</p>
-        <h3>Diagramas como texto</h3>
-        <p>Digite <code>/diagrama</code> e escreva um fluxograma, uma sequência ou uma linha do tempo em Mermaid. Ele é desenhado com traço de mão dentro da nota.</p>
+        <p>Imagens, PDFs e links ficam ao lado do parágrafo a que pertencem, e os links continuam visíveis mesmo sem internet.</p>
+        <h3>Diagramas escritos</h3>
+        <p>Digite <code>/diagrama</code> e escreva um fluxo, uma sequência ou uma linha do tempo em texto simples. O Caderninho desenha o diagrama dentro da nota, com traço de mão.</p>
       </div>
       <div>
-        <h2>Seus dados, numa pasta</h2>
-        <p>Notas, listas de tarefas, lembretes, quadros e categorias ficam num banco SQLite, com imagens e PDFs ao lado:</p>
+        <h2>Seus dados ficam com você</h2>
+        <p>Não há conta nem nuvem. Tudo fica numa pasta do seu Mac:</p>
         <div class="path">~/Library/Application Support/caderninho/</div>
-        <p>Não há conta nem sincronização na nuvem. Para fazer backup, feche o app e copie a pasta. Notas e lembretes viram PDF com <kbd>⇧⌘E</kbd>; quadros, PNG ou SVG.</p>
-        <p class="muted">As únicas requisições de rede são as que você dispara: a prévia de um link que você colou e o download, uma única vez, do modelo das páginas relacionadas.</p>
-        <h3>Limites</h3>
+        <p>Para fazer backup, feche o app e copie essa pasta. Notas e lembretes podem ser salvos em PDF com <kbd>⇧⌘E</kbd>, e quadros, como imagem.</p>
+        <p class="muted">O app só acessa a internet quando você pede: para mostrar a prévia de um link que você colou e, uma única vez, para baixar o que faz as páginas relacionadas funcionarem.</p>
+        <h3>O que ele ainda não faz</h3>
         <ul class="limits">
-          <li>Só para macOS, com interface em português.</li>
-          <li>Os lembretes só tocam com o app aberto, mesmo minimizado. Um alerta perdido toca quando o app volta.</li>
-          <li>Sem sincronização entre computadores e sem versão para celular.</li>
+          <li>Só funciona no Mac, e a interface é em português.</li>
+          <li>Os lembretes só tocam com o app aberto (pode estar minimizado). Se ele estiver fechado, o alerta toca quando você voltar.</li>
+          <li>Não sincroniza entre computadores e não tem versão para celular.</li>
           <li>Ainda não importa notas de outros apps.</li>
-          <li>Listas de tarefas não viram PDF, e cada tarefa não tem categorias próprias.</li>
+          <li>Listas de tarefas não são salvas em PDF.</li>
         </ul>
       </div>
     </div>
@@ -661,6 +667,8 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
   <footer class="wrap"><span>Caderninho · <a href="https://github.com/fagnermourafeitosa/caderninho">código no GitHub</a> · <a class="coffee" href="https://buymeacoffee.com/caderninho"><img src="img/bmc-logo.svg" alt="" style="height:14px;width:auto">Me pague um café</a></span><span>As capturas de tela mostram o app real com exemplos fictícios.</span></footer>
 </div>
 </main>
+
+<dialog class="zoom" id="zoom" aria-label="Captura ampliada"><button type="button" aria-label="Fechar">×</button><img alt=""><figcaption></figcaption></dialog>
 
 <script>
 (() => {
@@ -733,7 +741,7 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
     return token === typeToken;
   }
 
-  const HERO_T = 'Notas que viram tarefas sem perder o contexto.';
+  const HERO_T = 'Suas notas, tarefas e quadros, tudo conectado.';
   const HERO_L = 'Um caderno para o Mac, feito para quem escreve em português.';
   let heroTyped = false;
   async function heroIntro() {
@@ -848,6 +856,16 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
     const p = Math.min(1, Math.max(0, -r.top / total));
     render(Math.min(STEPS - 1, Math.floor(p * STEPS)));
   }
+  // ---------- screenshot zoom ----------
+  const zoom = $('#zoom'), zoomImg = zoom.querySelector('img'), zoomCaption = zoom.querySelector('figcaption');
+  document.querySelectorAll('.real img').forEach(img => {
+    img.tabIndex = 0; img.setAttribute('role', 'button'); img.title = 'Clique para ampliar';
+    const show = () => { zoomImg.src = img.currentSrc || img.src; zoomImg.alt = img.alt; zoomCaption.textContent = img.closest('figure')?.querySelector('figcaption')?.textContent || ''; zoom.showModal(); };
+    img.addEventListener('click', show);
+    img.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); show(); } });
+  });
+  zoom.addEventListener('click', () => zoom.close());
+
   addEventListener('scroll', onScroll, { passive: true });
   const topBar = document.querySelector('.top'), firstSheet = document.querySelector('.sheet');
   const onTopBar = () => topBar.classList.toggle('solid', !!firstSheet && firstSheet.getBoundingClientRect().top < topBar.offsetHeight);
