@@ -21,7 +21,9 @@
 
 Você escreve "pedir dois orçamentos" numa nota sobre a reforma da cozinha. Três semanas depois, a tarefa está numa lista e ninguém lembra de qual reforma era, quais orçamentos, nem por quê.
 
-O Caderninho mantém a tarefa presa à frase que a criou. Selecione um trecho, transforme em tarefa ou lembrete, e a tarefa sempre sabe de onde veio. A tarefa vai para um kanban simples, com as colunas que você quiser, e a nota continua mostrando em que coluna ela está. Todo o resto do app apoia essa ideia: uma página do dia com o kanban mais recente, páginas relacionadas encontradas no seu próprio computador, quadros para pensar no papel e referências colocadas ao lado do parágrafo a que pertencem.
+No Caderninho, a tarefa nasce da própria nota e continua ligada a ela. Selecione um trecho, transforme em tarefa, e ela entra numa lista onde dá para ver, de relance, em que pé está cada coisa: o que ainda nem começou, o que está andando e o que já terminou. A nota mostra a situação da tarefa, e a tarefa sempre sabe de onde veio.
+
+Para as ideias que pedem espaço, há os quadros: murais sem fim para post-its, setas, fluxos e organogramas. Notas, tarefas, lembretes e quadros ficam no mesmo caderno, tudo conectado.
 
 ![Uma nota com duas tarefas e um lembrete na margem, cada um ligado ao trecho destacado de onde veio; a tarefa concluída mostra o selo verde da coluna Done](docs/images/acoes-na-nota.png)
 
@@ -29,29 +31,29 @@ O Caderninho mantém a tarefa presa à frase que a criou. Selecione um trecho, t
 
 Na maioria dos apps, a nota e a lista de tarefas são coisas separadas. Copie uma linha de uma para a outra e a lista perde o contexto.
 
-No Caderninho, você seleciona o trecho e cria a partir dele uma **tarefa** ou um **lembrete**. A tarefa entra num pipeline e aparece na margem da nota com uma cópia do trecho e um selo com a coluna em que está. O trecho ganha um destaque tracejado, que fica verde quando a tarefa chega à coluna final. Imagens e cartões de link também podem originar ações.
+No Caderninho, você seleciona o trecho e cria a partir dele uma **tarefa** ou um **lembrete**. A tarefa entra numa das suas listas e aparece ao lado da nota, na margem, com uma cópia do trecho e a etapa em que está. O trecho fica destacado e ganha verde quando a tarefa termina. Imagens e cartões de link também podem virar tarefas.
 
-- Comece uma linha com `[]` para criar uma tarefa sem sair do texto. A linha passa a mostrar a tarefa com o selo da coluna.
-- Seleção, margem, menu de contexto e `[]` abrem o mesmo formulário **Nova tarefa**, com o título preenchido e o pipeline mais recente do caderno já escolhido.
+- Comece uma linha com `[]` para criar uma tarefa sem parar de escrever. A linha passa a mostrar a etapa da tarefa.
+- Seja pela seleção, pela margem, pelo botão direito ou por `[]`, abre o mesmo formulário **Nova tarefa**, com o título já preenchido e a lista mais recente do caderno escolhida.
 - Os lembretes aparecem no calendário e tocam um alerta no horário marcado; **Ver origem**, na margem, abre a nota e destaca o trecho.
 - Uma nota pode ter várias tarefas e vários alertas independentes.
 - Se você reescrever ou apagar o trecho depois, a ação guarda a cópia e a margem avisa que não encontra mais o original.
 
-## Um kanban simples para cada projeto
+## Listas que mostram em que pé está cada coisa
 
-Em **Tarefas**, cada pipeline é um quadro kanban. Ele nasce com **Backlog**, **Ready to Dev**, **Doing**, **Review** e **Done**, e você pode renomear, reordenar, adicionar e remover colunas. A última coluna é sempre a final: concluir uma tarefa é levá-la até lá. Arraste os cards entre colunas ou dentro da mesma coluna; a ordem fica salva.
+Em **Tarefas**, cada lista é organizada em colunas, uma para cada etapa do trabalho. Ela já começa com cinco etapas (**Backlog**, **Ready to Dev**, **Doing**, **Review** e **Done**), e você pode renomear, mudar de lugar, criar e remover etapas do jeito que fizer sentido para você. Para avançar uma tarefa, arraste-a para a próxima coluna; quando ela chega à última, está concluída. Basta olhar a lista para saber o que falta.
 
-![Kanban "Montar o ateliê" com as colunas Backlog, Ready to Dev, Doing, Review e Done, e cards com data de criação e número de comentários](docs/images/kanban.png)
+![Lista de tarefas "Montar o ateliê" organizada em cinco colunas, de Backlog a Done, com a data de criação e o número de comentários em cada tarefa](docs/images/kanban.png)
 
-Clique num card para abrir a tarefa. A descrição aceita listas, tabelas e imagens; os comentários podem ser editados (com a marca **editado em**) e removidos. Ao lado ficam a coluna, um owner opcional, a data de criação e o histórico de cada mudança de coluna ou posição.
+Clique numa tarefa para ver tudo sobre ela: a descrição, com listas, tabelas e imagens; os comentários, que você pode editar ou apagar; quem está cuidando dela; e o caminho que ela fez de uma etapa para outra.
 
-![Tarefa aberta com descrição em lista e tabela, miniaturas das imagens, dois comentários (um deles editado) e, ao lado, coluna, owner, data de criação e histórico](docs/images/tarefa.png)
+![Tarefa aberta com descrição em lista e tabela, miniatura da imagem, dois comentários (um deles editado) e, ao lado, a etapa, o responsável, a data de criação e o histórico](docs/images/tarefa.png)
 
 ## Uma página do dia que guarda o registro
 
-**Caderninho**, a primeira tela, mostra em faixas que você pode recolher: a nota editada mais recentemente no caderno com as páginas relacionadas a ela, o kanban do pipeline mais recente (dá para arrastar os cards ali mesmo), os lembretes de hoje e as últimas notas.
+**Caderninho**, a primeira tela, mostra em faixas que você pode recolher: a nota editada mais recentemente no caderno com as páginas relacionadas a ela, a lista de tarefas mais recente (dá para avançar as tarefas ali mesmo), os lembretes de hoje e as últimas notas.
 
-![Página do dia com a nota mais recente, seguida do kanban do pipeline mais recente, dos lembretes e das últimas notas](docs/images/pagina-do-dia.png)
+![Página do dia com a nota mais recente, seguida da lista de tarefas mais recente, dos lembretes e das últimas notas](docs/images/pagina-do-dia.png)
 
 No dia seguinte começa uma página nova. Os dias anteriores continuam disponíveis no seletor de datas, somente para leitura, exatamente como estavam: o que estava agendado e as notas daquele dia. Funciona como um diário que você nunca precisou escrever.
 
@@ -65,7 +67,7 @@ A interface, a leitura de datas e a busca foram construídas para o português, 
 
 ## O que mais ajuda
 
-**Páginas relacionadas, calculadas no seu Mac.** A cada salvamento, o Caderninho compara a página com as outras notas, pipelines e lembretes do mesmo caderno, por categorias em comum, palavras em comum e significado, incluindo o texto dentro de imagens. As duas páginas mais próximas aparecem no fim da nota, e o grafo (**⌥⌘R**) mostra o restante. Nenhum texto ou imagem sai do seu computador.
+**Páginas relacionadas, calculadas no seu Mac.** A cada salvamento, o Caderninho compara a página com as outras notas, listas de tarefas, quadros e lembretes do mesmo caderno, por categorias em comum, palavras em comum e significado, incluindo o texto dentro de imagens. As duas páginas mais próximas aparecem no fim da nota, e o grafo (**⌥⌘R**) mostra o restante. Nenhum texto ou imagem sai do seu computador.
 
 ![Grafo de páginas relacionadas a uma nota de viagem: uma lista de bagagem, uma nota de trilha, um lembrete sobre o tempo e outras notas](docs/images/relacionados.png)
 
@@ -73,15 +75,15 @@ A interface, a leitura de datas e a busca foram construídas para o português, 
 
 ![Nota de viagem com uma paisagem à direita e um cartão de link à esquerda, com o texto contornando os dois](docs/images/colagem.png)
 
-**Quadros para pensar no papel.** Post-its, setas presas às formas, frames, imagens e texto solto num papel pontilhado sem fim, com traço de mão. O texto do quadro entra na busca e nas páginas relacionadas, e o quadro pode ser exportado em PNG ou SVG.
+**Quadros para pensar no papel.** Um mural sem fim para post-its, setas, fluxos, organogramas, imagens e texto solto, com traço de mão. O quadro fica no mesmo caderno das notas e das tarefas: o texto dele aparece na busca e nas páginas relacionadas, e ele pode ser exportado em PNG ou SVG.
 
-![Quadro "Ideias para o ateliê" com post-its coloridos ligados por setas dentro de um frame, um título escrito à mão e o trilho de ferramentas à esquerda](docs/images/quadro.png)
+![Quadro "Ideias para o ateliê" com post-its coloridos ligados por setas, um título escrito à mão e as ferramentas de desenho à esquerda](docs/images/quadro.png)
 
 **Diagramas como texto.** Digite `/diagrama` para escrever um fluxograma, uma sequência, um mapa mental ou uma linha do tempo em [Mermaid](https://mermaid.js.org). O diagrama é desenhado com traço de mão dentro da nota, e a busca encontra as palavras dele.
 
 ## Seus dados, numa pasta
 
-Notas, pipelines e tarefas, lembretes, quadros e categorias ficam num banco SQLite; imagens e PDFs ficam ao lado dele:
+Notas, listas de tarefas, lembretes, quadros e categorias ficam num banco SQLite; imagens e PDFs ficam ao lado dele:
 
 ```text
 ~/Library/Application Support/caderninho/
@@ -96,7 +98,7 @@ As únicas requisições de rede são as que você dispara: buscar a prévia de 
 - Só para macOS, com interface em português.
 - Os lembretes só tocam com o app aberto (pode estar minimizado). Um alerta perdido com o app fechado ou o Mac em repouso toca quando o app volta.
 - Sem sincronização entre computadores e sem versão para celular.
-- Pipelines não são exportados em PDF, e tarefas não têm categorias nem páginas relacionadas próprias.
+- Listas de tarefas não são exportadas em PDF, e cada tarefa não tem categorias nem páginas relacionadas próprias.
 - Ainda não importa notas de outros apps.
 - As páginas relacionadas são buscadas dentro do mesmo caderno, não entre cadernos.
 
