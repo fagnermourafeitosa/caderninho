@@ -51,7 +51,7 @@ Clique num card para abrir a tarefa. A descrição aceita listas, tabelas e imag
 
 **Caderninho**, a primeira tela, mostra em faixas que você pode recolher: a nota editada mais recentemente no caderno com as páginas relacionadas a ela, o kanban do pipeline mais recente (dá para arrastar os cards ali mesmo), os lembretes de hoje e as últimas notas.
 
-![Página do dia com a nota mais recente ao lado do grafo de páginas relacionadas, seguida do kanban do pipeline mais recente, dos lembretes e das últimas notas](docs/images/pagina-do-dia.png)
+![Página do dia com a nota mais recente, seguida do kanban do pipeline mais recente, dos lembretes e das últimas notas](docs/images/pagina-do-dia.png)
 
 No dia seguinte começa uma página nova. Os dias anteriores continuam disponíveis no seletor de datas, somente para leitura, exatamente como estavam: o que estava agendado e as notas daquele dia. Funciona como um diário que você nunca precisou escrever.
 
