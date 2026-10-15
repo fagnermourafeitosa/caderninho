@@ -1,6 +1,6 @@
 {
   "name": "caderninho",
-  "version": "1.11.3",
+  "version": "1.11.4",
   "description": "Um bloco de notas animado, com tarefas e lembretes.",
   "main": "src/main/main.cjs",
   "license": "MIT",
