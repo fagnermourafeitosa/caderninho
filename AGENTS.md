@@ -127,6 +127,7 @@ The coding agent must proactively consult and read specific documentation and sp
   - When the change touches the renderer, `src/main/preload.cjs` or IPC handlers, run the affected Electron smoke tests (`npm run test:app`, or its scoped flags). Run smoke processes sequentially; they share the test data directory and desktop focus.
   - When the change touches `native/`, run `node scripts/build-ocr.cjs` and confirm the helper builds.
   - When the change touches packaging, resource paths, `native/`, `assets/` or dependencies, run `npm run package` and confirm the packaged app starts.
+- **Releases**: Publish with `scripts/release.sh [patch|minor|major|X.Y.Z] [--draft]` from a clean, pushed `main`. It bumps the version, runs `npm test`, packages and zips the app, then commits `release: vX.Y.Z`, tags, pushes and creates the GitHub release; it restores the version if anything fails before the commit.
 - **Isolated Test Data**: Tests MUST use a temporary data directory. Never read, write or delete the user's real notebooks, SQLite database or media.
 
 ## Electron Quality Rules
