@@ -60,11 +60,6 @@
  // Search (copying needs a real user gesture and is checked by the runner).
  openGlobalSearch();searchInput.value='nota fiscal';renderGlobalSearch();assert(searchMatches.some(match=>match.note.id===id),'Busca encontra texto do diagrama');closeGlobalSearch();
 
- // Home preview draws the diagram without editing tools.
- state=await window.notebook.action('view:select',{view:'home'});view='home';render();
- await until(()=>drawn('Guardar nota fiscal',$('#home-note-preview .diagram-block')),'Prévia da home desenha o diagrama');
- assert(!$('#home-note-preview .diagram-tools'),'Prévia da home não mostra ferramentas do diagrama');
-
  // Removal through the visible tool, undoable.
  state=await window.notebook.action('note:select',{id});view='notes';render();
  block().querySelector('[data-diagram-action=remove]').click();await settle();assert(!block()&&!savedCode(),'Remover diagrama');

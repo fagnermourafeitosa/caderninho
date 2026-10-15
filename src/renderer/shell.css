@@ -1,4 +1,4 @@
-/* Native Mac paper shell: kraft sidebar, stitched binding, one primary action and raised menus. */
+/* Native Mac paper shell: kraft sidebar attached to the page, one primary action and raised menus. */
 
 /* Sidebar: a Mac source list on kraft paper. */
 
@@ -15,10 +15,22 @@
 .nav-item:focus-visible{outline:2px solid #ae772f;outline-offset:2px}
 .sidebar-collapsed .sidebar{opacity:0;transform:translateX(20px);pointer-events:none;visibility:hidden;transition:opacity .18s ease,transform .24s ease,visibility 0s .24s}
 .notebook{cursor:grab}
-/* The spiral rings gave way to a stitched binding on the left edge. */
-
+/* Attached sidebar (spec 012): sidebar and page form one block split by the stitched binding. The
+   traffic lights sit at the top of the sidebar, or at the page corner while it is collapsed. */
 .book-binding{position:absolute;left:0;top:0;bottom:0;width:22px;z-index:1;pointer-events:none;background:linear-gradient(90deg,#e7d4a8,var(--paper-shade) 70%,#f6e9c9);border-right:1px solid #c9b385}
 .book-binding::after{content:'';position:absolute;top:14px;bottom:14px;left:10px;border-left:1.5px dashed #9b8659}
+
+.app{gap:0}
+.sidebar{padding-top:46px;border-right:0;border-radius:16px 0 0 16px;box-shadow:none}
+.app:not(.sidebar-collapsed) .sheet{border-left:1px solid var(--hairline);border-top-left-radius:0;border-bottom-left-radius:0}
+.app:not(.sidebar-collapsed) .notebook{border-top-left-radius:0;border-bottom-left-radius:0}
+.app:not(.sidebar-collapsed) .view-toolbar{padding-left:0}
+.fold-tab,.app:not(.sidebar-collapsed) .fold-tab{left:-11px;top:120px;width:22px;height:40px;border:1.5px solid var(--edge);border-radius:11px;background:var(--paper)}
+.app.app.sidebar-collapsed{padding-left:20px}
+.app.sidebar-collapsed .fold-tab{left:0;border-radius:0 11px 11px 0;border-left:0}
+.fold-tab .fold-arrow{transform:rotate(180deg)}
+.sidebar-collapsed .fold-tab .fold-arrow{transform:none}
+.page-content,.book-footer{left:56px}
 /* Toolbar: one ink primary action; secondary actions live in "Mais". */
 
 .view-toolbar{min-height:28px}
@@ -53,7 +65,7 @@
 
 .notebook-tab span{font-family:var(--hand-font)}
 .daily-date{text-transform:none}
-.home-connections .daily-section-heading>span{font-size:var(--text-meta)}
+.home-graph .daily-section-heading>span{font-size:var(--text-meta)}
 @media(max-width:760px){.view-toolbar .toolbar-primary .toolbar-action-label{display:none}.view-toolbar .toolbar-primary{padding:0 8px}}
 @media(prefers-reduced-motion:reduce){.nav-item,.sidebar{transition:none}}
 /* Like macOS overlay scrollbars: the page scrolls, the bar shows only while the pointer is on it. */
@@ -87,13 +99,41 @@
 .note-provenance .notebook-association select:hover{background:var(--hover);border-radius:4px}
 .note-provenance .list-date{margin:0;font:inherit;color:var(--muted)}
 
-/* Home: the latest note alone, or beside its connections; it never scrolls by itself. */
-.home-connections-layout{grid-template-columns:minmax(0,1fr)}
-.home-connections-layout.with-related{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.home-connections-layout:not(.with-related) #home-related-content{display:none}
-.home-note-preview{max-height:430px;overflow:hidden}
-.home-note-preview.clipped{-webkit-mask-image:linear-gradient(to bottom,#000 78%,transparent)}
-.home-note-preview .paper-cut{float:none;margin:10px 0;max-width:100%}
+/* Home rows (spec 012): bordered cards on the page; graph and today's reminders share a row. */
+.daily-toolbar{margin-bottom:26px}
+/* Toolbar controls: one 34px height in every section. */
+.page-content .view-toolbar{min-height:34px}
+.page-content .view-toolbar .toolbar-primary{height:34px;padding:0 16px;font-size:14px;border-radius:8px}
+.page-content .view-toolbar :is(.toolbar-back,#page-more,#global-search-toggle){width:34px;height:34px;border-radius:8px}
+.page-content .view-toolbar .daily-picker select{height:34px;padding:0 12px;font-size:14px;max-width:220px;border-radius:8px}
+.daily-heading{justify-content:flex-end;margin:0 0 22px}
+.daily-date{font-size:20px}
+.home-card{padding:14px 16px 12px;background:var(--sheet-raised);border:1px solid var(--hairline);border-radius:10px;margin-bottom:14px}
+.home-card .daily-section-heading{border-bottom:0;padding-bottom:0}
+.home-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;margin-bottom:14px}
+.home-pair>.home-card,#home-reminders-strip>.home-card{margin-bottom:0}
+#home-reminders-strip{display:flex;min-width:0}
+#home-reminders-strip>.home-strip{flex:1;min-width:0}
+.home-pair>:only-child,.home-pair>#home-reminders-strip:first-child{grid-column:1/-1}
+.home-graph .strip-meta{display:flex;align-items:center;gap:4px;min-width:0}
+.home-graph .strip-meta .daily-link span{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-note-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.home-note-card{display:flex;flex-direction:column;gap:6px;min-width:0;height:118px;overflow:hidden;padding:12px 14px;text-align:left;background:var(--paper);border:1px solid var(--hairline);border-radius:8px}
+.home-note-card:hover{background:var(--hover)}
+.home-note-card strong{font:600 15px/1.35 var(--body-font);overflow-wrap:anywhere}
+.home-note-card small{font:12px/1.5 var(--body-font);color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.home-note-card time{margin-top:auto;font:11px var(--body-font);color:var(--muted)}
+.home-draft .task-editor{box-sizing:border-box;width:100%;min-height:120px;max-height:320px;margin:0;overflow-y:auto;padding:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:8px;cursor:text}
+.home-draft .task-editor:focus-within{border-color:var(--hairline)}
+/* Narrow pages: headings wrap instead of overlapping; the overview never scrolls sideways. */
+.daily-overview{overflow-x:hidden;container-type:inline-size}
+.home-strip{min-width:0}
+.home-strip-heading{flex-wrap:wrap;align-items:center;row-gap:6px}
+.daily-overview .home-strip-heading h2{flex:1 1 auto;min-width:0;font-size:19px}
+.home-strip-heading h2>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-strip .strip-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px 10px;min-width:0;font-size:12px;color:var(--muted)}
+.home-strip .strip-meta .daily-link{white-space:nowrap}
+@container (max-width:620px){.home-pair{grid-template-columns:1fr}.home-note-grid{grid-template-columns:1fr}.home-note-card{height:auto;max-height:118px}}
 .note-provenance .notebook-association select{appearance:none;-webkit-appearance:none;margin:0 0 0 -2px;padding:0 16px 0 2px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 8l4 4 4-4' fill='none' stroke='%23303025' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right center/12px no-repeat;cursor:pointer}
 .note-provenance .notebook-association select:hover{background-color:var(--hover)}
 .daily-overview,.scroll-list{scrollbar-width:none}

@@ -1,5 +1,5 @@
 /* Related pages: view component. Ranking, OCR and inference stay in the main process. */
-let relatedRequest=0,homeRelatedRequest=0,relatedTimer,relatedFocus=null;
+let relatedRequest=0,relatedTimer,relatedFocus=null;
 const relatedGraphIcon='<svg viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" stroke-width="1.8"><path d="M7 7L17 6M7 7L11 18M17 6L11 18" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7" cy="7" r="3"/><circle cx="17" cy="6" r="3"/><circle cx="11" cy="18" r="3"/></svg>';
 function orderRelated(results){return [...results].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));}
 function refreshRelatedSoon(){clearTimeout(relatedTimer);relatedTimer=setTimeout(refreshRelated,300);}
@@ -43,23 +43,6 @@ function renderRelatedGraph(note,data,host=$('#related-content'),{openCenter=fal
  host.innerHTML=`${openCenter?'':'<p class="related-caption">Quanto mais perto desta página, mais afinidade. Clique para abrir.</p>'}<div class="related-graph" aria-label="Conexões desta página"><svg viewBox="0 0 640 640" class="related-edges" aria-hidden="true">${points.map(p=>`<path d="M320 320L${p.x} ${p.y}"/>`).join('')}</svg><${openCenter?'button type="button"':'div'} class="related-node related-center" style="left:50%;top:50%" ${openCenter?'aria-label="Abrir última nota"':''}>${icon(note.type)}<strong>${escape(note.title||'Sem título')}</strong><small>${openCenter?'Última nota':'Esta página'}</small></${openCenter?'button':'div'}>${points.map(p=>`<button class="related-node" data-related-id="${escape(p.id)}" style="left:${p.x/640*100}%;top:${p.y/640*100}%" aria-label="Abrir ${escape(p.title)}">${icon(p.type)}<span>${escape(p.title)}</span></button>`).join('')}</div>`;
  if(openCenter)host.querySelector('.related-center').onclick=()=>openRelatedPage({noteId:note.id});
  host.querySelectorAll('[data-related-id]').forEach(button=>button.onclick=async()=>{const target=points.find(p=>p.id===button.dataset.relatedId);if(host===$('#related-content'))$('#related-dialog').close();await openRelatedPage(target);});
-}
-async function refreshHomeRelated(){
- let host=$('#home-related-content');const note=latestHomeNote(),request=++homeRelatedRequest;
- if(view!=='home'||!host||!note)return;
- if(host.dataset.noteId!==note.id){host.closest('.home-connections').outerHTML=homeRelatedSection();bindHomePanels();renderHomeNotePreview();host=$('#home-related-content');}
- try{
-  const data=await window.notebook.related(note.id);
-  if(request!==homeRelatedRequest||view!=='home'||!host.isConnected||host.dataset.noteId!==note.id||latestHomeNote()?.id!==note.id)return;
-  const results=orderRelated(data.results).slice(0,4),signature=JSON.stringify([note.title,data.status,results.map(item=>[item.id,item.title,item.score])]);
-  if(host.dataset.connections===signature)return;
-  const layout=host.closest('.home-connections-layout');host.dataset.connections=signature;
-  if(!results.length){host.replaceChildren();layout.classList.remove('with-related');return;}
-  renderRelatedGraph(note,{...data,results},host,{openCenter:true});layout.classList.add('with-related');
-  host.insertAdjacentHTML('afterbegin',`<div class="daily-section-heading"><h2>${relatedGraphIcon}<span>Ideias por perto</span></h2></div>`);
- }catch{
-  if(request===homeRelatedRequest&&host.isConnected){host.replaceChildren();host.closest('.home-connections-layout').classList.remove('with-related');}
- }
 }
 document.addEventListener('DOMContentLoaded',()=>{
  const dialog=$('#related-dialog');$('#related-close').onclick=()=>dialog.close();

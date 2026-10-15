@@ -222,7 +222,7 @@ test('the snapshot carries searchable task text and the notebook of each pipelin
 test('home strip folding is stored per strip', t => {
   const { store } = setup(t);
   store.dispatch('home:fold', { strip: 'notes', folded: true });
-  assert.deepEqual(store.snapshot().homeFolded, { latest: false, pipeline: false, reminders: false, notes: true });
+  assert.deepEqual(store.snapshot().homeFolded, { draft: false, graph: false, reminders: false, notes: true, pipeline: false });
   assert.throws(() => store.dispatch('home:fold', { strip: 'tasks', folded: true }), /Faixa inválida/);
   assert.throws(() => store.dispatch('home:fold', { strip: 'notes', folded: 'yes' }), /Faixa inválida/);
 });

@@ -70,8 +70,8 @@
    Do instead: before treating a site/ illustration as current behavior, grep src/ (e.g. the Tarefa/Lembrete context menu existed only in site/index.html until spec 005).
 
 ## User Directives
-1. **[2026-10-01] Daily overview and temporal records**
-   Do instead: open on Caderninho with the latest updated note from the active notebook and its clickable related graph above the daily panels; show this live section only for today. Render the latest note with the shared editor blocks/media and source highlights in a read-only preview, preserving line breaks and complete content; omit the graph caption and daily writing field from home. Show the related graph beside the note only when connections exist (no empty section); never stack it below the note; the preview never scrolls by itself. Verify icons and labels do not overlap at small widths/heights. Keep pending tasks, today's completions/reminders and recent notes; preserve previous snapshots read-only. Store creation/update/check/uncheck/deletion events, clear deleted_at on restore, keep unknown legacy dates null and omit routine save status from the header; show failures only.
+1. **[2026-10-15] Home layout is spec 012 (daily note + attached sidebar)**
+   Do instead: read specs/012 before touching home or the shell; it supersedes the latest-note preview strip, the summary line and the binding/fold-tab rules below. Home rows: Nota do dia (one per notebook per day, created on first char, autosave) -> related graph + Lembretes de hoje -> 3 recent-note cards -> unchanged kanban. Prioridades and Backlog lock are deferred; do not build them without a new spec. Keep daily snapshots/past days read-only; store creation/update/check/uncheck/deletion events, clear deleted_at on restore.
 
 2. **[2026-10-04] Design refresh pending in specs/003 (native Mac paper)**
    Do instead: when 003 is approved it supersedes the rings, drawn traffic lights, grips, Chalkboard labels and illustrated sidebar below; design critique must think macOS-native and avoid generic "AI-looking" UI (glass cards, bento, gradients). Electron 44 cannot reach New York via ui-serif/name; load /System/Library/Fonts/NewYork.ttf through a protocol.
@@ -90,8 +90,8 @@
 7. **[2026-10-01] Collapsible sidebar uses the paper design**
    Do instead: attach a folded paper tab to the left book edge, keep window controls on the book, persist collapse in SQLite, and omit the top ribbon until favorites are requested.
 
-8. **[2026-10-02] Quick capture removed at user request**
-   Do instead: keep the app without a quick draft button, window, global shortcut or menu; retain legacy settings in SQLite without exposing the removed feature.
+8. **[2026-10-02] No global quick capture**
+   Do instead: no quick-capture window, global shortcut or menu; the only inline capture is the home "Nota do dia" from spec 012.
 
 9. **[2026-10-01] Adicionar mídia uses local media and metadata-only previews**
    Do instead: retain images and PDFs in userData/media, deduplicate by SHA-256, reference from SQLite cuts, preserve media for trashed cuts, and collect only unreferenced blobs. Link cards read metatags without executing page scripts and cache metadata/images offline. PDF cards use the native PDFKit reader in caderninho-ocr for title/excerpt and open the retained copy with shell.openPath; rebuild the helper before testing or packaging. Text excerpt cards are deferred.

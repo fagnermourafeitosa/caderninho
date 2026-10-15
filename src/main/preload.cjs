@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('notebook', {
   onSourceOrigin: callback => ipcRenderer.on('notebook:source-origin', (_event, id) => callback(id)),
   related: id => ipcRenderer.invoke('related:query', id),
   relatedRetry: () => ipcRenderer.invoke('related:retry'),
+  relatedRefresh: () => ipcRenderer.invoke('related:refresh'),
+  dailyDraftStart: notebookId => ipcRenderer.invoke('daily-draft:start', notebookId),
   relatedSettings: () => ipcRenderer.invoke('settings:related-read'),
   updateRelatedSettings: changes => ipcRenderer.invoke('settings:related-update', changes),
   resetRelatedRanking: () => ipcRenderer.invoke('settings:related-reset'),

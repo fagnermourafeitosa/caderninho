@@ -80,12 +80,12 @@
   window.notebook.resize('move', { x: -10000, y: -10000 });
   window.notebook.resize('end'); await wait(180);
   const compactWindow = await window.notebook.window('state');
-  assert(compactWindow.bounds.width === 620 && compactWindow.bounds.height === 520, 'Canto respeita tamanho mínimo');
+  assert(compactWindow.bounds.width === 760 && compactWindow.bounds.height === 520, 'Canto respeita tamanho mínimo');
   assert(document.querySelector('#note-body').getBoundingClientRect().height > 120, 'Editor utilizável no tamanho mínimo');
   const lastMenu = document.querySelector('[data-view=archive]').getBoundingClientRect();
   assert(lastMenu.bottom < innerHeight, 'Menu cabe na janela compacta');
   window.notebook.resize('start', { edge: 'se', x: 0, y: 0 });
-  window.notebook.resize('move', { x: originalWindow.bounds.width - 620, y: originalWindow.bounds.height - 520 });
+  window.notebook.resize('move', { x: originalWindow.bounds.width - 760, y: originalWindow.bounds.height - 520 });
   window.notebook.resize('end'); await wait(180);
   await click('#new-note', 160);
   assert(document.querySelector('.flipping-sheet'), 'Virada de página');

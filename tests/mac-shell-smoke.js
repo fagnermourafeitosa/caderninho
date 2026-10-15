@@ -4,7 +4,14 @@
   const width = (text, family) => { const span = document.createElement('span'); span.style.cssText = `font:400 40px ${family};position:absolute;white-space:nowrap`; span.textContent = text; document.body.append(span); const value = span.getBoundingClientRect().width; span.remove(); return value; };
   await document.fonts.ready;
   // Window chrome: the native traffic lights replace the drawn ones; resizing stays on the book border.
-  assert(!document.querySelector('.spiral') && document.querySelector('.book-binding'), 'Lombada no lugar das espirais');
+  assert(!document.querySelector('.spiral') && document.querySelector('.book-binding'), 'Lombada tracejada entre o menu e a página');
+  // The sidebar is attached to the page: no gap, the collapse arrow on its right edge.
+  const sideBox = document.querySelector('#sidebar').getBoundingClientRect(), sheetBox = document.querySelector('#sheet').getBoundingClientRect();
+  if (!state.sidebarCollapsed) {
+    assert(Math.abs(sideBox.right - sheetBox.left) <= 2, `Menu lateral grudado na página: ${sideBox.right} x ${sheetBox.left}`);
+    const arrow = document.querySelector('#sidebar-toggle').getBoundingClientRect();
+    assert(Math.abs((arrow.left + arrow.right) / 2 - sideBox.right) <= 12, 'Seta de recolher na borda direita do menu');
+  }
   assert(!document.querySelector('.traffic-lights, #close, #minimize, #maximize'), 'Semáforos desenhados removidos');
   assert(!document.querySelector('.resize-handle'), 'Puxadores de resize removidos');
   assert(document.querySelectorAll('.book-edges [data-resize]').length === 8, 'Resize pela borda do livro continua');
@@ -39,16 +46,20 @@
   const toastBox = document.querySelector('#toast').getBoundingClientRect(), book = document.querySelector('.notebook').getBoundingClientRect();
   assert(Math.abs((toastBox.left + toastBox.right) / 2 - (book.left + book.right) / 2) < 2, 'Aviso centralizado no caderno');
   document.querySelector('#toast').hidden = true;
-  assert(document.querySelector('#sidebar-toggle').getBoundingClientRect().width <= 18, 'Aba de recolher pequena');
-  // Native traffic lights take x+38..x+90 on the sheet; toolbar content starts after them.
-  const sheetLeft = document.querySelector('#sheet').getBoundingClientRect().left;
-  assert(document.querySelector('.view-toolbar').firstElementChild.getBoundingClientRect().left >= sheetLeft + 100, 'Toolbar livre dos semáforos');
+  assert(document.querySelector('#sidebar-toggle').getBoundingClientRect().width <= 24, 'Aba de recolher pequena');
+  // With the sidebar open the traffic lights sit on it, so the toolbar is free.
+  // Toolbar controls share one height in every section.
+  const heights = selector => [...document.querySelectorAll(selector)].filter(element => element.offsetParent).map(element => Math.round(element.getBoundingClientRect().height));
+  const notesHeights = heights('.view-toolbar .toolbar-primary, .view-toolbar .toolbar-back, #page-more, #global-search-toggle');
+  assert(notesHeights.length >= 3 && notesHeights.every(value => value === 34), 'Botões do topo das notas com 34px: ' + notesHeights.join());
   const notesCommands = window.availableNoteCommands;
   // Home: correct casing and plurals.
   state = await window.notebook.action('view:select', { view: 'home' }); view = 'home'; render(); await wait(50);
+  const homeHeights = heights('.view-toolbar .toolbar-primary, #daily-select, #global-search-toggle');
+  assert(homeHeights.length >= 2 && homeHeights.every(value => value === 34), 'Botões do topo da home com 34px: ' + homeHeights.join());
   const date = document.querySelector('.daily-date');
   assert(getComputedStyle(date).textTransform === 'none' && !/ De /.test(date.textContent), 'Data em caixa portuguesa');
-  assert(!/\b1 (tarefas|lembretes|notas)\b/.test(document.querySelector('#daily-summary').textContent), 'Resumo sem plural errado');
+  assert(!document.querySelector('#daily-summary'), 'Home sem linha de resumo');
   assert(getComputedStyle(date).fontFamily.includes('Excalifont'), 'Data do dia na manuscrita');
   return { errors: window.smokeErrors, notesCommands, homeCommands: window.availableNoteCommands };
 })()

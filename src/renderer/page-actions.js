@@ -44,13 +44,15 @@ function placeGlobalSearch() {
   else { const group = toolbar.querySelector('.toolbar-right') || toolbar; if (group.lastElementChild !== globalSearchNode) group.append(globalSearchNode); }
 }
 new MutationObserver(placeGlobalSearch).observe($('#page-content'), { childList: true });
-// Native traffic lights sit on the paper, right after the binding. An open modal covers the paper,
-// so they move to the window corner, above it, until the modal closes.
+// Native traffic lights sit at the top of the sidebar, or at the page's top-left while it is collapsed.
+// They are drawn above the page, so an open modal leaves them in place (spec 012).
 let windowButtonsAt = '';
-const WINDOW_CORNER = { x: 16, y: 14 };
+// On the page they start after the stitched binding.
+const BINDING_WIDTH = 22;
 function placeWindowButtons() {
-  const sheet = $('#sheet').getBoundingClientRect();
-  const position = document.querySelector('dialog:modal') ? WINDOW_CORNER : { x: Math.round(sheet.left + 38), y: Math.round(sheet.top + 12) };
+  const collapsed = $('.app').classList.contains('sidebar-collapsed');
+  const box = (collapsed ? $('#sheet') : $('#sidebar')).getBoundingClientRect();
+  const position = { x: Math.round(box.left + (collapsed ? BINDING_WIDTH : 0) + 14), y: Math.round(box.top + 14) };
   const key = position.x + ',' + position.y;
   if (key === windowButtonsAt) return;
   windowButtonsAt = key; window.notebook.windowButtons(position);
@@ -58,5 +60,3 @@ function placeWindowButtons() {
 new ResizeObserver(placeWindowButtons).observe($('#sheet'));
 $('.app').addEventListener('transitionend', placeWindowButtons);
 window.addEventListener('resize', placeWindowButtons);
-// showModal() and close() toggle the open attribute.
-new MutationObserver(placeWindowButtons).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });

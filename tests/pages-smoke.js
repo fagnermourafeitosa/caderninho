@@ -33,10 +33,9 @@
   assert(order.join() === 'note-title,note-categories,note-provenance', 'Hierarquia do topo: ' + order.join());
   assert(document.querySelector('.note-provenance #note-notebook') && document.querySelector('.note-provenance #note-dates'), 'Caderno e datas juntos');
   assert(!document.querySelector('.note-provenance').textContent.includes('Caderno '), 'Sem rótulo Caderno');
-  // Home: the latest note never scrolls by itself; no related section without connections.
+  // Home (spec 012): the daily note replaces the latest-note preview.
   await go('home'); await wait(400);
-  const preview = document.querySelector('#home-note-preview');
-  assert(preview && !['auto', 'scroll'].includes(getComputedStyle(preview).overflowY), 'Prévia sem barra de rolagem');
-  assert(!document.querySelector('#page-content').textContent.includes('Ideias por perto'), 'Ideias por perto só com conexões');
+  assert(!document.querySelector('#home-note-preview') && document.querySelector('.home-draft .task-editor'), 'Nota do dia no lugar da prévia');
+  assert(!document.querySelector('#page-content').textContent.includes('Ideias por perto'), 'Sem o antigo título do grafo');
   return { errors: window.smokeErrors };
 })()

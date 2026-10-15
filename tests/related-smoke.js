@@ -34,16 +34,13 @@
   assert(host.dataset.noteId===latest.id&&host.querySelector('.related-center strong').textContent===latest.title,'Home mostra a última nota do caderno no centro do grafo');
   assert(host.querySelectorAll('[data-related-id]').length===4,'Home mostra as quatro conexões mais próximas');
   assert(!host.querySelector('.related-caption'),'Home sem texto explicativo do grafo');
-  assert($('.home-connections').compareDocumentPosition($('#daily-panels'))&Node.DOCUMENT_POSITION_FOLLOWING,'Grafo aparece antes dos painéis existentes');
-  assert(!$('#daily-body')&&$('#daily-panels .daily-recent'),'Notas recentes continuam abaixo sem anotações diárias');
+  assert($('[data-strip="graph"]').parentElement.querySelector('[data-strip="reminders"]')&&$('[data-strip="graph"]').compareDocumentPosition($('[data-strip="notes"]'))&Node.DOCUMENT_POSITION_FOLLOWING,'Grafo ao lado dos lembretes, antes das notas');
   await clickAndWait(host.querySelector('.related-center'));assert(view==='notes'&&currentNote().id===latest.id,'Centro do grafo abre a última nota');
   await command('view:select',{view:'home'});view='home';render();await refreshHomeRelated();
   const target=$('#home-related-content [data-related-id]').dataset.relatedId;
   await clickAndWait($('#home-related-content [data-related-id]'));assert(view!=='home'&&'page:'+currentNote().id===target,'Conexão na home abre a página correspondente');
   await command('view:select',{view:'home'});view='home';render();await refreshHomeRelated();
-  const emptyHost=$('#home-related-content');renderRelatedGraph(latest,{results:[],status:'ready'},emptyHost,{openCenter:true});assert(emptyHost.textContent.includes('Ainda não encontramos')&&$('#daily-panels'),'Home sem conexões mantém conteúdo diário');
-  renderRelatedGraph(latest,{results:[],status:'error'},emptyHost,{openCenter:true});assert(emptyHost.querySelector('[data-related-retry]'),'Falha na home oferece nova tentativa');
-  await command('notebook:create',{name:'Caderno sem notas',description:'',color:'#c5d3ae'});view='home';render();await refreshHomeRelated();assert(!$('.home-connections')&&$('#daily-panels'),'Caderno vazio preserva home sem nota de outro caderno');
+  await command('notebook:create',{name:'Caderno sem notas',description:'',color:'#c5d3ae'});view='home';render();await refreshHomeRelated();assert(!$('[data-strip="graph"]')&&$('[data-strip="reminders"]')&&$('[data-strip="notes"]'),'Caderno sem notas não mostra o card de conexões');
   await command('notebook:select',{id:latest.notebookId});view='home';render();await refreshHomeRelated();assert($('#home-related-content').dataset.noteId===latest.id,'Troca de caderno restaura suas próprias conexões');
   await command('note:select',{id:source.id});view='notes';render();await openRelated();
   await new Promise(r=>setTimeout(r,300));

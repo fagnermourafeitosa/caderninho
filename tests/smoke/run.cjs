@@ -93,6 +93,26 @@ async function runPagesSmoke(win) {
   if (result.errors.length) throw new Error(result.errors.join('\n'));
   console.log('PAGES_SMOKE_OK');
 }
+// Home (spec 012): rows, graph card, folding, then a past day stays read-only without the daily note or graph.
+async function runHomeSmoke(win, store) {
+  fs.mkdirSync(path.join(ROOT, 'artifacts'), { recursive: true });
+  const home = await win.webContents.executeJavaScript(smokeScript('home-smoke.js'));
+  if (home.errors.length) throw new Error(home.errors.join('\n'));
+  const homeStore = new Store(app.getPath('userData'));
+  if (!homeStore.snapshot().pipelines.some(pipeline=>pipeline.tasks.some(task=>task.id===home.taskId))) throw new Error('Card da home não pertence a um pipeline salvo');
+  homeStore.close();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());
+  const actualNow=store.now;
+  store.now=()=>actualNow()+24*60*60*1000;
+  store.dispatch('view:select',{view:'home'}); testHook.setObservedDay(store.dayKey());
+  await win.webContents.executeJavaScript("(async () => { state = await window.notebook.state(); view = 'home'; render(); })()");
+  await win.webContents.executeJavaScript(`document.querySelector('#daily-select').value=${JSON.stringify(home.day)};document.querySelector('#daily-select').dispatchEvent(new Event('change'));`);
+  await new Promise(resolve => setTimeout(resolve, 100));
+  if (!await win.webContents.executeJavaScript(`state.daily.day===${JSON.stringify(home.day)}&&!document.querySelector('#daily-body')&&!document.querySelector('[data-strip="draft"],[data-strip="graph"]')&&[...document.querySelectorAll('[data-home-task]')].every(input=>input.disabled)`)) throw new Error('Página anterior não foi preservada para consulta');
+  fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-anterior.png'), (await win.webContents.capturePage()).toPNG());
+  store.now=actualNow; testHook.setObservedDay(store.dayKey());
+}
 // Native Mac shell: menu commands, enablement per view and traffic lights that follow the book.
 async function runMacShellSmoke(win) {
   const { Menu } = require('electron');
@@ -102,20 +122,28 @@ async function runMacShellSmoke(win) {
   const run = script => win.webContents.executeJavaScript(script);
   const result = await run(smokeScript('mac-shell-smoke.js'));
   if (result.errors.length) throw new Error(result.errors.join('\n'));
-  if (JSON.stringify(enabled()) !== JSON.stringify({ 'Nova nota': true, 'Adicionar mídia': false, 'Relacionados': false, 'Exportar PDF': false, 'Mover para a lixeira': false })) throw new Error('Menu Nota na home: ' + JSON.stringify(enabled()));
+  if (JSON.stringify(enabled()) !== JSON.stringify({ 'Nova nota': true, 'Adicionar mídia': false, 'Relacionados': false, 'Exportar PDF': false, 'Tela cheia do quadro': false, 'Mover para a lixeira': false })) throw new Error('Menu Nota na home: ' + JSON.stringify(enabled()));
   await run("(async()=>{state=await window.notebook.action('view:select',{view:'notes'});view='notes';render();})()"); await wait(50);
-  if (Object.values(enabled()).some(value => !value)) throw new Error('Menu Nota nas notas: ' + JSON.stringify(enabled()));
+  if (Object.entries(enabled()).some(([label, value]) => label !== 'Tela cheia do quadro' && !value)) throw new Error('Menu Nota nas notas: ' + JSON.stringify(enabled()));
   noteItems().find(item => item.label === 'Adicionar mídia').click(); await wait(100);
   if (!await run("document.querySelector('#cut-dialog').open")) throw new Error('Nota > Adicionar mídia não abriu o diálogo');
   await run("document.querySelector('#cut-dialog').close()");
   const startedCollapsed = await run('Boolean(state.sidebarCollapsed)');
   if (startedCollapsed) { await run("document.querySelector('#sidebar-toggle').click()"); await wait(400); }
-  const expanded = win.getWindowButtonPosition();
+  // Open: the traffic lights sit at the top of the sidebar. Collapsed: at the page's top-left corner,
+  // clear of the toolbar.
+  const corner = selector => run(`(() => { const box = document.querySelector('${selector}').getBoundingClientRect(); return { left: box.left, top: box.top }; })()`);
+  const near = (point, box) => point && point.x - box.left >= 8 && point.x - box.left <= 30 && point.y - box.top >= 8 && point.y - box.top <= 30;
+  const expanded = win.getWindowButtonPosition(), sidebarBox = await corner('#sidebar');
   await run("document.querySelector('#sidebar-toggle').click()"); await wait(400);
-  const collapsed = win.getWindowButtonPosition();
+  const collapsed = win.getWindowButtonPosition(), sheetBox = await corner('#sheet');
+  const toolbarLeft = await run("document.querySelector('.view-toolbar').firstElementChild.getBoundingClientRect().left");
+  const tabLeft = await run("document.querySelector('#sidebar-toggle').getBoundingClientRect().left");
   await run("document.querySelector('#sidebar-toggle').click()"); await wait(400);
   if (startedCollapsed) { await run("document.querySelector('#sidebar-toggle').click()"); await wait(400); }
-  if (!expanded || !collapsed || collapsed.x >= expanded.x || (startedCollapsed ? win.getWindowButtonPosition().x !== collapsed.x : win.getWindowButtonPosition().x !== expanded.x)) throw new Error('Semáforos não acompanham o livro: ' + JSON.stringify({ expanded, collapsed }));
+  // Collapsed: past the stitched binding (22px), the reopen tab on the binding itself.
+  const pastBinding = collapsed && collapsed.x >= sheetBox.left + 30 && collapsed.x <= sheetBox.left + 44 && collapsed.y - sheetBox.top >= 8 && collapsed.y - sheetBox.top <= 30;
+  if (!near(expanded, sidebarBox) || !pastBinding || toolbarLeft < collapsed.x + 60 || tabLeft < sheetBox.left - 1 || tabLeft > sheetBox.left + 4) throw new Error('Semáforos não acompanham o menu: ' + JSON.stringify({ expanded, sidebarBox, collapsed, sheetBox, toolbarLeft, tabLeft }));
   fs.mkdirSync(path.join(ROOT, 'artifacts'), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'artifacts', 'mac-shell.png'), (await win.webContents.capturePage()).toPNG());
   console.log('MAC_SHELL_SMOKE_OK', JSON.stringify({ expanded, collapsed }));
@@ -142,6 +170,7 @@ async function runSmoke() {
     if(process.argv.includes('--pipelines-only')){await runPipelinesSmoke(win,smokeScript);app.quit();return;}
     if(process.argv.includes('--settings-only')){await runSettingsSmoke(win,{configure:testHook.configure,store,related});app.quit();return;}
     if(process.argv.includes('--pages-only')){await runPagesSmoke(win);app.quit();return;}
+    if(process.argv.includes('--home-only')){await runHomeSmoke(win,store);console.log('HOME_SMOKE_OK');app.quit();return;}
     if(process.argv.includes('--mac-shell-only')){await runMacShellSmoke(win);app.quit();return;}
     if(process.argv.includes('--diagram-only')){await runDiagramSmoke(win);app.quit();return;}
     if(process.argv.includes('--native-only')){await runNativeEditorSmoke(win);app.quit();return;}
@@ -167,13 +196,6 @@ async function runSmoke() {
       const result=await win.webContents.executeJavaScript(smokeScript('search-smoke.js'));
       console.log('SEARCH_SMOKE_OK',JSON.stringify(result));app.quit();return;
     }
-    if(process.argv.includes('--home-preview-only')) {
-      media.fetch=async url=>({bytes:Buffer.from('<meta property="og:title" content="Referência">'),type:'text/html',url});
-      await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);
-      const result=await win.webContents.executeJavaScript(smokeScript('home-preview-smoke.js'));
-      if(result.errors.length)throw Error(result.errors.join('\n'));
-      console.log('HOME_PREVIEW_SMOKE_OK',JSON.stringify(result));app.quit();return;
-    }
     if(process.argv.includes('--related-only')) {
       await win.webContents.executeJavaScript(smokeScript('related-smoke.js'));
       const docs=require('../../src/main/related/domain/documents.cjs').documents(store.snapshot());
@@ -185,10 +207,10 @@ async function runSmoke() {
       await win.webContents.executeJavaScript("$('#related-dialog').close();state.activeView='home';view='home';render();");
       for(const [width,height] of [[1080,900],[1080,560],[800,560],[640,560]]){
         win.setSize(width,height);await new Promise(resolve=>setTimeout(resolve,160));
-        const geometry=await win.webContents.executeJavaScript(`(async()=>{await refreshHomeRelated();const host=$('#home-related-content');const fixture=[.95,.8,.65,.5].map((score,i)=>({id:'size-'+i,score,title:'Nota relacionada '+i,type:'notes'}));renderRelatedGraph(latestHomeNote(),{results:fixture,status:'ready'},host,{openCenter:true});const r=host.querySelector('.related-graph').getBoundingClientRect(),svg=host.querySelector('.related-edges').getBoundingClientRect(),nodes=[...host.querySelectorAll('.related-node .small-icon,.related-node span,.related-node strong')].map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});const note=$('.home-latest').getBoundingClientRect();return {width:innerWidth,height:innerHeight,graph:[r.width,r.height],svg:[svg.width,svg.height],nodes,sideBySide:r.left>=note.right&&r.top<=note.top+20}})()`);
+        const geometry=await win.webContents.executeJavaScript(`(async()=>{await refreshHomeRelated();const host=$('#home-related-content');const fixture=[.95,.8,.65,.5].map((score,i)=>({id:'size-'+i,score,title:'Nota relacionada '+i,type:'notes'}));renderRelatedGraph(latestHomeNote(),{results:fixture,status:'ready'},host,{openCenter:true});const r=host.querySelector('.related-graph').getBoundingClientRect(),svg=host.querySelector('.related-edges').getBoundingClientRect(),nodes=[...host.querySelectorAll('.related-node .small-icon,.related-node span,.related-node strong')].map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});const reminders=$('[data-strip="reminders"]').getBoundingClientRect(),card=$('[data-strip="graph"]').getBoundingClientRect();return {width:innerWidth,height:innerHeight,graph:[r.width,r.height],svg:[svg.width,svg.height],nodes,sideBySide:$('#daily-overview').clientWidth<=620||(card.right<=reminders.left+1&&Math.abs(card.top-reminders.top)<2)}})()`);
         console.log('HOME_GRAPH_SIZE',JSON.stringify({window:[geometry.width,geometry.height],graph:geometry.graph}));
         if(Math.abs(geometry.graph[0]-geometry.graph[1])>1||geometry.graph[0]<100)throw Error('Grafo da home foi comprimido');
-        if(!geometry.sideBySide)throw Error('Grafo deixou de ficar ao lado da nota');
+        if(!geometry.sideBySide)throw Error('Grafo deixou de ficar ao lado dos lembretes');
         for(let i=0;i<geometry.nodes.length;i++)for(let j=i+1;j<geometry.nodes.length;j++){const a=geometry.nodes[i],b=geometry.nodes[j];if(a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y)throw Error('Nós do grafo da home se sobrepõem');}
       }
       console.log('RELATED_SMOKE_OK',JSON.stringify(result));app.quit();return;
@@ -295,22 +317,7 @@ async function runSmoke() {
     const categories = await win.webContents.executeJavaScript(smokeScript('category-smoke.js'));
     if (categories.errors.length) throw new Error(categories.errors.join('\n'));
     fs.writeFileSync(path.join(ROOT, 'artifacts', 'categorias.png'), (await win.webContents.capturePage()).toPNG());
-    const home = await win.webContents.executeJavaScript(smokeScript('home-smoke.js'));
-    if (home.errors.length) throw new Error(home.errors.join('\n'));
-    const homeStore = new Store(app.getPath('userData'));
-    if (!homeStore.snapshot().pipelines.some(pipeline=>pipeline.tasks.some(task=>task.id===home.taskId))) throw new Error('Card da home não pertence a um pipeline salvo');
-    homeStore.close();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());
-    const actualNow=store.now;
-    store.now=()=>actualNow()+24*60*60*1000;
-    store.dispatch('view:select',{view:'home'}); testHook.setObservedDay(store.dayKey());
-    await win.webContents.executeJavaScript("(async () => { state = await window.notebook.state(); view = 'home'; render(); })()");
-    await win.webContents.executeJavaScript(`document.querySelector('#daily-select').value=${JSON.stringify(home.day)};document.querySelector('#daily-select').dispatchEvent(new Event('change'));`);
-    await new Promise(resolve => setTimeout(resolve, 100));
-    if (!await win.webContents.executeJavaScript(`state.daily.day===${JSON.stringify(home.day)}&&!document.querySelector('#daily-body')&&!document.querySelector('.home-connections')&&[...document.querySelectorAll('[data-home-task]')].every(input=>input.disabled)`)) throw new Error('Página anterior não foi preservada para consulta');
-    fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-anterior.png'), (await win.webContents.capturePage()).toPNG());
-    store.now=actualNow; testHook.setObservedDay(store.dayKey());
+    await runHomeSmoke(win, store);
     const notebooks=await win.webContents.executeJavaScript(smokeScript('notebook-smoke.js'));
     if(notebooks.errors.length) throw new Error(notebooks.errors.join('\n'));
     fs.writeFileSync(path.join(ROOT,'artifacts','cadernos.png'),(await win.webContents.capturePage()).toPNG());

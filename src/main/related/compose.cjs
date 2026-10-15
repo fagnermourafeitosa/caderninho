@@ -25,6 +25,7 @@ function createRelatedPages({ store, media, ocrPath, cacheDir = path.join(store.
     scheduler,
     engine: engineInUse,
     schedule: () => scheduler.schedule(),
+    refresh: () => { scheduler.runNow(); },
     ocrText: () => repository.ocrText(),
     close: () => { scheduler.close(); engineInUse.stop(); },
     useCases: {

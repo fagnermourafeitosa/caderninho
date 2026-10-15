@@ -19,6 +19,8 @@ const { createBoardUseCases } = require('./boards/compose.cjs');
 const { dialogExportTarget } = require('./boards/infrastructure/dialog-export-target.cjs');
 const { createPipelineUseCases } = require('./pipelines/compose.cjs');
 const { registerPipelines } = require('./pipelines/presentation/ipc.cjs');
+const { createDailyDraftUseCases } = require('./daily-draft/compose.cjs');
+const { registerDailyDraft } = require('./daily-draft/presentation/ipc.cjs');
 const { SCHEME: PIPELINE_SCHEME, pipelineProtocolHandler } = require('./pipelines/presentation/protocol.cjs');
 const { createSettingsUseCases } = require('./settings/compose.cjs');
 const { registerSettings } = require('./settings/presentation/ipc.cjs');
@@ -31,11 +33,11 @@ const ROOT = path.join(__dirname, '..', '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: PIPELINE_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
 let win, store, reminderInterval, saveFailed = false;
-let media, observedDay, related, boards, pipelines, settings;
+let media, observedDay, related, boards, pipelines, settings, dailyDrafts;
 let resolveReady;
 const ready = new Promise(resolve => { resolveReady = resolve; });
 let restoreBounds = null, resizeSession = null, moveSession = null, noteCommands = [];
-const MIN_WIDTH = 620, MIN_HEIGHT = 520, MAX_EXPANDED_WIDTH = 1200;
+const MIN_WIDTH = 760, MIN_HEIGHT = 520, MAX_EXPANDED_WIDTH = 1200;
 // Effects that leave the app; an external harness may replace them before the app is ready.
 const services = {
   playSound,
@@ -90,6 +92,7 @@ else {
     services.scheduleRelated();
     boards = createBoardUseCases({ store, media, events: { boardSaved: () => { saveFailed = false; services.scheduleRelated(); }, boardImageAttached: () => {} }, exportTarget: () => services.boardExportTarget });
     pipelines = createPipelineUseCases({ store });
+    dailyDrafts = createDailyDraftUseCases({ store });
     settings = createSettingsUseCases({
       store,
       catalog: systemSoundCatalog({ bundledFile: app.isPackaged ? path.join(process.resourcesPath, 'alarm.wav') : path.join(ROOT, 'assets', 'alarm.wav'), systemDirectory: '/System/Library/Sounds' }),
@@ -190,13 +193,16 @@ registerBoards(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['
 // Pipeline use cases exist once SQLite is open; storage failures are reported like any other save.
 const pipelineCall = name => input => { try { const result = pipelines[name](input); saveFailed = false; return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
 registerPipelines(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: Object.fromEntries(['addColumn', 'renameColumn', 'moveColumn', 'removeColumn', 'createTask', 'updateTask', 'moveTask', 'trashTask', 'restoreTask', 'addComment', 'editComment', 'removeComment', 'attachImage', 'openTask'].map(name => [name, pipelineCall(name)])) });
+// Daily draft use cases exist once SQLite is open; the new note joins related indexing like any save.
+const dailyDraftCall = input => { try { const result = dailyDrafts.startDailyDraft(input); saveFailed = false; services.scheduleRelated(); return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
+registerDailyDraft(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: { startDailyDraft: dailyDraftCall } });
 // Settings use cases exist once SQLite is open.
 const settingsCall = name => input => settings[name](input);
 registerSettings(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['readSettings', 'updateSettings', 'testAlertSound', 'testNotification', 'openNotificationSettings'].map(name => [name, settingsCall(name)])), onUpdated: settingsUpdated });
 registerEditorContextMenu(ipcMain, { getWindow: liveWindow, open: request => openEditorContextMenu(services.contextMenu)(request) });
 // Related use cases exist once SQLite is open.
 const relatedCall = name => input => related.useCases[name](input);
-registerRelated(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['queryRelated', 'readRelatedSettings', 'updateRelatedSettings', 'resetRelatedRanking', 'clearRelatedCache'].map(name => [name, relatedCall(name)])), retry: () => services.scheduleRelated(), notify: () => { if (win && !win.isDestroyed()) win.webContents.send('related:updated'); } });
+registerRelated(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['queryRelated', 'readRelatedSettings', 'updateRelatedSettings', 'resetRelatedRanking', 'clearRelatedCache'].map(name => [name, relatedCall(name)])), retry: () => services.scheduleRelated(), refresh: () => related.refresh(), notify: () => { if (win && !win.isDestroyed()) win.webContents.send('related:updated'); } });
 ipcMain.handle('notebook:state', () => store.snapshot());
 ipcMain.handle('notebook:export-pdf', async (_event,id) => {
   if(!flush())throw Error('Salve a última alteração antes de exportar.');

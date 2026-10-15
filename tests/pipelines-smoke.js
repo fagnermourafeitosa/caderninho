@@ -162,7 +162,7 @@
       await command('view:select', { view: 'home' }); view = state.activeView; render();
       await until(() => document.querySelector('#home-kanban .kanban'), 'home kanban');
       const strips = [...document.querySelectorAll('#daily-overview .home-strip')].map(strip => strip.dataset.strip);
-      assert(JSON.stringify(strips) === JSON.stringify(['latest', 'pipeline', 'reminders', 'notes']), 'Strip order: ' + strips);
+      assert(JSON.stringify(strips) === JSON.stringify(['draft', 'graph', 'reminders', 'notes', 'pipeline']), 'Strip order: ' + strips);
       assert(document.querySelector('#home-kanban .kanban').dataset.pipelineId === pipelineId, 'Latest pipeline on home');
       document.querySelector('[data-fold=notes]').click();
       await until(() => state.homeFolded.notes === true, 'fold saved');

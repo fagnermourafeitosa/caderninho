@@ -10,7 +10,8 @@ const {installSourceActions,sourceActions,sourceCommand,dueSourceActions}=requir
 const {installBoards,createEmptyBoard,boardsWithThumbnail}=require('./boards/infrastructure/sqlite-board-repository.cjs');
 const {installPipelines,createPipelineColumns}=require('./pipelines/infrastructure/sqlite-pipeline-schema.cjs');
 const {pipelineState}=require('./pipelines/infrastructure/pipeline-state.cjs');
-const HOME_STRIPS=['latest','pipeline','reminders','notes'];
+const {installDailyDrafts,dailyDraftState}=require('./daily-draft/infrastructure/sqlite-daily-draft-repository.cjs');
+const HOME_STRIPS=['draft','graph','reminders','notes','pipeline'];
 const TYPES = ['notes', 'tasks', 'reminders', 'boards'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
 const iso = value => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : null;
@@ -71,6 +72,7 @@ class Store {
     installSourceActions(this);
     installBoards(this);
     installPipelines(this);
+    installDailyDrafts(this);
     if (!this.getSetting('initialized')) this.initialize();
     if (!this.getSetting('categories_initialized')) this.transaction(()=>{ const stamp=new Date(this.now()).toISOString(); for(const note of this.db.prepare('SELECT id FROM notes').all()) syncCategories(this,note.id,stamp); this.setSetting('categories_initialized','1'); });
   }
@@ -160,7 +162,7 @@ class Store {
     const day = days.includes(this.getSetting('selected_day')) ? this.getSetting('selected_day') : today;
     const row = this.db.prepare('SELECT * FROM daily_pages WHERE day=?').get(day);
     const daily = { day, today, body: row.body, created:row.created,updated:row.updated, overview: JSON.parse(row.overview), days };
-    return { version: 2, sourceActions:sourceActions(this),trashSourceActions:sourceActions(this,true), notebooks:notebookState(this),activeNotebook:activeBook,notebookColors:COLORS, categories, daily, notes, pipelines, trashTasks, homeFolded, selected, trashCuts: cuts.filter(cut => cut.trashed && notes.some(note => note.id === cut.noteId && !note.trashed)), activeView: this.getSetting('active_view') || 'home', sidebarCollapsed: this.getSetting('sidebar_collapsed') === '1', storagePath: this.file };
+    return { version: 2, sourceActions:sourceActions(this),trashSourceActions:sourceActions(this,true), notebooks:notebookState(this),activeNotebook:activeBook,notebookColors:COLORS, categories, daily, dailyDraft:dailyDraftState(this,activeBook,today), notes, pipelines, trashTasks, homeFolded, selected, trashCuts: cuts.filter(cut => cut.trashed && notes.some(note => note.id === cut.noteId && !note.trashed)), activeView: this.getSetting('active_view') || 'home', sidebarCollapsed: this.getSetting('sidebar_collapsed') === '1', storagePath: this.file };
   }
   note(id, type) {
     const note = this.db.prepare('SELECT * FROM notes WHERE id=?').get(id);

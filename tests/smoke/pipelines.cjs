@@ -37,11 +37,13 @@ async function runPipelinesSmoke(win, smokeScript) {
   // While a modal is open the native window buttons leave the paper for the window corner, then come back (spec 009).
   const buttons = [];
   ipcMain.on('notebook:window-buttons', (_event, position) => buttons.push(position));
-  const paper = await run("(()=>{const sheet=document.querySelector('#sheet').getBoundingClientRect();return {x:Math.round(sheet.left+38),y:Math.round(sheet.top+12)};})()");
+  // Spec 012: back at the top of the sidebar, or past the binding when it is collapsed.
+  const paper = await run("(()=>{const collapsed=document.querySelector('.app').classList.contains('sidebar-collapsed'),box=document.querySelector(collapsed?'#sheet':'#sidebar').getBoundingClientRect();return {x:Math.round(box.left+(collapsed?22:0)+14),y:Math.round(box.top+14)};})()");
   await run(`openTaskModal(${JSON.stringify(ids['Pedir orçamento'])})`); await wait(400);
-  if (JSON.stringify(buttons.at(-1)) !== JSON.stringify({ x: 16, y: 14 })) throw new Error('Botões da janela não foram para o canto com a tarefa aberta: ' + JSON.stringify(buttons));
+  // Spec 012: an open modal leaves the traffic lights where they are, inside the app.
+  if (buttons.some(position => position.x < paper.x - 1 || position.y < paper.y - 1)) throw new Error('Botões da janela saíram do app com a tarefa aberta: ' + JSON.stringify(buttons));
   await run("document.querySelector('.task-modal[open]').close()"); await wait(400);
-  if (JSON.stringify(buttons.at(-1)) !== JSON.stringify(paper)) throw new Error('Botões da janela não voltaram ao papel: ' + JSON.stringify(buttons));
+  if (buttons.length && JSON.stringify(buttons.at(-1)) !== JSON.stringify(paper)) throw new Error('Botões da janela não voltaram ao papel: ' + JSON.stringify(buttons));
   await step('modal', ids['Pedir orçamento']);
   await shot('pipeline-after-modal.png');
   const { noteId } = await step('noteTasks', pipelineId);

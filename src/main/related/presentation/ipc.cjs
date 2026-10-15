@@ -1,4 +1,4 @@
-// Related pages IPC: queries and retry from the app window, and the settings section; value rules live in the domain.
+// Related pages IPC: queries, retry and refresh from the app window, and the settings section; value rules live in the domain.
 const { INVALID } = require('../domain/preferences.cjs');
 const QUERY_ERROR = 'Página inválida.';
 const ID = /^[A-Za-z0-9_-]{1,128}$/;
@@ -13,7 +13,7 @@ function changes(payload) {
   return Object.fromEntries(keys.map(key => [key, payload[key]]));
 }
 
-function registerRelated(ipcMain, { getWindow, useCases, retry, notify }) {
+function registerRelated(ipcMain, { getWindow, useCases, retry, refresh, notify }) {
   // Ranking changes alter what the footer and the home graph show: tell the page to ask again.
   const andNotify = result => { notify(); return result; };
   const routes = {
@@ -22,6 +22,8 @@ function registerRelated(ipcMain, { getWindow, useCases, retry, notify }) {
       return useCases.queryRelated(noteId);
     },
     'related:retry': () => { retry(); },
+    // The home graph's ↻: index now instead of waiting for the save debounce.
+    'related:refresh': () => { refresh(); },
     'settings:related-read': () => useCases.readRelatedSettings(),
     'settings:related-update': payload => andNotify(useCases.updateRelatedSettings(changes(payload))),
     'settings:related-reset': () => andNotify(useCases.resetRelatedRanking()),
@@ -35,6 +37,6 @@ function registerRelated(ipcMain, { getWindow, useCases, retry, notify }) {
   }
 }
 
-const CHANNELS = ['related:query', 'related:retry', 'settings:related-read', 'settings:related-update', 'settings:related-reset', 'settings:related-clear'];
+const CHANNELS = ['related:query', 'related:retry', 'related:refresh', 'settings:related-read', 'settings:related-update', 'settings:related-reset', 'settings:related-clear'];
 
 module.exports = { registerRelated, CHANNELS };
