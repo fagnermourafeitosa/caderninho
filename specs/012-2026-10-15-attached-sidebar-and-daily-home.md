@@ -3,7 +3,7 @@
 - **Specification ID**: 012
 - **Date**: 2026-10-15
 - **Slug**: attached-sidebar-and-daily-home
-- **Status**: In Progress
+- **Status**: Implemented
 - **Owner**: App shell (`src/renderer/` shell, sidebar and window buttons), Daily draft context (`src/main/daily-draft/`, home renderer)
 - **Related Specification**: [008 — Pipelines](008-2026-10-07-pipelines.md), [009 — Window buttons over modals](009-2026-10-08-window-buttons-over-modals.md), [011 — Related pages settings](011-2026-10-14-related-pages-settings.md)
 
@@ -94,35 +94,35 @@ The sidebar card, the gap, the binding and the traffic lights placed on the pape
 
 ## User Stories
 
-- [ ] 1. As a user, I want the traffic lights at the top of the sidebar, so that the window looks like a Mac window.
-- [ ] 2. As a user, I want the sidebar attached to the page without a gap, binding or rings, so that the app reads as one window.
-- [ ] 3. As a user, I want the collapse arrow on the right edge of the sidebar, so that the control sits next to what it hides.
-- [ ] 4. As a user, I want the sidebar to stay collapsed or open across launches, as today, so that my layout is kept.
-- [ ] 5. As a user, I want the traffic lights in the page's top-left corner while the sidebar is collapsed, so that they are always reachable.
-- [ ] 6. As a user, I want a narrow strip with the arrow at the left edge while the sidebar is collapsed, so that I can reopen it.
-- [ ] 7. As a user, I want the traffic lights to keep moving above an open modal, so that spec 009 keeps working.
-- [ ] 8. As a user, I want to type directly on the home page, so that I can write without creating a page first.
-- [ ] 9. As a user, I want the daily note editor to work like the note editor (blocks, slash menu, formatting), so that I do not learn a second editor.
-- [ ] 10. As a user, I want what I type saved automatically, so that I never press a button to keep it.
-- [ ] 11. As a user, I want no note created until I type, so that visiting the home page does not litter my notebook.
-- [ ] 12. As a user, I want the home page to keep the same daily note all day, so that my day's writing stays in one place.
-- [ ] 13. As a user, I want a blank daily note when the day turns, so that each day starts clean.
-- [ ] 14. As a user, I want one daily note per notebook, so that what I write belongs to the notebook I am in.
-- [ ] 15. As a user, I want to switch notebooks and come back to find my daily note there, so that nothing is lost.
-- [ ] 16. As a user, I want the daily note to be an ordinary note, so that I find it in Notas, Últimas notas and search and can open it as a page.
-- [ ] 17. As a user, I want a blank field after trashing the daily note, so that I can start over.
-- [ ] 18. As a user, I want pending text saved when midnight passes with the app open, so that nothing is lost at the day change.
-- [ ] 19. As a user, I want the related graph of my latest note next to today's reminders, so that I see connections while I write.
-- [ ] 20. As a user, I want the graph to update only after I pause, so that it does not flicker while I type.
-- [ ] 21. As a user, I want a ↻ button on the graph, so that I can refresh it at once.
-- [ ] 22. As a user, I want the graph card to stay visible with "Sem conexões ainda", so that the layout does not jump.
-- [ ] 23. As a user, I want to open the graph's note from the card header, so that I can go to the page.
-- [ ] 24. As a user, I want today's reminders in a card beside the graph, so that the day's commitments stay in view.
-- [ ] 25. As a user, I want my latest notes as three cards, so that I scan them faster.
-- [ ] 26. As a user, I want the kanban to stay at the bottom unchanged, so that my workflow keeps working.
-- [ ] 27. As a user, I want every home section foldable and remembered, so that the page shows what I care about.
-- [ ] 28. As a user, I want no summary line, taglines or footer sentence, so that the page has only useful content.
-- [ ] 29. As a user, I want past days to stay read-only without the daily note or graph, so that history is a snapshot.
+- [x] 1. As a user, I want the traffic lights at the top of the sidebar, so that the window looks like a Mac window.
+- [x] 2. As a user, I want the sidebar attached to the page without a gap, binding or rings, so that the app reads as one window.
+- [x] 3. As a user, I want the collapse arrow on the right edge of the sidebar, so that the control sits next to what it hides.
+- [x] 4. As a user, I want the sidebar to stay collapsed or open across launches, as today, so that my layout is kept.
+- [x] 5. As a user, I want the traffic lights in the page's top-left corner while the sidebar is collapsed, so that they are always reachable.
+- [x] 6. As a user, I want a narrow strip with the arrow at the left edge while the sidebar is collapsed, so that I can reopen it.
+- [x] 7. As a user, I want the traffic lights to keep moving above an open modal, so that spec 009 keeps working.
+- [x] 8. As a user, I want to type directly on the home page, so that I can write without creating a page first.
+- [x] 9. As a user, I want the daily note editor to work like the note editor (blocks, slash menu, formatting), so that I do not learn a second editor.
+- [x] 10. As a user, I want what I type saved automatically, so that I never press a button to keep it.
+- [x] 11. As a user, I want no note created until I type, so that visiting the home page does not litter my notebook.
+- [x] 12. As a user, I want the home page to keep the same daily note all day, so that my day's writing stays in one place.
+- [x] 13. As a user, I want a blank daily note when the day turns, so that each day starts clean.
+- [x] 14. As a user, I want one daily note per notebook, so that what I write belongs to the notebook I am in.
+- [x] 15. As a user, I want to switch notebooks and come back to find my daily note there, so that nothing is lost.
+- [x] 16. As a user, I want the daily note to be an ordinary note, so that I find it in Notas, Últimas notas and search and can open it as a page.
+- [x] 17. As a user, I want a blank field after trashing the daily note, so that I can start over.
+- [x] 18. As a user, I want pending text saved when midnight passes with the app open, so that nothing is lost at the day change.
+- [x] 19. As a user, I want the related graph of my latest note next to today's reminders, so that I see connections while I write.
+- [x] 20. As a user, I want the graph to update only after I pause, so that it does not flicker while I type.
+- [x] 21. As a user, I want a ↻ button on the graph, so that I can refresh it at once.
+- [x] 22. As a user, I want the graph card to stay visible with "Sem conexões ainda", so that the layout does not jump.
+- [x] 23. As a user, I want to open the graph's note from the card header, so that I can go to the page.
+- [x] 24. As a user, I want today's reminders in a card beside the graph, so that the day's commitments stay in view.
+- [x] 25. As a user, I want my latest notes as three cards, so that I scan them faster.
+- [x] 26. As a user, I want the kanban to stay at the bottom unchanged, so that my workflow keeps working.
+- [x] 27. As a user, I want every home section foldable and remembered, so that the page shows what I care about.
+- [x] 28. As a user, I want no summary line, taglines or footer sentence, so that the page has only useful content.
+- [x] 29. As a user, I want past days to stay read-only without the daily note or graph, so that history is a snapshot.
 
 ---
 
@@ -243,15 +243,15 @@ Tests assert external behavior through the highest existing seams: the use cases
 
 ## Acceptance Criteria
 
-- [ ] 1. The sidebar is attached to the page with a 1px divider and no binding; the traffic lights sit at its top.
-- [ ] 2. The collapse arrow sits on the sidebar's right edge; collapsed, the lights move to the page corner and a left strip reopens the sidebar; the state persists.
-- [ ] 3. The home page shows, in order, the daily note, the graph and today's reminders, three recent-note cards and the unchanged kanban.
-- [ ] 4. The daily note is created on the first character, autosaves, lasts the day, is one per notebook per day and resets on trash and day turn.
-- [ ] 5. The graph refreshes after 3 s without typing and on ↻, and keeps its card with an empty state.
-- [ ] 6. No summary line, footer sentence or new taglines on the home page.
-- [ ] 7. The running app matches the agreed layout, as verified by the user.
-- [ ] 8. All unit, integration, smoke and regression tests pass.
-- [ ] 9. Quality checks (`npm test` on Node 22+, `node --check` on changed files, affected smoke tests) pass with 0 errors.
+- [x] 1. The sidebar is attached to the page with a 1px divider and no binding; the traffic lights sit at its top.
+- [x] 2. The collapse arrow sits on the sidebar's right edge; collapsed, the lights move to the page corner and a left strip reopens the sidebar; the state persists.
+- [x] 3. The home page shows, in order, the daily note, the graph and today's reminders, three recent-note cards and the unchanged kanban.
+- [x] 4. The daily note is created on the first character, autosaves, lasts the day, is one per notebook per day and resets on trash and day turn.
+- [x] 5. The graph refreshes after 3 s without typing and on ↻, and keeps its card with an empty state.
+- [x] 6. No summary line, footer sentence or new taglines on the home page.
+- [x] 7. The running app matches the agreed layout, as verified by the user.
+- [x] 8. All unit, integration, smoke and regression tests pass.
+- [x] 9. Quality checks (`npm test` on Node 22+, `node --check` on changed files, affected smoke tests) pass with 0 errors.
 
 ---
 
@@ -286,5 +286,7 @@ Changes requested by the user after the first visual check (2026-10-15):
 - **Daily note editor.** Uses the shared editor instance of the task editors (blocks, slash menu, formatting, tables, own undo). Margin actions, media cards, diagrams and the hashtag pill are not available on the home page; hashtags still become categories when the note is saved. Images are added from the note page.
 - **Pre-existing smoke expectations.** The mac-shell smoke expected the Nota menu without "Tela cheia do quadro" (added by spec 007); the expectation now includes it.
 - **Second visual check (2026-10-15).** With the sidebar collapsed the traffic lights sit past the binding (page left + 22 + 14 px) and the reopen tab sits on the binding. Toolbar controls share one 34 px height in every section. The minimum window width rises from 620 to 760 px; home rows switch to one column when the home area is 620 px wide or less (container query). Card headings wrap instead of overlapping; the daily note editor has its own padded field.
-- **Pre-existing failure.** `selection-smoke.js` fails on `main` too (`Cannot read properties of undefined (reading 'focus')`); the full smoke run stops there, so the suites after it were run with their scoped flags.
 - **Modals (supersedes spec 009).** An open modal no longer moves the traffic lights to the window corner, which sat outside the drawn app; they stay at the sidebar top (or past the binding) because native buttons are drawn above the page.
+- **Remaining items closed (2026-10-15).** The home smoke now covers a trashed daily note (blank field, the next character starts another note) and the day turn with the app open: the notice arrives while the autosave is pending, the text lands in that day's note and the field is blank (checked to fail when the flush is removed). `selection-smoke.js` failed since spec 008 because its legacy-note scenario relied on a checkbox line to open the rich editor; it now selects lines in the plain note instead. The full default smoke suite and the scoped suites (pipelines, related, boards, settings) pass.
+- **Edge case.** A daily note whose first character is typed less than 400 ms before midnight is created for the new day, because the day comes from the main process.
+- **Approval (2026-10-15).** Approved by the user after checking the running app and the site; released as v1.11.6.

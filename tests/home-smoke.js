@@ -26,6 +26,11 @@
   assert(!state.dailyDraft.noteId&&document.querySelector('.home-draft .task-editor').textContent.trim()==='','Outro caderno mostra a nota do dia em branco');
   state=await window.notebook.action('notebook:select',{id:home});render();
   assert(document.querySelector('.home-draft .task-editor').textContent.includes('Ideia da manhã e mais'),'Voltar ao caderno mostra a nota do dia');
+  // Trashing the daily note leaves the field blank; the next character starts another one.
+  state=await window.notebook.action('note:trash',{id:draftId});render();
+  assert(!state.dailyDraft.noteId&&document.querySelector('.home-draft .task-editor').textContent.trim()==='','Nota do dia na lixeira deixa o campo em branco');
+  await typeDraft('Recomeço do dia');
+  assert(state.dailyDraft.noteId&&state.dailyDraft.noteId!==draftId&&state.notes.find(note=>note.id===state.dailyDraft.noteId).body.includes('Recomeço do dia'),'Próxima letra cria outra nota do dia');
   // Graph card: always present on today's page, with a refresh button and an empty state.
   await refreshHomeRelated();
   const graph=document.querySelector('[data-strip="graph"]');

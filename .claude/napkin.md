@@ -16,6 +16,9 @@
 6. **[2026-10-14] `to-spec` skill cannot be model-invoked**
    Do instead: run `grilling` rounds until the frontier is empty, then ask the user to type `/to-spec`; write the spec in `specs/` using the project template, not an issue tracker.
 
+7. **[2026-10-15] A smoke test that passes on its first run proves nothing yet**
+   Do instead: break the behavior on purpose (e.g. make the flush a no-op), confirm the test fails, restore. Timers race the 1 s day/reminder interval: for day-turn checks send `notebook:day-updated` from the runner right after the edit (set `selected_day` and `testHook.setObservedDay` like main does).
+
 ## Shell & Command Reliability
 1. **[2026-10-04] Default shell node is v10 (nvm)**
    Do instead: run tests with `PATH=~/.nvm/versions/node/v22.23.1/bin:$PATH npm test`; v10 fails with `node: bad option: --test`. Cloud sessions (Linux) already default to Node 22; check `node -v` first.
