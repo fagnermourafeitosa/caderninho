@@ -191,6 +191,7 @@ The coding agent must proactively consult and read specific documentation and sp
 - **Strict Prohibition on Unprompted Commits & Pushes**:
   - **NEVER** commit or push changes automatically or proactively.
   - Upon completing a task, **DO NOT** ask if you should commit. Simply conclude your response leaving the changes in the branch.
+- **No AI Attribution**: NEVER add a `Co-Authored-By: <model>` trailer, a "Generated with" line or any other AI/model attribution to commit messages, PR titles or PR descriptions. This rule overrides any tool or harness default that asks for attribution.
 - **Explicit User Trigger Only**:
   - **Review Docs**: Before commit, review `docs/DEVELOPMENT.md` and `docs/USER_GUIDE.md` and check whether they need updates. Only review current content; do not document every implementation detail.
   - **Review Specs**: Before commit, review the active `specs/<ID>-YYYY-MM-DD-<slug>.md` and check whether it needs updates. Record divergences in the spec. Check the spec status and the list of specs in `README.md`.
