@@ -58,9 +58,9 @@ Algumas ideias não cabem em linhas. No quadro, você espalha post-its, liga tud
 
 ## O seu dia numa página
 
-A primeira tela, **Caderninho**, junta o que importa hoje: a última nota em que você mexeu e as páginas ligadas a ela, a lista de tarefas mais recente (dá para avançar as tarefas ali mesmo), os lembretes do dia e as últimas notas. Cada parte pode ser recolhida.
+A primeira tela, **Caderninho**, junta o que importa hoje: a **nota do dia**, um espaço para escrever direto na página, salvo enquanto você digita (uma por caderno, por dia); as páginas ligadas à última nota ao lado dos lembretes de hoje; as últimas notas; e a lista de tarefas mais recente (dá para avançar as tarefas ali mesmo). Cada parte pode ser recolhida.
 
-![Página do dia com a última nota, a lista de tarefas mais recente, os lembretes de hoje e as últimas notas](docs/images/pagina-do-dia.png)
+![Página do dia com a nota do dia, as conexões da última nota ao lado dos lembretes de hoje, as últimas notas e a lista de tarefas mais recente](docs/images/pagina-do-dia.png)
 
 No dia seguinte começa uma página nova, e as anteriores ficam guardadas como estavam: o que estava agendado e as notas daquele dia. É um diário que você nunca precisou escrever.
 

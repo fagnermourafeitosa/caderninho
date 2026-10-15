@@ -6,7 +6,7 @@ Os nomes de botões e menus aparecem em negrito, exatamente como estão no app.
 
 ## Comece por aqui
 
-Abra o **Caderninho.app**. A primeira tela, **Caderninho**, mostra em faixas a nota atualizada mais recentemente no caderno (com o grafo de conexões dela), o kanban do pipeline mais recente, os lembretes de hoje e as últimas notas.
+Abra o **Caderninho.app**. A primeira tela, **Caderninho**, mostra a **Nota do dia** (um espaço para escrever direto na página), as **Conexões** da última nota ao lado dos **Lembretes de hoje**, as **Últimas notas** e o kanban do pipeline mais recente.
 
 Para escrever, abra **Notas**: a seção abre na lista das suas notas. Clique numa nota para abri-la, ou em **+ Nova nota** para começar uma. Dê um título e comece. As mudanças são salvas automaticamente no seu computador. Se algo falhar, o app mostra um aviso.
 
@@ -30,7 +30,7 @@ Na própria página, o nome do caderno abaixo do título, ao lado das datas, per
 
 | Seção | Para quê |
 | --- | --- |
-| **Caderninho** | Visão do dia: última nota, kanban do pipeline mais recente, lembretes e últimas notas. |
+| **Caderninho** | Visão do dia: nota do dia, conexões da última nota, lembretes de hoje, últimas notas e kanban do pipeline mais recente. |
 | **Cadernos** | Criar, editar, abrir e remover cadernos. |
 | **Notas** | Texto livre, categorias, imagens, cartões de link e tarefas criadas a partir do texto. |
 | **Tarefas** | Pipelines: quadros kanban com colunas configuráveis, onde cada tarefa é um card. |
@@ -42,9 +42,15 @@ Na própria página, o nome do caderno abaixo do título, ao lado das datas, per
 
 ### Página do dia
 
-A página de hoje é feita de faixas, de cima para baixo: **Última nota** (com o grafo), o **kanban** do pipeline criado mais recentemente no caderno, **Lembretes** e **Últimas notas**. A seta à esquerda de cada faixa a recolhe ou abre, e o app lembra essa escolha. No kanban da home você arrasta cards entre colunas e clica num card para abrir a tarefa, como na página do pipeline; **Abrir pipeline** leva ao quadro inteiro. Sem pipelines, a faixa oferece **+ Novo pipeline**.
+A página de hoje é feita de seções, de cima para baixo:
 
-No topo da página de hoje, a nota mais recente do caderno aparece com a formatação e as mídias dela. Quando ela tem conexões, **Ideias por perto** as mostra ao lado, como um grafo. Use **Continuar nesta nota** para editá-la, ou clique numa conexão para abrir outra página. No dia seguinte, o resumo da página anterior (lembretes e últimas notas) continua disponível no seletor de datas. Os dias anteriores são somente leitura; escolha **Hoje** para voltar ao dia atual.
+- **Nota do dia**: escreva direto na página, com o mesmo editor das tarefas (blocos, `/`, formatação, listas e tabelas). A nota é criada quando você digita a primeira letra e salva sozinha enquanto você escreve. Cada caderno tem a sua nota do dia: ao trocar de caderno, aparece a nota daquele caderno (ou o campo em branco), e ao voltar a sua nota continua lá. Ela é uma nota comum: aparece em **Notas**, nas **Últimas notas** e na busca. No dia seguinte, o campo começa em branco. Se ela for para a lixeira, a próxima letra começa outra. Para adicionar mídia, diagramas ou ações na margem, abra a nota.
+- **Conexões**: o grafo da nota atualizada mais recentemente no caderno. Enquanto você escreve a nota do dia, ele espera você parar de digitar por alguns segundos antes de recalcular; o botão de recalcular faz isso na hora. O título no topo do card abre a nota. Sem nenhuma nota no caderno, o card não aparece.
+- **Lembretes de hoje**: os alertas do dia, ao lado das conexões.
+- **Últimas notas**: as três notas mais recentes, em cards.
+- **Kanban**: o pipeline criado mais recentemente no caderno. Você arrasta cards entre colunas e clica num card para abrir a tarefa, como na página do pipeline; **Abrir pipeline** leva ao quadro inteiro. Sem pipelines, aparece **+ Novo pipeline**.
+
+A seta à esquerda de cada seção a recolhe ou abre, e o app lembra essa escolha. No dia seguinte, a página anterior (lembretes e últimas notas) continua disponível no seletor de datas. Os dias anteriores são somente leitura e não mostram a nota do dia nem as conexões; escolha **Hoje** para voltar ao dia atual.
 
 ### Categorias
 
@@ -166,7 +172,7 @@ Nas notas, o histórico de desfazer inclui título, texto, pílulas e linhas de 
 
 Arraste uma área não editável do caderno para mover a janela, e arraste a borda do caderno para redimensioná-la. A janela usa os botões do próprio Mac: o vermelho fecha, o amarelo minimiza e o verde aumenta a janela até a altura disponível, com largura de até 1.200 pixels. Um clique duplo no topo também aumenta ou restaura a janela.
 
-A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fica salva.
+O menu lateral fica grudado na página, separado pela costura tracejada, com os botões da janela no topo. A aba na borda dele recolhe ou abre o menu; recolhido, a aba e os botões da janela ficam no canto da página, depois da costura. Essa preferência fica salva. A janela tem largura mínima de 760 pixels.
 
 ## Ajustes
 

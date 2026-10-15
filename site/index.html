@@ -95,13 +95,17 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .dots i.on{background:var(--ink);transform:scale(1.3)}
 
 /* book */
-.book{position:relative;height:min(700px,calc(100vh - 110px));display:grid;grid-template-columns:168px minmax(0,1fr);gap:10px}
-.side{background:var(--kraft);border:2px solid var(--edge);border-radius:14px;padding:22px 12px;box-shadow:0 4px 0 -1px #d9c38f,0 4px 0 1px var(--edge)}
+.book{position:relative;height:min(700px,calc(100vh - 110px));display:grid;grid-template-columns:168px minmax(0,1fr);gap:0}
+.side{position:relative;background:var(--kraft);border:2px solid var(--edge);border-right:0;border-radius:14px 0 0 14px;padding:46px 12px 22px;box-shadow:0 4px 0 -1px #d9c38f,0 4px 0 1px var(--edge)}
+.side .lights{position:absolute;left:14px;top:16px;display:flex;gap:8px}
+.side .lights i{width:12px;height:12px;border-radius:50%;background:#ff5f57;border:.5px solid #0000001f}
+.side .lights i:nth-child(2){background:#febc2e}
+.side .lights i:nth-child(3){background:#28c840}
 .side .nb{font-size:11px;letter-spacing:.08em;color:var(--muted);font-weight:650;margin:0 0 12px 10px}
 .side div.row{display:flex;align-items:center;gap:10px;font-size:14px;padding:7px 10px;border-radius:8px;margin-bottom:2px;transition:background .3s}
 .side div.row.on{background:var(--select);font-weight:650}
 .side .gap{height:14px}
-.paper{position:relative;border:2px solid var(--edge);border-radius:14px;background:var(--paper);perspective:2200px;box-shadow:0 5px 0 -1px var(--shade),0 5px 0 1px var(--edge),0 10px 0 -1px var(--shade),0 10px 0 1px var(--edge),0 30px 50px -24px rgba(54,53,42,.45)}
+.paper{position:relative;border:2px solid var(--edge);border-left-width:1px;border-radius:0 14px 14px 0;background:var(--paper);perspective:2200px;box-shadow:0 5px 0 -1px var(--shade),0 5px 0 1px var(--edge),0 10px 0 -1px var(--shade),0 10px 0 1px var(--edge),0 30px 50px -24px rgba(54,53,42,.45)}
 .paper::before{content:"";position:absolute;left:14px;top:0;bottom:0;border-left:1.5px dashed var(--hairline);z-index:4}
 .tabs{position:absolute;right:-26px;top:120px;display:flex;flex-direction:column;gap:8px;z-index:-1}
 .tabs i{display:block;width:26px;border:2px solid var(--edge);border-left:0;border-radius:0 8px 8px 0}
@@ -214,7 +218,7 @@ svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-widt
 /* day pages */
 .dayhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:6px}
 .dayhead .date{font:clamp(18px,2vw,24px) var(--hand);color:var(--ink);text-align:right}
-.daysum{font-size:13px;color:var(--muted);margin-bottom:14px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .ro{display:inline-flex;align-items:center;font-size:12px;font-weight:400;border:1px dashed var(--muted);color:var(--muted);border-radius:4px;padding:1px 7px;margin-left:10px;vertical-align:5px}
 .strip{border-top:1px solid var(--hairline);padding:9px 0 12px}
 .strip h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px;margin:0 0 8px}
@@ -324,6 +328,7 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
 @media (max-width:1100px){
   .book{grid-template-columns:minmax(0,1fr)}
   .side{display:none}
+  .paper{border-left-width:2px;border-radius:14px}
   .stage{gap:32px}
 }
 @media (max-width:860px){
@@ -349,6 +354,7 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
   .tmodal{grid-template-columns:1fr;left:3%;right:3%}
   .tmodal .tside{display:none}
   .strip.st-last{display:none}
+  .pair{grid-template-columns:1fr}
   .postit{font-size:12px;height:76px;padding:6px}
   .postit[style*="top:226px"]{top:186px!important}
   .bt{font-size:20px}
@@ -438,7 +444,7 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
       </div>
       <div class="cap" data-for="8">
         <p>Todo dia começa com uma página que junta o que importa.</p>
-        <p class="small">A última nota e as páginas ligadas a ela, a lista de tarefas mais recente e os lembretes de hoje.</p>
+        <p class="small">Um espaço para escrever o dia, as conexões da última nota, os lembretes de hoje e a lista de tarefas mais recente.</p>
       </div>
       <div class="cap" data-for="9">
         <p>Os dias anteriores ficam guardados como estavam.</p>
@@ -457,6 +463,7 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
 
     <div class="book" aria-hidden="true">
       <div class="side">
+        <div class="lights"><i></i><i></i><i></i></div>
         <div class="nb">PESSOAL</div>
         <div class="row" data-nav="dia"><svg class="i"><use href="#i-cal"/></svg>Caderninho</div>
         <div class="row"><svg class="i"><use href="#i-books"/></svg>Cadernos</div>
@@ -541,9 +548,19 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
         </div>
 
         <div class="pg" data-page="hoje">
-          <div class="dayhead"><h2>Página do dia</h2><div class="date">quinta-feira, 1 de outubro</div></div>
-          <div class="daysum">3 lembretes · 4 notas recentes</div>
-          <div class="strip st-last"><h3><span class="fold">▾</span><svg class="i"><use href="#i-note"/></svg>Última nota<span class="aside">com conexões</span></h3><div class="last"><b>Reforma da cozinha</b><p>Conversei com a Ana sobre a bancada. A ideia é trocar o granito por madeira…</p></div></div>
+          <div class="dayhead"><span></span><div class="date">quinta-feira, 1 de outubro</div></div>
+          <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-note"/></svg>Nota do dia</h3><div class="last"><p>Ligar para a marcenaria antes das 16h. Levar as medidas da parede da pia.</p></div></div>
+          <div class="pair">
+            <div class="strip st-last"><h3><span class="fold">▾</span><svg class="i"><use href="#i-note"/></svg>Conexões<span class="aside">Reforma da cozinha</span></h3>
+              <div class="rem">Pedir dois orçamentos</div>
+              <div class="rem">Ideias para a bancada</div>
+            </div>
+            <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-bell"/></svg>Lembretes de hoje</h3>
+              <div class="rem"><b>14:00</b>Revisar o planejamento</div>
+              <div class="rem"><b>16:00</b>Ligar para o eletricista</div>
+              <div class="rem"><b>18:00</b>Pausa para caminhar</div>
+            </div>
+          </div>
           <div class="strip mini"><h3><span class="fold">▾</span><svg class="i"><use href="#i-kanban"/></svg>Reforma da cozinha<span class="aside">último pipeline · 2 finalizados de 6</span></h3>
             <div class="kb">
               <div class="kc"><h4>Backlog <i>2</i></h4><div class="kd">Trocar o rejunte da pia<small>12/09</small></div><div class="kd">Escolher a torneira<small>14/09</small></div></div>
@@ -553,16 +570,10 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
               <div class="kc final"><h4>Done <i>2</i></h4><div class="kd">Pedir dois orçamentos<small>10/09</small></div><div class="kd">Ligar para o eletricista<small>09/09</small></div></div>
             </div>
           </div>
-          <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-bell"/></svg>Lembretes<span class="aside">3 neste dia</span></h3>
-            <div class="rem"><b>14:00</b>Revisar o planejamento</div>
-            <div class="rem"><b>16:00</b>Ligar para o eletricista</div>
-            <div class="rem"><b>18:00</b>Pausa para caminhar</div>
-          </div>
         </div>
 
         <div class="pg" data-page="ontem">
-          <div class="dayhead"><h2>Página anterior<span class="ro">somente leitura</span></h2><div class="date">quarta-feira, 30 de setembro</div></div>
-          <div class="daysum">1 lembrete · 3 notas do dia</div>
+          <div class="dayhead"><span class="ro">somente leitura</span><div class="date">quarta-feira, 30 de setembro</div></div>
           <div class="strip"><h3><span class="fold">▾</span><svg class="i"><use href="#i-bell"/></svg>Lembretes<span class="aside">1 neste dia</span></h3>
             <div class="rem"><b>10:30</b>Reunião do condomínio</div>
           </div>
@@ -619,8 +630,8 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-s
       <figure><img src="img/kanban.webp" width="1440" height="926" loading="lazy" alt="Lista de tarefas Montar o ateliê dividida em cinco colunas, com a data de criação e o número de comentários em cada tarefa."><figcaption>Uma lista de tarefas, com uma coluna para cada etapa.</figcaption></figure>
     </div>
     <div class="shots">
-      <figure><img src="img/tarefa.webp" width="1306" height="1269" loading="lazy" alt="Tarefa aberta com detalhes em lista e tabela, uma imagem, comentários (um deles editado) e, ao lado, a etapa atual, o responsável, a data de criação e o histórico."><figcaption>Uma tarefa aberta, com os detalhes e a conversa.</figcaption></figure>
-      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1543" loading="lazy" alt="Página do dia com a última nota, a lista de tarefas mais recente, os lembretes de hoje e as últimas notas."><figcaption>A página do dia.</figcaption></figure>
+      <figure><img src="img/tarefa.webp" width="1307" height="1227" loading="lazy" alt="Tarefa aberta com detalhes em lista e tabela, uma imagem, comentários (um deles editado) e, ao lado, a etapa atual, o responsável, a data de criação e o histórico."><figcaption>Uma tarefa aberta, com os detalhes e a conversa.</figcaption></figure>
+      <figure><img src="img/pagina-do-dia.webp" width="1440" height="1543" loading="lazy" alt="Página do dia com a nota do dia, as conexões da última nota ao lado dos lembretes de hoje, as últimas notas e a lista de tarefas mais recente."><figcaption>A página do dia.</figcaption></figure>
     </div>
     <figure class="wide"><img src="img/quadro.webp" width="1440" height="1200" loading="lazy" alt="Quadro Ideias para o ateliê com post-its coloridos ligados por setas e um título escrito à mão."><figcaption>Um quadro com post-its e setas.</figcaption></figure>
   </section>

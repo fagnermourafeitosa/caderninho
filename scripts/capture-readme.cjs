@@ -8,6 +8,7 @@ const {createRelatedPages}=require('../src/main/related/compose.cjs');
 const {documents}=require('../src/main/related/domain/documents.cjs');const {rank}=require('../src/main/related/domain/ranking.cjs');
 const relatedConfig=require('../src/main/related/domain/model.cjs');
 const {createPipelineUseCases}=require('../src/main/pipelines/compose.cjs');
+const {createDailyDraftUseCases}=require('../src/main/daily-draft/compose.cjs');
 const {registerPipelines}=require('../src/main/pipelines/presentation/ipc.cjs');
 const {SCHEME:PIPELINE_SCHEME,pipelineProtocolHandler}=require('../src/main/pipelines/presentation/protocol.cjs');
 const {createBoardUseCases}=require('../src/main/boards/compose.cjs');
@@ -75,6 +76,7 @@ app.whenReady().then(async()=>{
   const indexRelated=async()=>{if(lexical)return;await related.scheduler.runNow();if(related.scheduler.status!=='ready')throw new Error(related.scheduler.error||'Related indexing failed');};
   ipcMain.handle('related:query',(_event,id)=>lexical?lexicalQuery(id):related.useCases.queryRelated(id));
   ipcMain.handle('related:retry',()=>indexRelated());
+  ipcMain.handle('related:refresh',()=>indexRelated());
   await indexRelated();
   ipcMain.handle('notebook:state',()=>store.snapshot());
   ipcMain.handle('notebook:action',(_event,name,input)=>command(name,input));
@@ -195,6 +197,11 @@ app.whenReady().then(async()=>{
   store.now=()=>new Date('2026-10-01T13:05:00-03:00').getTime();
   command('note:update',{id:collage,body:store.snapshot().notes.find(note=>note.id===collage).body});
   }
+  // The daily note on the home page (spec 012), written in the active notebook.
+  const daily=createDailyDraftUseCases({store}).startDailyDraft({notebookId:book}).noteId;
+  command('note:update',{id:daily,editorDoc:[block('paragraph','Ateliê: ligar para a marcenaria e pedir o orçamento da bancada de madeira.'),block('bullet','Separar as referências de cor para a parede verde-clara.'),block('bullet','Escolher a luminária e medir a prateleira da janela.')]});
+  command('category:attach',{noteId:daily,name:'projeto'});
+  await indexRelated();
   win.setSize(1400,1500);
   await capture('pagina-do-dia.png',"(async()=>{document.querySelector('#related-dialog')?.close();document.querySelector('dialog[open]')?.close();state=await window.notebook.action('view:select',{view:'home'});view='home';render();await new Promise(resolve=>setTimeout(resolve,800));})()");
   if(!pipelinesOnly){

@@ -42,7 +42,7 @@ To validate only actions linked to passages and media, including the editor's ri
 npm run test:app -- --source-only
 ```
 
-To validate only Mermaid diagram blocks (editor, undo, home preview, clipboard and PDF):
+To validate only Mermaid diagram blocks (editor, undo, clipboard and PDF):
 
 ```sh
 npm run test:app -- --diagram-only
@@ -65,6 +65,20 @@ To validate only the Settings page (spec 010): the sidebar, menu command and **A
 ```sh
 npm run test:app -- --settings-only
 ```
+
+To validate only the home page (spec 012): section order, graph card with refresh and empty state, recent-note cards, kanban, folding, the daily note (an editor on the page, one note created on the first character, autosave, one daily note per notebook) and a past day without the daily note or graph:
+
+```sh
+npm run test:app -- --home-only
+```
+
+To validate only the window shell: the attached sidebar with the stitched binding, the collapse tab, traffic lights at the sidebar top or past the binding when collapsed, one 34 px height for toolbar controls, and the Nota menu per view:
+
+```sh
+npm run test:app -- --mac-shell-only
+```
+
+`tests/selection-smoke.js` currently fails on `main` too (`Cannot read properties of undefined (reading 'focus')`), so the default suite stops there; run the suites after it with their scoped flags.
 
 The smoke runner also works on Linux under a virtual display (`xvfb-run -a npx electron --no-sandbox tests/smoke/run.cjs --pipelines-only`). macOS-only checks (the New York font and native window buttons in the default suite, `Ctrl+A` in diagram code in `--native-only`/`--editor-only`, the native right-click in `--source-only`, focus in `--search-only` and PDF title extraction in `--pdf-cuts-only`) fail there and must be confirmed on a Mac.
 
@@ -108,7 +122,7 @@ To generate only the linked actions and collage screenshots:
 npx electron scripts/capture-readme.cjs --features-only
 ```
 
-To generate only the task screenshots (note with tasks, kanban, open task, board and the day page):
+To generate only the task screenshots (note with tasks, kanban, open task, board and the day page with a fictional daily note):
 
 ```sh
 npx electron scripts/capture-readme.cjs --pipelines-only
