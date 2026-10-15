@@ -1,6 +1,6 @@
 const {parentPort,workerData}=require('node:worker_threads');
 const {execFile}=require('node:child_process');
-const config=require('./related-config.cjs');
+const config=require('../domain/model.cjs');
 const fs=require('node:fs');const path=require('node:path');
 let model,tokenizer;
 async function load() {
@@ -10,7 +10,7 @@ async function load() {
  env.cacheDir=workerData.cacheDir;
  env.localModelPath=workerData.cacheDir+path.sep;
  const local=path.join(workerData.cacheDir,config.model);
- env.allowRemoteModels=!['config.json','tokenizer.json','tokenizer_config.json','onnx/model_q4.onnx','onnx/model_q4.onnx_data'].every(file=>fs.existsSync(path.join(local,file))); 
+ env.allowRemoteModels=!config.modelFiles.every(file=>fs.existsSync(path.join(local,file))); 
  tokenizer=await AutoTokenizer.from_pretrained(config.model,{revision:config.revision});
  model=await AutoModel.from_pretrained(config.model,{revision:config.revision,dtype:config.dtype,device:'cpu',session_options:{intra_op_num_threads:2,inter_op_num_threads:1}});
  parentPort.postMessage({status:'indexing'});

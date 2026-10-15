@@ -235,7 +235,7 @@ class Store {
           this.setSetting('sidebar_collapsed', input.collapsed ? '1' : '0'); break;
         }
         case 'view:select': {
-          if (![...TYPES, 'archive', 'home', 'notebooks'].includes(input.view)) throw new Error('Seção inválida.');
+          if (![...TYPES, 'archive', 'home', 'notebooks', 'settings'].includes(input.view)) throw new Error('Seção inválida.');
           this.setSetting('active_view', input.view); if (input.view === 'home') this.setSetting('selected_day', this.dayKey()); break;
         }
         case 'note:create': {

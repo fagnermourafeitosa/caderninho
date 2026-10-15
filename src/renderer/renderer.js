@@ -61,7 +61,7 @@ function render() {
   });
   $('#footer-label').textContent = ''; delete $('#footer-label').dataset.connections;
   $('#page-number').textContent = '';
-  if (view === 'notebooks') renderNotebooks(); else if (view === 'home') renderHome(); else if (view === 'archive') renderTrash(); else if (view === 'reminders' && !reminderEditor) renderReminderCalendar(); else if (indexLabels[view] && showingIndex()) renderIndex(); else renderPage();
+  if (view === 'notebooks') renderNotebooks(); else if (view === 'home') renderHome(); else if (view === 'archive') renderTrash(); else if (view === 'settings') renderSettings(); else if (view === 'reminders' && !reminderEditor) renderReminderCalendar(); else if (indexLabels[view] && showingIndex()) renderIndex(); else renderPage();
   syncNoteCommands();
   $('#save-state').title = `Salvamento automático em ${state.storagePath}`;
   refreshRelatedSoon();
@@ -132,7 +132,7 @@ function renderSchedule() {
     if (!Number.isFinite(date.getTime())) { toast('Escolha um dia e um horário válidos.'); return; }
     if (await action('schedule:activate', { id: note.id, due: date.toISOString() })) { renderSchedule(); toast('Alerta sonoro agendado.'); }
   };
-  $('#test-sound').onclick = () => window.notebook.sound();
+  $('#test-sound').onclick = () => window.notebook.testSound();
   if ($('#cancel-schedule')) $('#cancel-schedule').onclick = async () => { if (await action('schedule:cancel', { id: note.id })) renderSchedule(); };
 }
 function cancelTurn() {
@@ -156,7 +156,7 @@ async function turn(name, input = {}) {
 }
 async function createNote() {
   if(view==='notebooks') {openNotebookDialog();return;}
-  const type = view === 'home' ? 'notes' : view === 'archive' ? (trashType === 'cards' ? 'tasks' : trashType) : view;
+  const type = view === 'home' || view === 'settings' ? 'notes' : view === 'archive' ? (trashType === 'cards' ? 'tasks' : trashType) : view;
   const day = type === 'reminders' && !reminderEditor ? calendarDay : null;
   if (await turn('note:create', { type })) {
     if (day) {

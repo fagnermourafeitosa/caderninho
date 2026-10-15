@@ -33,7 +33,7 @@ async function openRelated(){
 }
 function renderRelatedGraph(note,data,host=$('#related-content'),{openCenter=false}={}){
  if(!data.results.length){
-  const text=data.status==='error'?'Não foi possível concluir a análise local. Suas páginas continuam salvas.':data.status==='loading'?'Preparando o modelo local. O primeiro uso baixa os arquivos; suas páginas ficam neste Mac.':data.status==='indexing'?'Lendo as páginas deste caderno… As conexões aparecem aqui quando estiverem prontas.':'Ainda não encontramos conexões relevantes para esta página.';
+  const text=data.status==='disabled'?'Notas relacionadas estão desligadas em Ajustes.':data.status==='error'?'Não foi possível concluir a análise local. Suas páginas continuam salvas.':data.status==='loading'?'Preparando o modelo local. O primeiro uso baixa os arquivos; suas páginas ficam neste Mac.':data.status==='indexing'?'Lendo as páginas deste caderno… As conexões aparecem aqui quando estiverem prontas.':'Ainda não encontramos conexões relevantes para esta página.';
   host.innerHTML=`<div class="related-empty">${relatedGraphIcon}<p role="status">${text}</p>${data.status==='error'?'<button data-related-retry class="primary">Tentar novamente</button>':''}</div>`;
   if(host.querySelector('[data-related-retry]'))host.querySelector('[data-related-retry]').onclick=()=>window.notebook.relatedRetry();return;
  }

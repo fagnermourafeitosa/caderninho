@@ -89,7 +89,7 @@ Clique em **+ Novo lembrete**, escreva a nota, escolha **Dia e horário** e cliq
 
 Mudar a data ou o horário desativa o agendamento anterior até você clicar em **Agendar** de novo.
 
-**O app precisa estar aberto para tocar o alerta; pode estar minimizado.** Fechar a janela encerra o app. Se o horário passar com o app fechado ou o computador em repouso, o alerta toca quando o app abrir ou o computador acordar. Cada alerta toca uma vez, usa o volume do sistema e mostra uma mensagem no app e uma notificação do sistema, quando disponível. Páginas na lixeira não disparam alertas.
+**O app precisa estar aberto para tocar o alerta; pode estar minimizado.** Fechar a janela encerra o app. Se o horário passar com o app fechado ou o computador em repouso, o alerta toca quando o app abrir ou o computador acordar. Cada alerta toca uma vez e mostra uma mensagem no app; o som e a notificação do sistema seguem o que você escolheu em **Ajustes**. Páginas na lixeira não disparam alertas.
 
 ### Quadros
 
@@ -168,6 +168,13 @@ Arraste uma área não editável do caderno para mover a janela, e arraste a bor
 
 A aba de papel à esquerda recolhe ou abre o menu lateral. Essa preferência fica salva.
 
+## Ajustes
+
+**Ajustes** fica no rodapé do menu lateral, abaixo de uma linha. Também abre pelo menu **Caderninho > Ajustes…** ou com `Cmd+,`. Cada mudança vale na hora; não há botão de salvar.
+
+- **Alertas**: escolha **Som e notificação**, **Só som** ou **Só notificação**. Escolha o som (o alarme do Caderninho ou um som do macOS) e o volume, de 10% a 100%. **Testar som** toca o som escolhido; o mesmo botão no agendamento também. **Enviar notificação de teste** mostra uma notificação na hora. O macOS só lista o Caderninho nos ajustes de notificação depois da primeira notificação, então use esse botão antes de procurar o app lá. **Abrir ajustes de notificação** leva aos Ajustes do Sistema, onde você permite as notificações do Caderninho.
+- **Janela**: **Manter janela na frente** deixa o caderno acima das outras janelas (não de apps em tela cheia). O mesmo ajuste está no menu **Janela > Manter na Frente**.
+
 ## Datas e lixeira
 
 As páginas mostram quando foram criadas e atualizadas. As tarefas registram quando foram criadas e cada mudança de coluna ou posição; itens removidos guardam a data de exclusão até serem restaurados. Dados de versões antigas podem mostrar **não registrado** quando a data não existia.
@@ -219,3 +226,5 @@ Depois do salvamento automático, o Caderninho procura relações entre notas, p
 Use **Relacionados** no menu **⋯**, ou **⌥⌘R**, para abrir o grafo. A página atual fica no centro; conteúdos com mais afinidade ficam mais perto. Clique numa conexão para abrir a página de origem. Em janelas estreitas, o botão mostra só o ícone, com o nome ao passar o mouse.
 
 O cálculo combina categorias, palavras em comum e o significado do texto. No Mac, o texto encontrado em imagens também conta. Páginas e imagens não são enviadas para análise na nuvem. O primeiro uso precisa de internet para baixar o modelo; depois disso, a análise funciona localmente.
+
+Em **Ajustes > Notas relacionadas** você pode desligar as conexões (o modelo deixa de ser baixado e nada é calculado), escolher quantas notas aparecem (de 3 a 12) e a sensibilidade: **Ampla** mostra mais conexões, **Estrita** só as mais fortes. **Restaurar padrão** volta a 8 e **Equilibrada**. A seção também mostra o modelo usado, de onde ele vem, quanto espaço ocupa e se já foi baixado. **Apagar cache e recalcular** apaga o modelo e as conexões calculadas, depois de confirmar; suas páginas não são afetadas.

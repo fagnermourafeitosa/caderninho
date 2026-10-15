@@ -4,9 +4,9 @@
 const {app,BrowserWindow,ipcMain,nativeImage,protocol,net}=require('electron');
 const {pathToFileURL}=require('node:url');
 const {MediaStore}=require('../src/main/media.cjs');
-const {RelatedService}=require('../src/main/related-service.cjs');
-const {documents,rank}=require('../src/main/related-engine.cjs');
-const relatedConfig=require('../src/main/related-config.cjs');
+const {createRelatedPages}=require('../src/main/related/compose.cjs');
+const {documents}=require('../src/main/related/domain/documents.cjs');const {rank}=require('../src/main/related/domain/ranking.cjs');
+const relatedConfig=require('../src/main/related/domain/model.cjs');
 const {createPipelineUseCases}=require('../src/main/pipelines/compose.cjs');
 const {registerPipelines}=require('../src/main/pipelines/presentation/ipc.cjs');
 const {SCHEME:PIPELINE_SCHEME,pipelineProtocolHandler}=require('../src/main/pipelines/presentation/protocol.cjs');
@@ -68,13 +68,12 @@ app.whenReady().then(async()=>{
   for(const [title,columnName] of [['Organizar a mesa de trabalho','Done'],['Separar os livros para doação','Done'],['Trocar a resistência do chuveiro','Review'],['Agendar a consulta de rotina','Ready to Dev'],['Renovar o seguro do carro','Backlog']])task(house,title,columnName);
   at('2026-10-01T13:00:00-03:00');
   command('view:select',{view:'home'});
-  related=new RelatedService(store,media,{onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');}});
-  related.cacheDir=path.join(root,'artifacts','embedding-cache');
+  related=createRelatedPages({store,media,cacheDir:path.join(root,'artifacts','embedding-cache'),onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');}});
   // Without the model, only categories and words in common count.
   const lexical=flag('--lexical-related');
-  const lexicalQuery=id=>{const docs=documents(store.snapshot(),related.ocr()),source=docs.find(d=>d.id==='page:'+id);if(!source)return {status:'ready',results:[]};return {status:'ready',results:rank(source,docs,{},{...relatedConfig,weights:{categories:.6,lexical:.4,semantic:0},threshold:.15})};};
-  const indexRelated=async()=>{if(lexical)return;await related.run();if(related.status!=='ready')throw new Error(related.error||'Related indexing failed');};
-  ipcMain.handle('related:query',(_event,id)=>lexical?lexicalQuery(id):related.query(id));
+  const lexicalQuery=id=>{const docs=documents(store.snapshot(),related.ocrText()),source=docs.find(d=>d.id==='page:'+id);if(!source)return {status:'ready',results:[]};return {status:'ready',results:rank(source,docs,{},{...relatedConfig,weights:{categories:.6,lexical:.4,semantic:0},threshold:.15})};};
+  const indexRelated=async()=>{if(lexical)return;await related.scheduler.runNow();if(related.scheduler.status!=='ready')throw new Error(related.scheduler.error||'Related indexing failed');};
+  ipcMain.handle('related:query',(_event,id)=>lexical?lexicalQuery(id):related.useCases.queryRelated(id));
   ipcMain.handle('related:retry',()=>indexRelated());
   await indexRelated();
   ipcMain.handle('notebook:state',()=>store.snapshot());
@@ -188,7 +187,7 @@ app.whenReady().then(async()=>{
   command('category:attach',{noteId:travelReminder,name:'viagem'});
   command('schedule:activate',{id:travelReminder,due:'2026-10-02T18:00:00-03:00'});
   await indexRelated();
-  const relatedCount=(lexical?lexicalQuery(collage):related.query(collage)).results.length;
+  const relatedCount=(lexical?lexicalQuery(collage):related.useCases.queryRelated(collage)).results.length;
   if(relatedCount<3)throw new Error('Expected related fictional travel pages');
   await capture('colagem.png',open(collage,'await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));'));
   win.setSize(1080,900);

@@ -225,3 +225,10 @@ test('removing quick capture preserves legacy saved data without accepting draft
   assert.throws(()=>reopened.dispatch('draft:commit'));
   assert.equal(reopened.getSetting('quick_draft'),legacy);
 });
+
+test('the settings view can be selected and is restored after reopening', t => {
+  const { store, open } = fixture(t);
+  store.dispatch('view:select', { view: 'settings' });
+  assert.equal(store.snapshot().activeView, 'settings');
+  assert.equal(open().snapshot().activeView, 'settings');
+});

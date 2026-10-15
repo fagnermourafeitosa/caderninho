@@ -13,6 +13,9 @@
 5. **[2026-10-02] Export PDF from saved page data**
    Do instead: flush current edits, build escaped HTML from the SQLite snapshot with embedded local media, and print in an unattached WebContentsView from a private temporary HTML file, then remove it; do not put HTML with embedded images in a data URL, which fails for large media. Keep page controls out, preserve rich text/list numbering, repeat table headers and set the paper color on @page as well as html/body so margins are colored; check long-page pagination and page corners with rendered PDFs.
 
+6. **[2026-10-14] `to-spec` skill cannot be model-invoked**
+   Do instead: run `grilling` rounds until the frontier is empty, then ask the user to type `/to-spec`; write the spec in `specs/` using the project template, not an issue tracker.
+
 ## Shell & Command Reliability
 1. **[2026-10-04] Default shell node is v10 (nvm)**
    Do instead: run tests with `PATH=~/.nvm/versions/node/v22.23.1/bin:$PATH npm test`; v10 fails with `node: bad option: --test`. Cloud sessions (Linux) already default to Node 22; check `node -v` first.

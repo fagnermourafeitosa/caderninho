@@ -84,6 +84,8 @@ O Caderninho foi pensado em português, não traduzido para ele.
 
 **Diagramas escritos.** Digite `/diagrama` e escreva um fluxo, uma sequência ou uma linha do tempo em texto simples ([Mermaid](https://mermaid.js.org)). O Caderninho desenha o diagrama dentro da nota, com traço de mão.
 
+**Ajustes do seu jeito.** Em **Ajustes** (`⌘,`) você escolhe se o lembrete toca um som, mostra uma notificação ou os dois, qual som e em que volume. Também pode deixar o caderno sempre na frente das outras janelas e ajustar as páginas relacionadas: desligar, escolher quantas aparecem e quão fortes precisam ser, ver o modelo usado e apagar o que foi baixado.
+
 ## Seus dados ficam com você
 
 Não há conta nem nuvem. Tudo fica numa pasta do seu Mac:

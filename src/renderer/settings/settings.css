@@ -1,0 +1,26 @@
+/* Ajustes (spec 010): sidebar entry below a hairline, and a plain form page on the paper. */
+.sidebar-footer{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);display:flex;flex-direction:column}
+.settings-page{max-width:560px}
+.settings-section{padding:18px 0;border-bottom:1px solid var(--line)}
+.settings-section:last-child{border-bottom:none}
+.settings-section h2{font:650 var(--text-section) var(--body-font);margin-bottom:12px}
+.settings-row{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center;gap:12px;min-height:36px;font:var(--control-font-size)/1.35 var(--body-font)}
+.settings-row select{max-width:260px}
+.settings-volume{display:flex;align-items:center;gap:10px;max-width:260px}
+.settings-volume input{flex:1;accent-color:var(--ink)}
+.settings-volume output{min-width:40px;color:var(--muted);font-variant-numeric:tabular-nums}
+.settings-actions button{display:inline-flex;align-items:center;gap:var(--control-gap);padding:5px 9px;border:1px solid var(--line);border-radius:5px;background:transparent;font:var(--control-font-size)/1.35 var(--body-font);color:var(--ink)}
+.settings-actions button:hover:not(:disabled){background:var(--hover)}
+.settings-actions button:disabled{opacity:.5}
+.settings-actions .small-icon{width:var(--control-icon-size);height:var(--control-icon-size)}
+.settings-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.settings-hint-group{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.settings-hint{font-size:12px;color:var(--muted);line-height:1.45}
+.settings-check{grid-template-columns:auto minmax(0,1fr);justify-content:start}
+.settings-section > .settings-hint{margin-top:4px}
+.settings-subheading{font:600 var(--control-font-size)/1.35 var(--body-font);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px}
+.settings-model{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 12px;margin:0 0 8px;font:var(--control-font-size)/1.35 var(--body-font)}
+.settings-model dt{color:var(--muted)}
+.settings-model dd{margin:0;overflow-wrap:anywhere}
+.settings-link{display:inline-flex;align-items:center;gap:4px;padding:0;border:0;background:none;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.settings-link .small-icon{width:14px;height:14px}

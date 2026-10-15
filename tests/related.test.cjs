@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const {documents,rank,cosine}=require('../src/main/related-engine.cjs');const config=require('../src/main/related-config.cjs');
+const {documents}=require('../src/main/related/domain/documents.cjs');const {rank,cosine}=require('../src/main/related/domain/ranking.cjs');const config=require('../src/main/related/domain/model.cjs');
 const page=(id,book,text,type='notes')=>({id,notebookId:book,type,title:text,body:'',categories:[],items:[],cuts:[]});
 test('only active content in the same notebook is related, including tasks and linked reminders',()=>{
  const state={notes:[page('a','one','viagem serra'),page('b','one','trilha serra'),page('c','two','viagem serra'),{...page('d','one','viagem serra'),trashed:true}],sourceActions:[{id:'r',noteId:'b',notebookId:'one',kind:'reminder',title:'reservar viagem',origin:{quote:'serra'}}]};
@@ -22,19 +22,22 @@ test('OCR and metadata enter the document, content hash changes without changing
 });
 
 test('SQLite cache survives reopening, invalidates edits, and immediately excludes trash',async()=>{
- const fs=require('node:fs'),os=require('node:os'),path=require('node:path');const {Store}=require('../src/main/store.cjs');const {RelatedService}=require('../src/main/related-service.cjs');
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'related-cache-'));let store,service;
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');const {Store}=require('../src/main/store.cjs');const {createRelatedPages}=require('../src/main/related/compose.cjs');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'related-cache-'));let store,service,calls=0;
+ // Engine stand-in: every document embeds to the same vector, so both pages relate.
+ const engine={embed:async()=>{calls++;return [1,0];},recognize:async()=>'',canRecognize:()=>false,stop:async()=>{}};
+ const open=()=>createRelatedPages({store,media:{file:()=>null},engine});
  try {
   store=new Store(dir);store.dispatch('note:trash',{id:'welcome'});
   store.dispatch('note:create',{type:'notes',title:'Ateliê iluminação'});const first=store.snapshot().selected.notes;
   store.dispatch('note:create',{type:'notes',title:'Ateliê móveis'});const second=store.snapshot().selected.notes;
-  service=new RelatedService(store,{file:()=>null});let calls=0;service.job=async()=>{calls++;return [1,0];};
-  await service.run();assert.equal(calls,2);assert.equal(service.query(first).results[0].noteId,second);
-  service.close();store.close();store=new Store(dir);service=new RelatedService(store,{file:()=>null});service.job=async()=>{calls++;return [1,0];};
-  await service.run();assert.equal(calls,2,'Reopening reuses both cached vectors');
-  store.dispatch('note:update',{id:second,body:'Uma mesa perto da janela'});await service.run();assert.equal(calls,3,'Only edited content is embedded again');
-  store.dispatch('note:trash',{id:second});assert.equal(service.query(first).results.length,0,'Trash disappears before indexing');
-  await service.run();assert.equal(store.db.prepare('SELECT count(*) AS n FROM related_vectors').get().n,1);
+  service=open();
+  await service.scheduler.runNow();assert.equal(calls,2);assert.equal(service.useCases.queryRelated(first).results[0].noteId,second);
+  service.close();store.close();store=new Store(dir);service=open();
+  await service.scheduler.runNow();assert.equal(calls,2,'Reopening reuses both cached vectors');
+  store.dispatch('note:update',{id:second,body:'Uma mesa perto da janela'});await service.scheduler.runNow();assert.equal(calls,3,'Only edited content is embedded again');
+  store.dispatch('note:trash',{id:second});assert.equal(service.useCases.queryRelated(first).results.length,0,'Trash disappears before indexing');
+  await service.scheduler.runNow();assert.equal(store.db.prepare('SELECT count(*) AS n FROM related_vectors').get().n,1);
  }finally{service?.close();store?.close();fs.rmSync(dir,{recursive:true,force:true});}
 });
 

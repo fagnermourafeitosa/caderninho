@@ -12,6 +12,7 @@ const { Store } = require('../../src/main/store.cjs');
 const { runNativeEditorSmoke } = require('./native-editor.cjs');
 const { runBoardsSmoke } = require('./boards.cjs');
 const { runPipelinesSmoke } = require('./pipelines.cjs');
+const { runSettingsSmoke } = require('./settings.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 let alarmCount = 0;
 const contextMenu = scriptedContextMenu();
@@ -125,20 +126,21 @@ async function runSmoke() {
     await installRendererErrors(win.webContents);
     if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(ROOT,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript("openSourceComposer(actionsForNote()[0].origin,'reminder')");await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(ROOT,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());await runEditorContextMenuSmoke(win);app.quit();return;}
     if(process.argv.includes('--related-runtime-only')) {
-      related.cacheDir=path.join(process.cwd(),'artifacts','embedding-cache');
+      related.engine.cacheDir=path.join(process.cwd(),'artifacts','embedding-cache');
       store.dispatch('note:update',{id:'welcome',title:'Custos de nuvem',body:'Reduzir os gastos com infraestrutura e serviços de nuvem.'});
       const next=store.dispatch('note:create',{type:'notes',title:'Cloud cost optimization'});const target=next.selected.notes;
       store.dispatch('note:update',{id:target,body:'Optimize cloud infrastructure costs and reduce spending.'});
-      await related.run();if(related.status!=='ready')throw Error(related.error);
-      if(!related.query('welcome').results.some(d=>d.noteId===target))throw Error('Modelo local não encontrou conexão entre idiomas.');
+      await related.scheduler.runNow();if(related.scheduler.status!=='ready')throw Error(related.scheduler.error);
+      if(!related.useCases.queryRelated('welcome').results.some(d=>d.noteId===target))throw Error('Modelo local não encontrou conexão entre idiomas.');
       if(process.platform==='darwin'){
         const file=path.join(store.directory,'ocr-probe.png');fs.writeFileSync(file,fs.readFileSync(path.join(ROOT,'docs','images','acoes-na-nota.png')));
-        const text=await related.job({kind:'ocr',file});if(!text.includes('Próximos passos'))throw Error('OCR do pacote não leu o texto esperado.');
+        const text=await related.engine.recognize(file);if(!text.includes('Próximos passos'))throw Error('OCR do pacote não leu o texto esperado.');
       }
       console.log('RELATED_RUNTIME_OK');app.quit();return;
     }
     if(process.argv.includes('--boards-only')){await runBoardsSmoke(win,smokeScript);app.quit();return;}
     if(process.argv.includes('--pipelines-only')){await runPipelinesSmoke(win,smokeScript);app.quit();return;}
+    if(process.argv.includes('--settings-only')){await runSettingsSmoke(win,{configure:testHook.configure,store,related});app.quit();return;}
     if(process.argv.includes('--pages-only')){await runPagesSmoke(win);app.quit();return;}
     if(process.argv.includes('--mac-shell-only')){await runMacShellSmoke(win);app.quit();return;}
     if(process.argv.includes('--diagram-only')){await runDiagramSmoke(win);app.quit();return;}
@@ -174,9 +176,9 @@ async function runSmoke() {
     }
     if(process.argv.includes('--related-only')) {
       await win.webContents.executeJavaScript(smokeScript('related-smoke.js'));
-      const docs=require('../../src/main/related-engine.cjs').documents(store.snapshot());
-      for(const d of docs)store.db.prepare('INSERT OR REPLACE INTO related_vectors VALUES(?,?,?,?)').run(d.id,d.hash,require('../../src/main/related-config.cjs').version,JSON.stringify([1,0]));
-      related.status='ready';
+      const docs=require('../../src/main/related/domain/documents.cjs').documents(store.snapshot());
+      for(const d of docs)store.db.prepare('INSERT OR REPLACE INTO related_vectors VALUES(?,?,?,?)').run(d.id,d.hash,require('../../src/main/related/domain/model.cjs').version,JSON.stringify([1,0]));
+      related.scheduler.status='ready';
       const result=await win.webContents.executeJavaScript('verifyRelatedSmoke()');
       if(result.errors.length)throw Error(result.errors.join('\n'));
       fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});fs.writeFileSync(path.join(ROOT,'artifacts','relacionados.png'),(await win.webContents.capturePage()).toPNG());

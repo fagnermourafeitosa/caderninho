@@ -251,7 +251,7 @@ test('related pages index a board by its title and extracted text', t => {
   const id = createBoard(store);
   store.dispatch('note:update', { id, title: 'Roteiro da viagem' });
   boards(store).save({ noteId: id, baseVersion: 0, scene: { elements: [text('t1', 'Trilha curta até o mirante')], viewport } });
-  const { documents } = require('../src/main/related-engine.cjs');
+  const { documents } = require('../src/main/related/domain/documents.cjs');
   const page = documents(store.snapshot()).find(document => document.id === 'page:' + id);
   assert.equal(page.type, 'boards');
   assert.equal(page.text, 'Roteiro da viagem\nTrilha curta até o mirante');

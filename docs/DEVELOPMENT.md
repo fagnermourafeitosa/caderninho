@@ -60,6 +60,12 @@ To validate only pipelines (spec 008): default columns, adding, renaming, moving
 npm run test:app -- --pipelines-only
 ```
 
+To validate only the Settings page (spec 010): the sidebar, menu command and **Ajustes…** (`Cmd+,`) entry points, alert mode, sound and volume saved to SQLite, **Testar som**, due reminders following the alert mode, and **Manter janela na frente** in sync with the Window menu:
+
+```sh
+npm run test:app -- --settings-only
+```
+
 The smoke runner also works on Linux under a virtual display (`xvfb-run -a npx electron --no-sandbox tests/smoke/run.cjs --pipelines-only`). macOS-only checks (the New York font and native window buttons in the default suite, `Ctrl+A` in diagram code in `--native-only`/`--editor-only`, the native right-click in `--source-only`, focus in `--search-only` and PDF title extraction in `--pdf-cuts-only`) fail there and must be confirmed on a Mac.
 
 ## Boards (Excalidraw)
@@ -122,10 +128,14 @@ Features not yet implemented are recorded in [ROADMAP.md](ROADMAP.md).
 
 Computation is separate from presentation:
 
-- `src/main/related-config.cjs`: category/lexical/semantic weights, threshold, maximum count and pinned model version. Weights are normalized; the initial values still need calibration with real examples.
-- `src/main/related-engine.cjs`: searchable documents, signal comparison and ranking restricted to the same notebook. Distance in the graph represents the combined affinity.
-- `src/main/related-service.cjs`: queue after saving, SQLite cache by content/model, disposal of old vectors and text extraction from images.
-- `src/main/related-worker.cjs`: EmbeddingGemma Q4 on CPU, off the UI thread. Long notes are split and their vectors combined. Uses the symmetric similarity prompt.
+The related-pages context lives in `src/main/related/` (spec 011):
+
+- `domain/model.cjs`: category/lexical/semantic weights, default threshold and count, pinned model version and the model files. Weights are normalized; the initial values still need calibration with real examples.
+- `domain/documents.cjs` and `domain/ranking.cjs`: searchable documents, signal comparison and ranking restricted to the same notebook. Distance in the graph represents the combined affinity.
+- `domain/preferences.cjs`: the user's on/off switch, count (3–12) and sensitivity levels (thresholds 0.35 / 0.40 / 0.48).
+- `application/indexing-scheduler.cjs` and `application/index-pages.cjs`: queue after saving, one pass at a time, SQLite cache by content/model, disposal of old vectors and text extraction from images. Other use cases: query, read/update/reset settings, clear the cache.
+- `infrastructure/embedding-worker.cjs`: EmbeddingGemma Q4 on CPU, off the UI thread. Long notes are split and their vectors combined. Uses the symmetric similarity prompt. `embedding-worker-client.cjs` owns the thread; `model-folder.cjs` measures and removes `userData/models`.
+- `presentation/ipc.cjs`: `related:query`, `related:retry` and the `settings:related-*` channels of the Settings page.
 - `src/renderer/related-ui.js`: footer and modal, without showing scores. The graph shows up to eight direct connections to the current page; clicking opens the source page.
 - `native/ocr.swift`: Apple Vision OCR in Portuguese/English and PDFKit title/excerpt extraction. `prestart` and `prepackage` compile the helper; the distributed app includes the executable and does not require Swift.
 

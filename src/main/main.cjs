@@ -3,7 +3,8 @@ const { execFile } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Store } = require('./store.cjs');
-const { RelatedService } = require('./related-service.cjs');
+const { createRelatedPages } = require('./related/compose.cjs');
+const { registerRelated } = require('./related/presentation/ipc.cjs');
 const { MediaStore, webUrl } = require('./media.cjs');
 const { pathToFileURL } = require('node:url');
 const { randomUUID } = require('node:crypto');
@@ -19,11 +20,18 @@ const { dialogExportTarget } = require('./boards/infrastructure/dialog-export-ta
 const { createPipelineUseCases } = require('./pipelines/compose.cjs');
 const { registerPipelines } = require('./pipelines/presentation/ipc.cjs');
 const { SCHEME: PIPELINE_SCHEME, pipelineProtocolHandler } = require('./pipelines/presentation/protocol.cjs');
+const { createSettingsUseCases } = require('./settings/compose.cjs');
+const { registerSettings } = require('./settings/presentation/ipc.cjs');
+const { settingsMenuItem, windowMenu, menuSettingChange } = require('./settings/presentation/menu.cjs');
+const { systemSoundCatalog } = require('./settings/infrastructure/system-sound-catalog.cjs');
+const { afplaySoundPlayer } = require('./settings/infrastructure/afplay-sound-player.cjs');
+const { electronWindowPlacement } = require('./settings/infrastructure/electron-window-placement.cjs');
+const { macosNotificationSettings } = require('./settings/infrastructure/macos-notification-settings.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: PIPELINE_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
 let win, store, reminderInterval, saveFailed = false;
-let media, observedDay, related, boards, pipelines;
+let media, observedDay, related, boards, pipelines, settings;
 let resolveReady;
 const ready = new Promise(resolve => { resolveReady = resolve; });
 let restoreBounds = null, resizeSession = null, moveSession = null, noteCommands = [];
@@ -33,6 +41,7 @@ const services = {
   playSound,
   scheduleRelated: () => related.schedule(),
   notifications: () => Notification.isSupported(),
+  showNotification: input => new Notification({ ...input, silent: true }).show(),
   pdfDestination: title => dialog.showSaveDialog(win, { title: 'Exportar página para PDF', defaultPath: path.join(app.getPath('documents'), title), filters: [{ name: 'Documento PDF', extensions: ['pdf'] }], buttonLabel: 'Exportar' }),
   cursor: () => screen.getCursorScreenPoint(),
   contextMenu: nativeContextMenuPresenter(Menu, () => liveWindow()),
@@ -64,11 +73,9 @@ function flush() {
   try { if(store) { store.dispatch('category:finalize'); store.flush(); } return true; }
   catch (error) { reportSaveError(error); return false; }
 }
-function playSound() {
-  if (process.platform === 'darwin') {
-    // afplay plays independently of renderer autoplay and window visibility.
-    execFile('/usr/bin/afplay', [app.isPackaged ? path.join(process.resourcesPath, 'alarm.wav') : path.join(ROOT, 'assets', 'alarm.wav')], error => { if (error) { console.error(error.message); shell.beep(); } });
-  } else shell.beep();
+function playSound(input) {
+  if (process.platform === 'darwin') afplaySoundPlayer({ execFile, beep: () => shell.beep() }).play(input);
+  else shell.beep();
 }
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -79,10 +86,18 @@ else {
     catch (error) { dialog.showErrorBox('Não foi possível abrir o caderno', error.message); app.quit(); return; }
     store.dispatch('view:select', { view: 'home' }); observedDay = store.dayKey();
     media = new MediaStore(store, nativeImage);
-    related = new RelatedService(store, media, { ocrPath: app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(ROOT,'native','caderninho-ocr'), onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');} });
+    related = createRelatedPages({ store, media, ocrPath: app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(ROOT,'native','caderninho-ocr'), onUpdate:()=>{if(win&&!win.isDestroyed())win.webContents.send('related:updated');} });
     services.scheduleRelated();
     boards = createBoardUseCases({ store, media, events: { boardSaved: () => { saveFailed = false; services.scheduleRelated(); }, boardImageAttached: () => {} }, exportTarget: () => services.boardExportTarget });
     pipelines = createPipelineUseCases({ store });
+    settings = createSettingsUseCases({
+      store,
+      catalog: systemSoundCatalog({ bundledFile: app.isPackaged ? path.join(process.resourcesPath, 'alarm.wav') : path.join(ROOT, 'assets', 'alarm.wav'), systemDirectory: '/System/Library/Sounds' }),
+      player: { play: input => services.playSound(input) },
+      window: electronWindowPlacement(liveWindow),
+      notificationSettings: macosNotificationSettings({ openExternal: url => shell.openExternal(url) }),
+      notifications: { supported: () => services.notifications(), show: input => services.showNotification(input) },
+    });
   store.db.prepare("UPDATE cuts SET status='unavailable' WHERE status='loading'").run();
   media.collect();
     pipelines.collectImages();
@@ -102,12 +117,18 @@ else {
 function buildMenu() {
   const send = command => { if (win && !win.isDestroyed()) win.webContents.send('notebook:command', command); };
   Menu.setApplicationMenu(Menu.buildFromTemplate([
-    ...(process.platform === 'darwin' ? [{ label: 'Caderninho', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'hide' }, { role: 'quit' }] }] : []),
+    ...(process.platform === 'darwin' ? [{ label: 'Caderninho', submenu: [{ role: 'about' }, { type: 'separator' }, settingsMenuItem(send), { type: 'separator' }, { role: 'hide' }, { role: 'quit' }] }] : []),
     noteMenu(noteCommands, send),
     { label: 'Editar', submenu: [{ label: 'Desfazer', accelerator: 'CommandOrControl+Z', click: (_item, targetWindow) => dispatchHistory('undo', targetWindow) }, { label: 'Refazer', accelerator: 'CommandOrControl+Shift+Z', click: (_item, targetWindow) => dispatchHistory('redo', targetWindow) }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] },
-    { role: 'windowMenu' }
+    windowMenu(settings.readSettings().preferences.keepOnTop, keepOnTop => updateSettings({ keepOnTop }))
   ]));
 }
+// Every settings change, from the page or the menu, refreshes the menu check and the open page.
+function settingsUpdated(view) {
+  buildMenu();
+  if (win && !win.isDestroyed()) win.webContents.send('settings:updated', view);
+}
+const updateSettings = menuSettingChange({ update: changes => settings.updateSettings(changes), onUpdated: settingsUpdated, report: reportSaveError, rebuild: () => buildMenu() });
 function dispatchHistory(direction, targetWindow) {
   const focused = targetWindow || BrowserWindow.getFocusedWindow();
   if (!focused) return;
@@ -121,6 +142,7 @@ async function createWindow() {
   moveSession = null;
   win = new BrowserWindow({ width: Math.min(820, area.width), height: Math.min(820, area.height), minWidth: MIN_WIDTH, minHeight: MIN_HEIGHT, resizable: true, fullscreenable: false, titleBarStyle: 'hidden', trafficLightPosition: { x: 24, y: 24 }, transparent: true, hasShadow: false, backgroundColor: '#00000000', title: 'Caderninho', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: false } });
     buildMenu();
+  settings.applyWindowPlacement();
   win.on('maximize', () => { win.unmaximize(); toggleHeight(); });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
@@ -144,9 +166,10 @@ function checkReminders() {
   let due;
   try { due = store.due(); } catch (error) { reportSaveError(error); return; }
   if (!due.length) return;
-  services.playSound();
+  const alert = settings.planAlert();
+  if (alert.sound) services.playSound(alert.sound);
   win?.webContents.send('notebook:reminder', due);
-  if (services.notifications()) {
+  if (alert.notification && services.notifications()) {
     due.forEach(reminder => {
       const notification = new Notification({ title: reminder.title || 'Caderninho · Lembrete', body: reminder.body.slice(0, 240) || 'Chegou o horário agendado.', silent: true });
       notification.on('click', () => {
@@ -167,9 +190,13 @@ registerBoards(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['
 // Pipeline use cases exist once SQLite is open; storage failures are reported like any other save.
 const pipelineCall = name => input => { try { const result = pipelines[name](input); saveFailed = false; return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
 registerPipelines(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: Object.fromEntries(['addColumn', 'renameColumn', 'moveColumn', 'removeColumn', 'createTask', 'updateTask', 'moveTask', 'trashTask', 'restoreTask', 'addComment', 'editComment', 'removeComment', 'attachImage', 'openTask'].map(name => [name, pipelineCall(name)])) });
+// Settings use cases exist once SQLite is open.
+const settingsCall = name => input => settings[name](input);
+registerSettings(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['readSettings', 'updateSettings', 'testAlertSound', 'testNotification', 'openNotificationSettings'].map(name => [name, settingsCall(name)])), onUpdated: settingsUpdated });
 registerEditorContextMenu(ipcMain, { getWindow: liveWindow, open: request => openEditorContextMenu(services.contextMenu)(request) });
-ipcMain.handle('related:query', (_event,id) => related.query(id));
-ipcMain.handle('related:retry', () => { services.scheduleRelated(); });
+// Related use cases exist once SQLite is open.
+const relatedCall = name => input => related.useCases[name](input);
+registerRelated(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['queryRelated', 'readRelatedSettings', 'updateRelatedSettings', 'resetRelatedRanking', 'clearRelatedCache'].map(name => [name, relatedCall(name)])), retry: () => services.scheduleRelated(), notify: () => { if (win && !win.isDestroyed()) win.webContents.send('related:updated'); } });
 ipcMain.handle('notebook:state', () => store.snapshot());
 ipcMain.handle('notebook:export-pdf', async (_event,id) => {
   if(!flush())throw Error('Salve a última alteração antes de exportar.');
@@ -228,7 +255,6 @@ ipcMain.handle('cuts:open', async (_event, id) => { const cut = store.cut(id);
     return;
   }
  if (cut.kind !== 'link') throw new Error('Este recorte não é um link.'); return shell.openExternal(webUrl(cut.url).href); });
-ipcMain.handle('notebook:sound', () => { services.playSound(); return true; });
 ipcMain.handle('notebook:window', (_event, action) => {
   if (action === 'maximize') return toggleHeight();
   if (action === 'state') return windowState();
@@ -283,7 +309,7 @@ ipcMain.on('notebook:move', (event, phase) => {
 module.exports = { testHook: {
   ready,
   configure: overrides => Object.assign(services, overrides),
-  context: () => ({ win, store, media, related, pipelines }),
+  context: () => ({ win, store, media, related, pipelines, settings }),
   dispatchHistory,
   setObservedDay: day => { observedDay = day; },
 } };
