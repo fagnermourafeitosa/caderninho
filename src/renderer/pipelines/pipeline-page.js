@@ -5,7 +5,7 @@ function renderPipelinePage() {
   const note = currentNote(), label = labels.tasks;
   const toolbar = `<div class="view-toolbar"><span class="toolbar-left"><button id="back-to-index" class="toolbar-back" aria-label="${indexLabels.tasks.back}" title="${indexLabels.tasks.back}">${icon('chevron')}</button></span><span class="toolbar-right">${note ? `<button id="new-task" class="add-note toolbar-action toolbar-primary" aria-label="Nova tarefa" title="Nova tarefa">${icon('add')}<span class="toolbar-action-label">Nova tarefa</span></button>${moreMenu([moreItem('new-pipeline', 'kanban', label.create, '⌘N'), '<hr>', moreItem('trash-note', 'trash', 'Mover para a lixeira', '⇧⌘⌫', true)])}` : `<button id="new-note" class="add-note toolbar-action toolbar-primary" aria-label="${label.create}" title="${label.create}">${icon('add')}<span class="toolbar-action-label">${label.create}</span></button>`}</span></div>`;
   if (!note) {
-    $('#page-content').innerHTML = toolbar + empty('Seu primeiro pipeline?', 'Organize tarefas em colunas, do Backlog ao Done.', 'tasks', `<button id="empty-create" class="primary">${actionLabel('kanban', label.create)}</button>`);
+    $('#page-content').innerHTML = toolbar + empty('Seu primeiro pipeline?', 'Organize tarefas em colunas, do Backlog ao Done.', 'tasks', `<button id="empty-create" class="empty-create">${actionLabel('kanban', label.create)}</button>`);
     $('#empty-create').onclick = createNote; $('#new-note').onclick = createNote; bindBack(); syncNoteCommands(); return;
   }
   const pipeline = pipelineOf(note.id);

@@ -57,7 +57,9 @@ h1{font-size:var(--text-title);font-weight:650;letter-spacing:-.01em;margin-bott
 .empty svg{width:68px;height:68px;margin-bottom:16px;opacity:.85}
 .empty h2{font-size:18px;font-weight:normal;color:var(--ink);margin-bottom:8px}
 .empty p{font-size:13px;line-height:1.7}
-.empty .primary{margin-top:20px;color:var(--ink)}
+.empty-create{display:inline-flex;align-items:center;gap:6px;margin-top:20px;padding:4px 6px;background:transparent;border:0;border-radius:6px;font:13px var(--body-font);color:var(--ink)}
+.empty-create:hover{background:var(--hover)}
+.empty .empty-create .small-icon{width:16px;height:16px;margin:0;opacity:1}
 .reminder-form{display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--line)}
 .reminder-form>input{background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px 0;font-size:15px;width:100%}
 .reminder-form .date-row{display:flex;gap:10px;align-items:center}

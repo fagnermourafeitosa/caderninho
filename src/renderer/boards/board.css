@@ -57,11 +57,8 @@
 .board-list button.on{background:var(--accent-soft)}
 .board-list-gap{width:16px;flex:none}
 
-/* Empty Quadros index: ink illustration and a plain "+ Novo quadro" text action (empty mockup). */
-.empty:has(.board-empty-create) svg{color:var(--ink)}
-.empty .board-empty-create{display:inline-flex;align-items:center;gap:6px;margin-top:20px;padding:4px 6px;background:transparent;border:0;border-radius:6px;font:13px var(--body-font);color:var(--ink)}
-.empty .board-empty-create:hover{background:var(--hover)}
-.empty .board-empty-create .small-icon{width:16px;height:16px;margin:0;opacity:1}
+/* Empty Quadros index: ink illustration (the "+ Novo quadro" action uses the shared .empty-create). */
+.empty:has(use[href="#illus-boards"]) svg{color:var(--ink)}
 
 /* Quadros index rows. */
 .board-index-row{display:flex;align-items:center;gap:14px}
