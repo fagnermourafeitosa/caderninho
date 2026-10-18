@@ -20,3 +20,14 @@ test('typing pauses and history limits keep bounded independent snapshots', () =
   for (let i = 1; i <= 3; i++) { clock += 1000; history.record(value(String(i)), 'body'); }
   assert.equal(history.step('undo').body, '2'); assert.equal(history.step('undo').body, '1'); assert.equal(history.step('undo'), null);
 });
+
+test('completed layout edits are distinct steps interleaved with typing',()=>{
+  const layout=[{id:'card',groupId:'card',position:0,anchor:0,side:'left',width:.5}];
+  const history=new EditHistory({...value('text'),mediaLayout:layout});
+  const moved=layout.map(item=>({...item,side:'right'}));
+  assert.equal(history.record({...value('text'),mediaLayout:moved}),true);
+  history.record({...value('typed'),mediaLayout:moved},'body');
+  assert.equal(history.step('undo').body,'text');
+  assert.equal(history.step('undo').mediaLayout[0].side,'left');
+  assert.equal(history.step('redo').mediaLayout[0].side,'right');
+});

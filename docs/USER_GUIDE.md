@@ -138,7 +138,11 @@ Comece uma linha com `[]` ou `[ ]` seguido de espaço para criar uma **tarefa** 
 
 Em **Notas**, use **Adicionar mídia** no menu **⋯** ou pressione **⇧⌘M**, cole uma imagem ou um link no texto, ou arraste imagens, PDFs e links para a página. Os arquivos aceitos são imagens **PNG, JPEG e WebP** de até **20 MB** cada, e documentos **PDF** de até **50 MB**.
 
-Use a alça **Arraste** para posicionar a mídia ao lado de um parágrafo, à esquerda ou à direita. Os botões **− / +** ajustam a largura; o texto acompanha a posição da mídia.
+Use the **Arraste** handle to place media beside a paragraph or another card. The insertion indicator shows the destination before you release. Cards placed beside one another initially share the group space equally; **− / +** adjusts each card's width afterward. Text flows beside a card or group when space permits and continues below it.
+
+Cards wrap onto subsequent rows in a narrow window and return to their intended arrangement when you widen it. Pasting inserts beside the current paragraph without splitting its text; dropping uses the indicated destination. The media dialog remembers the writing position from before it opened. In tables, code and diagrams, insertion anchors before the block.
+
+Each completed move or width adjustment supports undo and redo. Layout history does not restore deleted cards. When newer cards share a group, undo keeps them in place and fits historical card widths proportionally into the remaining space. PDF export preserves the card grouping and order with wrapping adapted to the printable width.
 
 Os cartões de link guardam o título, a descrição e a imagem obtidos das metatags do site. Depois de criada, a prévia fica disponível sem internet. Clicar no cartão abre o endereço no navegador. Sites sem metadados ou que exigem login podem aparecer sem prévia. Os cartões não se atualizam sozinhos.
 
@@ -168,7 +172,7 @@ O PDF em A4 inclui título, caderno, categorias, datas, texto formatado, tabelas
 
 As ações da página também ficam no menu **Nota** da barra de menus, habilitadas quando a página aberta as oferece.
 
-Nas notas, o histórico de desfazer inclui título, texto, pílulas e linhas de tarefa, guardado por página durante a sessão. Na tarefa aberta, a descrição e cada comentário têm o próprio desfazer. Ele recomeça quando você fecha o app. Mover mídias, agendar alertas e mover cards ou colunas não fazem parte desse histórico.
+In notes, undo history includes the title, text, pills, task lines, and completed media moves and width adjustments, kept per page during the session. Task descriptions and comments have separate histories. History resets when the app closes. Scheduling alerts and moving pipeline cards or columns remain outside note history.
 
 Arraste uma área não editável do caderno para mover a janela, e arraste a borda do caderno para redimensioná-la. A janela usa os botões do próprio Mac: o vermelho fecha, o amarelo minimiza e o verde aumenta a janela até a altura disponível, com largura de até 1.200 pixels. Um clique duplo no topo também aumenta ou restaura a janela.
 

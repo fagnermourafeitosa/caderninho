@@ -29,6 +29,8 @@ const { systemSoundCatalog } = require('./settings/infrastructure/system-sound-c
 const { afplaySoundPlayer } = require('./settings/infrastructure/afplay-sound-player.cjs');
 const { electronWindowPlacement } = require('./settings/infrastructure/electron-window-placement.cjs');
 const { macosNotificationSettings } = require('./settings/infrastructure/macos-notification-settings.cjs');
+const {createMediaLayout}=require('./media-layout/compose.cjs');
+const {registerMediaLayout,importPlacement}=require('./media-layout/presentation/ipc.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'caderno-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: PIPELINE_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true } }, { scheme: FONT_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 app.disableHardwareAcceleration();
@@ -93,6 +95,7 @@ else {
     boards = createBoardUseCases({ store, media, events: { boardSaved: () => { saveFailed = false; services.scheduleRelated(); }, boardImageAttached: () => {} }, exportTarget: () => services.boardExportTarget });
     pipelines = createPipelineUseCases({ store });
     dailyDrafts = createDailyDraftUseCases({ store });
+    registerMediaLayout(ipcMain,createMediaLayout({store}));
     settings = createSettingsUseCases({
       store,
       catalog: systemSoundCatalog({ bundledFile: app.isPackaged ? path.join(process.resourcesPath, 'alarm.wav') : path.join(ROOT, 'assets', 'alarm.wav'), systemDirectory: '/System/Library/Sounds' }),
@@ -218,7 +221,7 @@ ipcMain.handle('notebook:export-pdf', async (_event,id) => {
   return {canceled:false,filePath};
 });
 ipcMain.handle('notebook:action', (_event, action, input) => {
-  if (['source:purge','note:purge','cut:purge','cut:create','cut:preview'].includes(action)) throw new Error('Use o comando específico para esta operação.');
+  if (['source:purge','note:purge','cut:purge','cut:create','cut:preview','cut:layout'].includes(action)) throw new Error('Use o comando específico para esta operação.');
   try { const state = store.dispatch(action, input); saveFailed = false; services.scheduleRelated(); return state; }
   catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; }
 });
@@ -232,21 +235,24 @@ ipcMain.handle('notebook:purge', async (_event, kind, id) => {
   media.collect(); pipelines.collectImages(); saveFailed = false; services.scheduleRelated(); return store.snapshot();
 });
 ipcMain.handle('cuts:image', (_event, input) => {
+  const placement=importPlacement(input,createMediaLayout({store}));
   const note = store.note(input.noteId, 'notes'); if (note.trashed) throw new Error('Restaure a nota primeiro.');
   const blobId = media.image(input.bytes);
-  const state=store.dispatch('cut:create', { noteId: note.id, kind: 'image', blobId, title: input.name || 'Imagem' }); services.scheduleRelated(); return state;
+  const state=store.dispatch('cut:create', { noteId: note.id, kind: 'image', blobId, title: input.name || 'Imagem', placement }); services.scheduleRelated(); return state;
 });
 ipcMain.handle('cuts:pdf', async (_event, input) => {
+  const placement=importPlacement(input,createMediaLayout({store}));
   const note = store.note(input.noteId, 'notes'); if (note.trashed) throw new Error('Restaure a nota primeiro.');
   const readerPath = app.isPackaged ? path.join(process.resourcesPath,'caderninho-ocr') : path.join(ROOT,'native','caderninho-ocr');
   const data = await media.pdf(input.bytes, input.name, readerPath);
-  const state = store.dispatch('cut:create', { noteId: note.id, kind: 'pdf', ...data });
+  const state = store.dispatch('cut:create', { noteId: note.id, kind: 'pdf', ...data, placement });
   services.scheduleRelated(); return state;
 });
 ipcMain.handle('cuts:link', (_event, input) => {
+  const placement=importPlacement(input,createMediaLayout({store}));
   const url = webUrl(input.url).href;
   const id = randomUUID();
-  const state = store.dispatch('cut:create', { id, noteId: input.noteId, kind: 'link', url, title: new URL(url).hostname, status: 'loading' });
+  const state = store.dispatch('cut:create', { id, noteId: input.noteId, kind: 'link', placement, url, title: new URL(url).hostname, status: 'loading' });
   media.preview(url).then(data => store.dispatch('cut:preview', { id, ...data, status: 'ready' })).catch(() => {
     try { store.dispatch('cut:preview', { id, status: 'unavailable' }); } catch {}
   }).finally(() => { if (store && win && !win.isDestroyed()) { try { win.webContents.send('notebook:cuts-updated', store.snapshot()); services.scheduleRelated(); } catch {} } });

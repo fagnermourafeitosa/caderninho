@@ -23,8 +23,11 @@ function saved() {
   const at=new Date();
   clearTimeout(saveLabelTimer); saveLabelTimer=setTimeout(() => { if (!pending && !$('#save-state').classList.contains('failed')) { $('#save-state').textContent=`Salvo às ${at.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`; $('#save-state').title=`Salvamento automático confirmado em ${formatDateTime(at)} · ${state.storagePath}`; } },Math.max(0,300-(Date.now()-savingStarted)));
 }
-async function action(name, input = {}, options = {}) {
-  if (name === 'note:update' && options.history !== false) rememberNoteEdit(input,options);
+function action(name,input={},options={}) {
+  if(name==='note:update'&&options.history!==false)rememberNoteEdit(input,options);
+  return enqueueNoteMutation(()=>performAction(name,input,options),name==='note:update'?input.id:null);
+}
+async function performAction(name, input = {}, options = {}) {
   pending++; beginSaving();
   try {
     state = await window.notebook.action(name, input);
@@ -51,6 +54,7 @@ function renderSidebar() {
   $('#sidebar-notebook').textContent = state.notebooks.find(book => book.id === state.activeNotebook)?.name || '';
 }
 function render() {
+  disposeMediaLayout();
   sourceDraft=null;
   leaveBoard();
   hideEditorMenus();
@@ -67,6 +71,7 @@ function render() {
   refreshRelatedSoon();
 }
 function renderPage() {
+  disposeMediaLayout();
   finishDiagramSession();
   if (view === 'boards') { renderBoardPage(); return; }
   if (view === 'tasks') { renderPipelinePage(); return; }

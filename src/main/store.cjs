@@ -11,6 +11,8 @@ const {installBoards,createEmptyBoard,boardsWithThumbnail}=require('./boards/inf
 const {installPipelines,createPipelineColumns}=require('./pipelines/infrastructure/sqlite-pipeline-schema.cjs');
 const {pipelineState}=require('./pipelines/infrastructure/pipeline-state.cjs');
 const {installDailyDrafts,dailyDraftState}=require('./daily-draft/infrastructure/sqlite-daily-draft-repository.cjs');
+const {installMediaLayout}=require('./media-layout/infrastructure/sqlite-layout-repository.cjs');
+const {initializeImportedLayout}=require('./media-layout/compose.cjs');
 const HOME_STRIPS=['draft','graph','reminders','notes','pipeline'];
 const TYPES = ['notes', 'tasks', 'reminders', 'boards'];
 const text = (value, max = 500) => String(value ?? '').slice(0, max);
@@ -73,6 +75,7 @@ class Store {
     installBoards(this);
     installPipelines(this);
     installDailyDrafts(this);
+    installMediaLayout(this);
     if (!this.getSetting('initialized')) this.initialize();
     if (!this.getSetting('categories_initialized')) this.transaction(()=>{ const stamp=new Date(this.now()).toISOString(); for(const note of this.db.prepare('SELECT id FROM notes').all()) syncCategories(this,note.id,stamp); this.setSetting('categories_initialized','1'); });
   }
@@ -148,7 +151,7 @@ class Store {
     const notes = this.db.prepare('SELECT * FROM notes ORDER BY created,rowid').all().map(row => this.dto(row));
     const categories=categoryState(this,notes);
     const thumbnails=boardsWithThumbnail(this); for (const note of notes) if (note.type === 'boards') note.hasThumbnail = thumbnails.has(note.id);
-    const cuts = this.db.prepare('SELECT * FROM cuts ORDER BY created,rowid').all().map(row => ({ id: row.id, noteId: row.note_id, kind: row.kind, blobId: row.blob_id, url: row.url, title: row.title, description: row.description, status: row.status, side: row.side, anchor: row.anchor, width: row.width, trashed: Boolean(row.trashed), created: row.created, updated:row.updated_at, deletedAt:row.deleted_at }));
+    const cuts = this.db.prepare('SELECT * FROM cuts ORDER BY created,rowid').all().map(row => ({ id: row.id, noteId: row.note_id, kind: row.kind, blobId: row.blob_id, url: row.url, title: row.title, description: row.description, status: row.status, side: row.side, anchor: row.anchor, width: row.width, groupId:row.layout_group, position:row.layout_order, trashed: Boolean(row.trashed), created: row.created, updated:row.updated_at, deletedAt:row.deleted_at }));
     notes.forEach(note => { note.cuts = cuts.filter(cut => cut.noteId === note.id && !cut.trashed); });
     const activeBook=activeNotebook(this);
     const selected = {};
@@ -211,15 +214,9 @@ class Store {
           if (['image','pdf'].includes(input.kind) && !input.blobId) throw new Error('Arquivo ausente.');
           const id = input.id || randomUUID();
           this.db.prepare('INSERT INTO cuts(id,note_id,kind,blob_id,url,title,description,status,created) VALUES(?,?,?,?,?,?,?,?,?)').run(id, note.id, input.kind, input.blobId || null, text(input.url, 4000), text(input.title, 300), text(input.description, 800), input.status || 'ready', stamp);
-          this.db.prepare('UPDATE cuts SET updated_at=? WHERE id=?').run(stamp,id); event(this,'cut',id,'create',stamp);
+          this.db.prepare('UPDATE cuts SET updated_at=?,layout_group=? WHERE id=?').run(stamp,id,id); event(this,'cut',id,'create',stamp);
+          initializeImportedLayout(this,{noteId:note.id,cutId:id,target:input.placement});
           this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp, note.id); break;
-        }
-        case 'cut:layout': {
-          const cut = this.cut(input.id), note = this.note(cut.note_id);
-          if (note.trashed || cut.trashed) throw new Error('Restaure o recorte antes de mover.');
-          const side = input.side ?? cut.side, anchor = input.anchor ?? cut.anchor, width = input.width ?? cut.width;
-          if (!['left','right'].includes(side) || !Number.isInteger(anchor) || anchor < 0 || anchor > 10000 || !Number.isFinite(width) || width < .25 || width > .85) throw new Error('Posição do recorte inválida.');
-          this.db.prepare('UPDATE cuts SET side=?,anchor=?,width=?,updated_at=? WHERE id=?').run(side, anchor, width, stamp,cut.id); this.db.prepare('UPDATE notes SET updated=? WHERE id=?').run(stamp,note.id); break;
         }
         case 'cut:preview': {
           const cut = this.cut(input.id);

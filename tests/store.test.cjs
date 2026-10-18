@@ -159,11 +159,12 @@ test('cuts retain layout and references across reopen and typed trash restores',
   store.db.prepare('INSERT INTO media_blobs(id,file,mime,bytes) VALUES(?,?,?,?)').run(blob, blob + '.png', 'image/png', 5);
   store.dispatch('note:update', { id, body: 'Texto ao redor' });
   store.dispatch('cut:create', { id: 'cut-image', noteId: id, kind: 'image', blobId: blob });
-  store.dispatch('cut:layout', { id: 'cut-image', side: 'left', anchor: 3, width: .4 });
+  const layout=require('../src/main/media-layout/compose.cjs').createMediaLayout({store});
+  layout.move({noteId:id,cutId:'cut-image',target:{kind:'block',side:'left',anchor:3}});layout.resize({noteId:id,cutId:'cut-image',width:.4});
   const cut = note(open(), id).cuts[0];
   assert.equal(cut.side, 'left'); assert.equal(cut.anchor, 3); assert.equal(cut.blobId, blob);
   assert.equal(note(store, id).body, 'Texto ao redor');
-  assert.throws(() => store.dispatch('cut:layout', { id: cut.id, width: 10 }));
+  assert.throws(() => layout.resize({noteId:id,cutId:cut.id,width:10}));
   store.dispatch('cut:trash', { id: cut.id });
   assert.equal(store.snapshot().trashCuts.length, 1);
   store.dispatch('note:trash', { id }); assert.equal(store.snapshot().trashCuts.length, 0);

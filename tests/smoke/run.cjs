@@ -165,6 +165,13 @@ async function runSmoke() {
   const { win, store, media, related } = testHook.context();
   try {
     await installRendererErrors(win.webContents);
+    if(process.argv.includes('--media-layout-only')) {
+      media.fetch=async url=>({bytes:Buffer.from('<title>Referência</title>'),type:'text/html',url});
+      const result=await win.webContents.executeJavaScript(smokeScript('media-layout-smoke.js'));
+      if(result.errors.length)throw new Error(result.errors.join('\n'));
+      await require('./media-layout.cjs').verifyMediaLayoutClose({win,store,result});
+      console.log('MEDIA_LAYOUT_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     if(process.argv.includes('--source-only')) {fs.mkdirSync(path.join(ROOT,'artifacts'),{recursive:true});await win.webContents.executeJavaScript(`window.cutTestBytes = ${JSON.stringify([...fs.readFileSync(path.join(ROOT,'assets','icon.png'))])}`);const result=await win.webContents.executeJavaScript(smokeScript('source-actions-smoke.js'));console.log('SOURCE_ACTIONS_SMOKE_OK',JSON.stringify(result));fs.writeFileSync(path.join(ROOT,'artifacts','source-actions.png'),(await win.webContents.capturePage()).toPNG());await win.webContents.executeJavaScript("openSourceComposer(actionsForNote()[0].origin,'reminder')");await new Promise(resolve=>setTimeout(resolve,250));fs.writeFileSync(path.join(ROOT,'artifacts','source-action-composer.png'),(await win.webContents.capturePage()).toPNG());await runEditorContextMenuSmoke(win);app.quit();return;}
     if(process.argv.includes('--related-runtime-only')) {
       related.engine.cacheDir=path.join(process.cwd(),'artifacts','embedding-cache');

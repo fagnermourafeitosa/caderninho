@@ -61,7 +61,7 @@ function renderDocumentBlock(block,index){
   if(block.type==='divider'){line.classList.add('block-divider');editableText(line).contentEditable='true';editableText(line).setAttribute('aria-label','Divisor');}
   return line;
 }
-function renderDocumentBlocks(editor,note){let offset=0;note.editorDoc.forEach((block,i)=>{const size=pageDocument.blockText(block).split('\n').length;note.cuts.filter(cut=>Math.min(cut.anchor,note.body.split('\n').length-1)>=offset&&Math.min(cut.anchor,note.body.split('\n').length-1)<offset+size).forEach(cut=>editor.append(cutCard(cut)));editor.append(renderDocumentBlock(block,offset));offset+=size;});editor.dataset.structured='true';}
+function renderDocumentBlocks(editor,note){let offset=0;note.editorDoc.forEach((block,i)=>{const size=pageDocument.blockText(block).split('\n').length;editor.append(renderDocumentBlock(block,offset));offset+=size;});editor.dataset.structured='true';}
 function ensureRichEditor(){
   if(taskEditorActive())return editorHost();
   const old=$('#note-body');if(!old)return null;if(old.dataset.structured==='true')return old;
@@ -275,7 +275,7 @@ document.addEventListener('beforeinput',event=>{
 // inside a writing span. Repair unknown browser nodes before reading or editing.
 function normalizePageDOM(){
   const editor=editorHost();if(!editor||editor.tagName==='TEXTAREA')return;
-  const unknown=[...editor.childNodes].filter(node=>node.nodeType===3?Boolean(node.textContent):node.nodeType===1&&!node.matches('.writing-line,.paper-cut'));
+  const unknown=[...editor.childNodes].filter(node=>node.nodeType===3?Boolean(node.textContent):node.nodeType===1&&!node.matches('.writing-line,.paper-cut,.media-card-group'));
   if(!unknown.length)return;
   const selection=getSelection(),inside=editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode);
   const offset=(node,n)=>{const range=document.createRange();range.selectNodeContents(editor);range.setEnd(node,n);return range.toString().length;};

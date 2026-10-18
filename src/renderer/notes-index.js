@@ -17,6 +17,7 @@ function renderIndexRows() {
   if (view === 'boards') loadBoardThumbnails($('#notes-index'));
 }
 function renderIndex() {
+  disposeMediaLayout();
   const label = labels[view], names = indexLabels[view], count = visibleNotes().length;
   const toolbar = `<div class="view-toolbar"><span class="toolbar-left"></span><span class="toolbar-right"><button id="new-note" class="add-note toolbar-action toolbar-primary" aria-label="${label.create}" title="${label.create}">${icon('add')}<span class="toolbar-action-label">${label.create}</span></button></span></div>`;
   const body = count ? `<input id="index-search" class="index-search" type="search" placeholder="Procurar em ${names.many}…" aria-label="Procurar em ${names.many}" autocomplete="off"><div id="notes-index" class="notes-index scroll-list"></div>` : empty({ notes: 'Uma página nova?', tasks: 'Seu primeiro pipeline?', boards: 'Um quadro em branco?' }[view], { notes: 'Escreva e deixe o caderninho guardar.', tasks: 'Organize tarefas em colunas, do Backlog ao Done.', boards: 'Post-its, setas e imagens num papel sem fim.' }[view], view, `<button id="empty-create" class="empty-create">${actionLabel('add', label.create)}</button>`);

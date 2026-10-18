@@ -4,8 +4,8 @@ function ensurePageHistory(note) {
   let history = pageHistories.get(note.id);
   // External edits become a fresh baseline instead of
   // allowing an old snapshot to erase content appended from another window.
-  if (!history || history.current.title !== note.title || history.current.body !== note.body || JSON.stringify(history.current.editorDoc??null)!==JSON.stringify(note.editorDoc??null)) {
-    history = new EditHistory({ title: note.title, body: note.body,editorDoc:note.editorDoc }); pageHistories.set(note.id, history);
+  if (!history || (!noteMutationPending(note.id)&&(history.current.title !== note.title || history.current.body !== note.body || JSON.stringify(history.current.editorDoc??null)!==JSON.stringify(note.editorDoc??null)))) {
+    history = new EditHistory({ title: note.title, body: note.body,editorDoc:note.editorDoc,mediaLayout:noteMediaPlacements(note) }); pageHistories.set(note.id, history);
   }
   return history;
 }
@@ -23,7 +23,7 @@ function editorSelection() {
 function rememberNoteEdit(input,options={}) {
   const note = state?.notes.find(item => item.id === input.id); if (!note) return;
   const history = pageHistories.get(note.id) || ensurePageHistory(note), previous = history.current;
-  const next = { title: input.title ?? previous.title, body: input.body ?? previous.body,editorDoc:Object.hasOwn(input,'editorDoc')?input.editorDoc:previous.editorDoc, selection: editorSelection() };
+  const next = { title: input.title ?? previous.title, body: input.body ?? previous.body,editorDoc:Object.hasOwn(input,'editorDoc')?input.editorDoc:previous.editorDoc, selection: editorSelection(),mediaLayout:previous.mediaLayout };
   let group = Object.hasOwn(input, 'title') ? 'title' : 'body';
   if (group === 'body') {
     if (previous.body.split('\n').length !== next.body.split('\n').length) group = null;
@@ -50,34 +50,63 @@ function isPageHistoryTarget(target = document.activeElement) {
   if (target?.closest('#note-body, #note-title')) return true;
   return ['notes', 'reminders'].includes(view) && !target?.closest('input, textarea, select, [contenteditable="true"], dialog');
 }
+function displayHistorySnapshot(note,restored,selection,textChanged) {
+  if(currentNote()?.id!==note.id||view==='archive')return;
+  const projected={...note,title:restored.title,body:restored.body,editorDoc:restored.editorDoc,
+    cuts:note.cuts.map(cut=>({...cut,...restored.mediaLayout?.find(item=>item.id===cut.id)}))};
+  if(!textChanged&&note.type==='notes')refreshMediaGroups(projected);
+  else {
+    const editor=$('#note-body'),scroll=editor?.scrollTop||0;
+    $('#note-title').value=restored.title;
+    if(editor) {
+      if(view==='notes'&&(projected.editorDoc||editor.classList.contains('collage-editor')||projected.cuts.length||categoryText.tokens(projected.body).length))mountCollage(projected);
+      else editor.value=restored.body;
+      $('#note-body').scrollTop=scroll;
+    }
+    restoreEditorSelection(restored.selection||selection);
+  }
+  updateDetail();if(view==='notes')renderSmartMargin();
+}
 function editPageHistory(direction) {
-  const noteId = currentNote()?.id; if (!noteId) return;
+  const note=currentNote();if(!note)return undoQueue;
   finishDiagramSession();
-  undoQueue = undoQueue.then(async () => {
-    const history = pageHistories.get(noteId); if (!history) return;
-    const selection = editorSelection();
-    const restored = history.step(direction); if (!restored) return;
-    unfinishedCategoryNote=null;
-    // Restore the page immediately so typing after the shortcut cannot be
-    // overwritten when the asynchronous SQLite acknowledgement arrives.
-    if (currentNote()?.id === noteId && view !== 'archive') {
-      const note = { ...currentNote(), title: restored.title, body: restored.body,editorDoc:restored.editorDoc }, editor = $('#note-body'), scroll = editor?.scrollTop || 0;
-      $('#note-title').value = note.title;
-      if (editor) {
-        if (view === 'notes' && (note.editorDoc || editor.classList.contains('collage-editor') || note.cuts.length || categoryText.tokens(note.body).length)) mountCollage(note);
-        else editor.value = note.body;
-        $('#note-body').scrollTop = scroll;
+  const history=pageHistories.get(note.id);if(!history)return undoQueue;
+  const previous=history.current,selection=editorSelection(),restored=history.step(direction);
+  if(!restored)return undoQueue;
+  const intended=history.current;
+  const textChanged=previous.title!==restored.title||previous.body!==restored.body||JSON.stringify(previous.editorDoc)!==JSON.stringify(restored.editorDoc);
+  const layoutChanged=JSON.stringify(previous.mediaLayout||[])!==JSON.stringify(restored.mediaLayout||[]);
+  if(layoutChanged&&note.type==='notes') {
+    try {
+      const live=noteMediaPlacements(historyMediaNote(note,{current:previous}));
+      const projected=MediaLayoutDomain.restore(live,restored.mediaLayout||[]);
+      history.reconcileMediaLayout(restored.mediaLayout,projected);restored.mediaLayout=projected;
+    }catch(error){history.step(direction==='undo'?'redo':'undo');toast(error.message);return undoQueue;}
+  }
+  unfinishedCategoryNote=null;
+  displayHistorySnapshot(note,restored,selection,textChanged);
+  // Reserve persistence now: subsequent input must join after this undo/redo intent.
+  undoQueue=enqueueNoteMutation(async()=>{
+    let success=true;
+    if(layoutChanged&&note.type==='notes') {
+      try {
+        state=await window.notebook.mediaLayoutRestore({noteId:note.id,placements:restored.mediaLayout||[]});
+        const fresh=state.notes.find(item=>item.id===note.id);
+        history.reconcileMediaLayout(restored.mediaLayout,noteMediaPlacements(fresh));
+        if(view==='notes'&&currentNote()?.id===note.id)refreshMediaGroups(historyMediaNote(fresh,history));
       }
-      updateDetail(); if (view === 'notes') renderSmartMargin(); restoreEditorSelection(restored.selection || selection);
+      catch(error){toast(error.message);success=false;}
     }
-    // A board's text comes from its canvas: the page history only restores its title.
-    const update = currentNote()?.type === 'boards' ? { id: noteId, title: restored.title } : { id: noteId, title: restored.title, body: restored.body,editorDoc:restored.editorDoc };
-    if (!await action('note:update', update, { history: false })) {
-      // Do not remove an edit made while the save was in flight.
-      if (history.current.title === restored.title && history.current.body === restored.body) history.step(direction === 'undo' ? 'redo' : 'undo');
+    if(success&&textChanged) {
+      const input=note.type==='boards'?{id:note.id,title:restored.title}:{id:note.id,title:restored.title,body:restored.body,editorDoc:restored.editorDoc};
+      success=await performAction('note:update',input,{history:false});
     }
-    if(view==='notes'&&currentNote()?.id===noteId)renderSourceMargin();
-  }).catch(error => toast(error.message));
+    if(!success&&history.current===intended) {
+      history.step(direction==='undo'?'redo':'undo');
+      displayHistorySnapshot(state.notes.find(item=>item.id===note.id),history.current,selection,textChanged);
+    }
+    if(view==='notes'&&currentNote()?.id===note.id)renderSourceMargin();
+  },note.id).catch(error=>toast(error.message));
   return undoQueue;
 }
 function capturePageSelection() { const history = pageHistories.get(currentNote()?.id); if (history) history.current.selection = editorSelection(); }
