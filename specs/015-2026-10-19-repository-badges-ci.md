@@ -3,7 +3,7 @@
 - **Specification ID**: 015
 - **Date**: 2026-10-19
 - **Slug**: repository-badges-ci
-- **Status**: Waiting Approve
+- **Status**: Implemented
 - **Owner**: Repository documentation and development automation
 - **Related Specification**: [014 — Fixed-size media cards and destination masks](014-2026-10-19-fixed-media-cards.md)
 
@@ -30,8 +30,8 @@ Release information updates without editing README version numbers. Test status 
 ## User Stories
 
 - [x] 1. As a visitor, I can identify the release, supported platform and local-first storage and follow relevant documentation.
-- [ ] 2. As a contributor, I receive a failing GitHub check when the selected test command fails.
-- [ ] 3. As a visitor, I see the actual test status for `main`, without a hard-coded success claim.
+- [x] 2. As a contributor, I receive a failing GitHub check when the selected test command fails.
+- [x] 3. As a visitor, I see the actual test status for `main`, without a hard-coded success claim.
 
 ## Architecture Gate
 
@@ -84,7 +84,7 @@ The requested public seams are existing npm test commands and GitHub's workflow 
 ## Acceptance Criteria
 
 - [x] 1. README has release, macOS Apple Silicon and local-first badges, with no downloads badge.
-- [ ] 2. The Tests workflow runs the confirmed suite with Node 22, lockfile installation and failing exit propagation.
+- [x] 2. The Tests workflow runs the confirmed suite with Node 22, lockfile installation and failing exit propagation.
 - [x] 3. README test status reads that workflow on `main` and links to its runs.
 - [x] 4. Selected tests, YAML parsing and whitespace checks pass locally; hosted verification is recorded accurately.
 - [x] 5. Development documentation, README review and formal code reviewer diagnosis/table are recorded.
@@ -132,3 +132,10 @@ No actionable defects or boundary violations found after rigorous audit. No auto
 The user explicitly requested “commit push” and then “approved”. This approves specification 015 and authorizes committing, pushing the dedicated branch and fast-forward integration into `main`. The implementation and formal review remain unchanged. Final status and hosted acceptance evidence will be recorded after observing the first GitHub Actions run.
 
 Pre-commit documentation review: README reviewed, badge row added as specified; existing descriptions, screenshots, diagrams, commands and versions need no other change. There is no specifications index. Development documentation already describes the workflow; user-guide behavior is unchanged. No specification divergence is open.
+
+
+## Hosted Verification and Final Approval — 2026-10-19
+
+The dedicated task branch was pushed and fast-forward integrated into `main` at `4fc34064a86b497c702d5cfd12477dabe9aa1ec0`. GitHub Actions run [39255716771](https://github.com/fagnermourafeitosa/caderninho/actions/runs/39255716771) completed successfully on its Ubuntu runner. Checkout, Node setup, clean lockfile installation, the test command and cleanup all succeeded. The hosted test log reports 287 tests, 287 passes and zero failures. The README status image queries this same workflow on `main`; it does not use a static passing label. This supplies the remaining hosted evidence for criterion 2 and stories 2–3.
+
+The user's explicit “approved” authorizes the final `Waiting Approve` to `Implemented` transition. All acceptance criteria now have the source/configuration, local command or hosted execution evidence recorded above. The prior pending-publication statements describe the earlier state and are superseded by this section. No product behavior, dependency or workflow implementation changed after the formal review. README, development documentation and user guidance were reviewed again before publication; no further changes are needed. This specification is now a historical record.
