@@ -28,6 +28,8 @@ npm test
 npm run test:app
 ```
 
+The **Tests** GitHub Actions workflow (`.github/workflows/tests.yml`) runs `npm test` on Ubuntu with Node.js 22 for pushes to `main`, pull requests targeting `main`, and manual runs. It installs the lockfile dependencies with `npm ci --ignore-scripts`, since this unit/integration suite does not need Electron binaries or native/model installation scripts. The README test badge reports this workflow on `main`; Electron smoke tests remain a separate local validation step.
+
 The app tests drive the real app from an external sandbox (`tests/smoke/sandbox.cjs`): a temporary data folder, separate from personal notebooks, plus replacements for sound, notifications, the related-pages model, the PDF save dialog, the desktop cursor and the editor's native context menu (scripted answers), set through `testHook.configure`. Windows stay hidden and the app never becomes the active one (Chromium focus emulation keeps pages behaving as focused), so a run does not take your keyboard; the copy check still uses the system clipboard and restores it. The app itself has no test mode; `tests/production-boundary.test.cjs` keeps it that way. They cover persistence, editor, selection, media, categories, calendar, reminders and undo/redo.
 
 To validate note media layout (spec 013), including adjacent cards, responsive wrapping, drag insertion, paste position, layout undo/redo and typing after Undo while a text save is pending:

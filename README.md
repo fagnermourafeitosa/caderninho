@@ -10,6 +10,13 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/fagnermourafeitosa/caderninho/releases/latest"><img src="https://img.shields.io/github/v/release/fagnermourafeitosa/caderninho?label=release&amp;style=flat-square&amp;color=6b624c" alt="Latest release"></a>
+  <a href="https://github.com/fagnermourafeitosa/caderninho/actions/workflows/tests.yml"><img src="https://github.com/fagnermourafeitosa/caderninho/actions/workflows/tests.yml/badge.svg?branch=main" alt="Unit and integration test status"></a>
+  <a href="docs/INSTALLATION.md"><img src="https://img.shields.io/badge/platform-macOS%20%28Apple%20Silicon%29-303025?style=flat-square" alt="macOS on Apple Silicon"></a>
+  <a href="docs/USER_GUIDE.md#seus-dados-ficam-no-seu-computador"><img src="https://img.shields.io/badge/storage-local--first-6b624c?style=flat-square" alt="Local-first storage"></a>
+</p>
+
+<p align="center">
   <a href="https://fagnermourafeitosa.github.io/caderninho/">Ver o site</a> ·
   <a href="docs/INSTALLATION.md">Instalar no Mac</a> ·
   <a href="docs/USER_GUIDE.md">Guia de uso</a>
