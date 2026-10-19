@@ -18,7 +18,7 @@ function rendererHistory({body='base',cuts=[],save=async()=>{},layout=async()=>{
     window:{addEventListener:noop,notebook:{onHistory:noop,
       action:async(_name,input)=>{await save(input);persisted={...persisted,...input};writes.push(input.body);return snapshot();},
       mediaLayoutResize:async input=>{await layout(input);const next=domain.resize(placements(persisted),input.cutId,input.width);persisted.cuts=persisted.cuts.map(cut=>({...cut,...next.find(p=>p.id===cut.id)}));return snapshot();},
-      link:async({placement})=>{await importMedia();persisted.cuts.push({id:'imported',groupId:'imported',position:0,anchor:0,side:'left',width:.5});const next=domain.move(placements(persisted),'imported',placement);persisted.cuts=persisted.cuts.map(cut=>({...cut,...next.find(p=>p.id===cut.id)}));return snapshot();},
+      link:async({placement})=>{await importMedia();persisted.cuts.push({id:'imported',groupId:'imported',position:0,anchor:0,side:'left',width:240});const next=domain.move(placements(persisted),'imported',placement);persisted.cuts=persisted.cuts.map(cut=>({...cut,...next.find(p=>p.id===cut.id)}));return snapshot();},
       mediaLayoutRestore:async input=>{await restore(input);const next=domain.restore(placements(persisted),input.placements);persisted.cuts=persisted.cuts.map(cut=>({...cut,...next.find(p=>p.id===cut.id)}));return snapshot();},
     }},
     noteMediaPlacements:placements,getSelection:()=>({rangeCount:0}),categoryText:{tokens:()=>[]},

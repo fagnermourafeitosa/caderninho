@@ -138,11 +138,11 @@ Comece uma linha com `[]` ou `[ ]` seguido de espaço para criar uma **tarefa** 
 
 Em **Notas**, use **Adicionar mídia** no menu **⋯** ou pressione **⇧⌘M**, cole uma imagem ou um link no texto, ou arraste imagens, PDFs e links para a página. Os arquivos aceitos são imagens **PNG, JPEG e WebP** de até **20 MB** cada, e documentos **PDF** de até **50 MB**.
 
-Use the **Arraste** handle to place media beside a paragraph or another card. The insertion indicator shows the destination before you release. Cards placed beside one another initially share the group space equally; **− / +** adjusts each card's width afterward. Text flows beside a card or group when space permits and continues below it.
+Use the **Arraste** handle to place media beside a paragraph or another card. A translucent card-shaped mask shows the destination before you release, including empty space beside another card. Cards start at 240 px wide and keep their chosen width when the window changes. **− / +** adjusts one card by 40 px within 180–600 px; joining cards preserves each card's width. Text flows beside a card or group when space permits and continues below it.
 
-Cards wrap onto subsequent rows in a narrow window and return to their intended arrangement when you widen it. Pasting inserts beside the current paragraph without splitting its text; dropping uses the indicated destination. The media dialog remembers the writing position from before it opened. In tables, code and diagrams, insertion anchors before the block.
+Cards wrap onto subsequent rows in a narrow window and return to their intended arrangement when you widen it. If a single card is wider than the viewport, only its displayed width is capped; its saved width and image proportions remain intact. Pasting inserts beside the current paragraph without splitting its text; dropping uses the indicated destination. The media dialog remembers the writing position from before it opened. In tables, code and diagrams, insertion anchors before the block.
 
-Each completed move or width adjustment supports undo and redo. Layout history does not restore deleted cards. When newer cards share a group, undo keeps them in place and fits historical card widths proportionally into the remaining space. PDF export preserves the card grouping and order with wrapping adapted to the printable width.
+Each completed move or width adjustment supports undo and redo. Layout history does not restore deleted cards. Undo keeps newer cards in place and restores historical widths without resizing neighboring cards. PDF export preserves the card grouping and order with wrapping adapted to the printable width.
 
 Os cartões de link guardam o título, a descrição e a imagem obtidos das metatags do site. Depois de criada, a prévia fica disponível sem internet. Clicar no cartão abre o endereço no navegador. Sites sem metadados ou que exigem login podem aparecer sem prévia. Os cartões não se atualizam sozinhos.
 

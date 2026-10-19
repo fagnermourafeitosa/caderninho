@@ -13,7 +13,10 @@ test('purpose-specific layout IPC validates unknown payloads and persists a vali
   for(const input of [null,[],{}, {noteId,cutId:'a',target:{kind:'block',anchor:-1,side:'left'}}])assert.throws(()=>move({},input));
   move({},{noteId,cutId:'a',target:{kind:'block',anchor:2,side:'left'}});
   assert.equal(handlers.get('media-layout:read')({},{noteId})[0].anchor,2);
-  assert.throws(()=>handlers.get('media-layout:resize')({},{noteId,cutId:'a',width:'1'}));
+  for(const width of [.5,179,601,240.5,'240',NaN])assert.throws(()=>handlers.get('media-layout:resize')({},{noteId,cutId:'a',width}));
+  assert.equal(handlers.get('media-layout:read')({},{noteId})[0].width,240);
+  handlers.get('media-layout:resize')({},{noteId,cutId:'a',width:320});
+  assert.equal(handlers.get('media-layout:read')({},{noteId})[0].width,320);
 });
 
 test('import destination validation rejects missing and foreign card targets before file work',t=>{

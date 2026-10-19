@@ -1,28 +1,11 @@
 let cancelMediaDrag=()=>{};
-function mediaDropTarget(x,y,excluded) {
-  const editor=$('#note-body');if(!editor)return null;
-  const bounds=editor.getBoundingClientRect();
-  if(x<bounds.left||x>bounds.right||y<bounds.top||y>bounds.bottom)return null;
-  for(const card of editor.querySelectorAll('.paper-cut')) {
-    if(card.dataset.cutId===excluded)continue;
-    const box=card.getBoundingClientRect();
-    if(x>=box.left&&x<=box.right&&y>=box.top&&y<=box.bottom) {
-      const edge=y<box.top+box.height*.2?'before':y>box.bottom-box.height*.2?'after':x<box.left+box.width/2?'beside-before':'beside-after';
-      return {placement:{kind:'card',cutId:card.dataset.cutId,edge},box};
-    }
-  }
-  const lines=[...editor.querySelectorAll('.writing-line')],line=lines.find(line=>y<line.getBoundingClientRect().bottom)||lines.at(-1);
-  return {placement:{kind:'block',anchor:Number(line?.dataset.lineIndex||0),side:x<bounds.left+bounds.width/2?'left':'right'},box:line?.getBoundingClientRect()||bounds};
-}
 function showMediaIndicator(target) {
   document.querySelector('.media-insertion-indicator')?.remove();
   if(!target)return;
-  const marker=document.createElement('div'),{placement,box}=target;
+  const marker=document.createElement('div'),box=target.preview;
   marker.className='media-insertion-indicator';marker.setAttribute('aria-hidden','true');
-  const beside=placement.edge?.startsWith('beside'),after=placement.edge?.endsWith('after');
-  marker.style.left=(beside?(after?box.right:box.left):box.left)+'px';
-  marker.style.top=(placement.edge==='after'?box.bottom:box.top)+'px';
-  marker.style.width=(beside?3:box.width)+'px';marker.style.height=(beside?box.height:3)+'px';
+  marker.style.left=box.left+'px';marker.style.top=box.top+'px';
+  marker.style.width=box.width+'px';marker.style.height=box.height+'px';
   document.body.append(marker);
 }
 function bindMediaDrag(card,cut) {

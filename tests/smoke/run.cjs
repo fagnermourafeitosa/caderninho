@@ -165,6 +165,13 @@ async function runSmoke() {
   const { win, store, media, related } = testHook.context();
   try {
     await installRendererErrors(win.webContents);
+    if(process.argv.includes('--fixed-media-only')) {
+      media.fetch=async url=>({bytes:Buffer.from('<title>Reference</title>'),type:'text/html',url});
+      const result=await win.webContents.executeJavaScript(smokeScript('fixed-media-cards-smoke.js'));
+      if(result.errors.length)throw new Error(result.errors.join('\n'));
+      const printed=execFileSync('swift',[path.join(__dirname,'pdf-full-text.swift'),result.pdf],{encoding:'utf8',timeout:60000,maxBuffer:8*1024*1024});if(!printed.includes('Trailing paragraph.'))throw new Error('Fixed-card PDF lost trailing writing');
+      console.log('FIXED_MEDIA_SMOKE_OK',JSON.stringify(result));app.quit();return;
+    }
     if(process.argv.includes('--media-layout-only')) {
       media.fetch=async url=>({bytes:Buffer.from('<title>Referência</title>'),type:'text/html',url});
       const result=await win.webContents.executeJavaScript(smokeScript('media-layout-smoke.js'));

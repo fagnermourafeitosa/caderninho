@@ -51,7 +51,7 @@ class Store {
         kind TEXT NOT NULL CHECK(kind IN ('image','link','pdf')), blob_id TEXT REFERENCES media_blobs(id),
         url TEXT NOT NULL DEFAULT '', title TEXT NOT NULL DEFAULT '', description TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL DEFAULT 'ready', side TEXT NOT NULL DEFAULT 'right', anchor INTEGER NOT NULL DEFAULT 0,
-        width REAL NOT NULL DEFAULT 0.5, trashed INTEGER NOT NULL DEFAULT 0, created TEXT NOT NULL
+        width INTEGER NOT NULL DEFAULT 240, trashed INTEGER NOT NULL DEFAULT 0, created TEXT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS notes_type_trash ON notes(type, trashed);
       CREATE INDEX IF NOT EXISTS reminders_due ON notes(reminder_enabled, trashed, fired, scheduled_at);

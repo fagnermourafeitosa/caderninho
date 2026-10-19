@@ -9,7 +9,7 @@ test('PDF filenames cannot escape the chosen directory and have a sensible fallb
  assert.equal(filename('../../Meu: arquivo/novo'),'..-..-Meu- arquivo-novo.pdf');assert.equal(filename('...'),'Página.pdf');assert.ok(filename('A'.repeat(200)).length<=104);
 });
 test('export shows an attached PDF title and excerpt without embedding its bytes as an image',()=>{
- const note={id:'pdf-note',type:'notes',notebookId:'book',title:'Referencias',body:'Texto',categories:[],cuts:[{id:'pdf',groupId:'pdf',position:0,side:'right',kind:'pdf',blobId:'blob',title:'Meu PDF',description:'Trecho inicial',anchor:0,width:.5}],items:[]};
+ const note={id:'pdf-note',type:'notes',notebookId:'book',title:'Referencias',body:'Texto',categories:[],cuts:[{id:'pdf',groupId:'pdf',position:0,side:'right',kind:'pdf',blobId:'blob',title:'Meu PDF',description:'Trecho inicial',anchor:0,width:240}],items:[]};
  const html=buildPDFHTML(note,{notebooks:[],sourceActions:[]},{file:()=>__filename});
  assert.ok(html.includes('PDF · documento anexado'));assert.ok(html.includes('Meu PDF'));assert.ok(html.includes('Trecho inicial'));assert.ok(!html.includes('data:image/png'));
 });
@@ -28,13 +28,14 @@ test('PDF export carries escaped diagram code for local rendering, without netwo
 });
 
 test('PDF preserves saved media grouping, card order and surrounding text flow',()=>{
- const cuts=[{id:'b',groupId:'g',position:1,side:'left',anchor:0,width:.2,kind:'link',title:'Second',url:'https://example.com/b'},
- {id:'a',groupId:'g',position:0,side:'left',anchor:0,width:.2,kind:'link',title:'First',url:'https://example.com/a'}];
+ const cuts=[{id:'b',groupId:'g',position:1,side:'left',anchor:0,width:180,kind:'link',title:'Second',url:'https://example.com/b'},
+ {id:'a',groupId:'g',position:0,side:'left',anchor:0,width:180,kind:'link',title:'First',url:'https://example.com/a'}];
  const html=buildPDFHTML({id:'n',type:'notes',title:'Layout',body:'Writing beside the cards',categories:[],cuts},{notebooks:[],sourceActions:[]},{file:()=>null});
  assert.match(html,/class="media-card-group"/);
  assert.ok(html.indexOf('First')<html.indexOf('Second'));
  assert.ok(html.indexOf('Second')<html.indexOf('Writing beside the cards'));
  assert.match(html,/float:left/);
  assert.match(html,/flex-wrap:wrap/);
+ assert.equal((html.match(/figure style="width:180px"/g)||[]).length,2);
  assert.doesNotMatch(html,/max-height:175mm/,'Export does not clip oversized media');
 });

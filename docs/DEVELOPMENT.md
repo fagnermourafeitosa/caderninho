@@ -34,6 +34,7 @@ To validate note media layout (spec 013), including adjacent cards, responsive w
 
 ```sh
 npm run test:app -- --media-layout-only
+npm run test:app -- --fixed-media-only
 ```
 
 To run only the native keyboard and mouse scenarios:

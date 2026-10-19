@@ -160,7 +160,7 @@ test('cuts retain layout and references across reopen and typed trash restores',
   store.dispatch('note:update', { id, body: 'Texto ao redor' });
   store.dispatch('cut:create', { id: 'cut-image', noteId: id, kind: 'image', blobId: blob });
   const layout=require('../src/main/media-layout/compose.cjs').createMediaLayout({store});
-  layout.move({noteId:id,cutId:'cut-image',target:{kind:'block',side:'left',anchor:3}});layout.resize({noteId:id,cutId:'cut-image',width:.4});
+  layout.move({noteId:id,cutId:'cut-image',target:{kind:'block',side:'left',anchor:3}});layout.resize({noteId:id,cutId:'cut-image',width:220});
   const cut = note(open(), id).cuts[0];
   assert.equal(cut.side, 'left'); assert.equal(cut.anchor, 3); assert.equal(cut.blobId, blob);
   assert.equal(note(store, id).body, 'Texto ao redor');
@@ -170,7 +170,7 @@ test('cuts retain layout and references across reopen and typed trash restores',
   store.dispatch('note:trash', { id }); assert.equal(store.snapshot().trashCuts.length, 0);
   assert.throws(() => store.dispatch('cut:restore', { id: cut.id }));
   store.dispatch('note:restore', { id }); store.dispatch('cut:restore', { id: cut.id });
-  assert.equal(note(store, id).cuts[0].width, .4);
+  assert.equal(note(store, id).cuts[0].width, 220);
   assert.throws(() => store.dispatch('cut:purge', { id: cut.id }));
   store.dispatch('cut:trash', { id: cut.id }); store.dispatch('cut:purge', { id: cut.id });
   assert.equal(note(store, id).cuts.length, 0);

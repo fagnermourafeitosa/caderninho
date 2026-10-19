@@ -22,7 +22,7 @@ test('typing pauses and history limits keep bounded independent snapshots', () =
 });
 
 test('completed layout edits are distinct steps interleaved with typing',()=>{
-  const layout=[{id:'card',groupId:'card',position:0,anchor:0,side:'left',width:.5}];
+  const layout=[{id:'card',groupId:'card',position:0,anchor:0,side:'left',width:240}];
   const history=new EditHistory({...value('text'),mediaLayout:layout});
   const moved=layout.map(item=>({...item,side:'right'}));
   assert.equal(history.record({...value('text'),mediaLayout:moved}),true);

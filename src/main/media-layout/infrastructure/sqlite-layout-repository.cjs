@@ -1,7 +1,11 @@
 function installMediaLayout(store) {
-  if (store.db.prepare('PRAGMA table_info(cuts)').all().some(column => column.name === 'layout_group')) return;
-  store.transaction(() => {
+  const columns=store.db.prepare('PRAGMA table_info(cuts)').all();
+  if(!columns.some(column=>column.name==='layout_group'))store.transaction(()=>{
     store.db.exec("ALTER TABLE cuts ADD COLUMN layout_group TEXT NOT NULL DEFAULT ''; ALTER TABLE cuts ADD COLUMN layout_order INTEGER NOT NULL DEFAULT 0; UPDATE cuts SET layout_group=id;");
+  });
+  const width=columns.find(column=>column.name==='width');
+  if(width.type!=='INTEGER'||width.dflt_value!=='240')store.transaction(()=>{
+    store.db.exec('ALTER TABLE cuts ADD COLUMN fixed_width INTEGER NOT NULL DEFAULT 240; ALTER TABLE cuts DROP COLUMN width; ALTER TABLE cuts RENAME COLUMN fixed_width TO width;');
   });
 }
 function sqliteLayoutRepository(store) {

@@ -14,14 +14,14 @@ async function verifyMediaLayoutClose({win,store,result}) {
   });
   await win.webContents.executeJavaScript(`(async()=>{
     state=await window.notebook.action('note:select',{id:${JSON.stringify(result.noteId)}});view='notes';indexFor=null;render();
-    const resize=changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:.12});
+    const resize=changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:200});
     await new Promise(resolve=>setTimeout(resolve,30));
     const line=document.querySelector('#note-body .line-text');putCaret(line,0);document.execCommand('insertText',false,'Typing during layout ');
     await resize;await noteMutationQueue;
     if(!document.querySelector('#note-body').value.includes('Typing during layout '))throw new Error('Layout acknowledgement erased active writing');
   })()`);
   await win.webContents.executeJavaScript(`(async()=>{
-    const resize=changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:.14});
+    const resize=changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:280});
     await new Promise(resolve=>setTimeout(resolve,30));
     const undo=editPageHistory('undo');await Promise.resolve();
     putCaret(document.querySelector('#note-body .line-text'),0);document.execCommand('insertText',false,'Typing while layout undo waits ');
@@ -72,20 +72,20 @@ async function verifyMediaLayoutClose({win,store,result}) {
     if(!document.querySelector('#note-body').value.includes('Typing during failed import '))throw new Error('Failed import erased active writing');
   })()`);
   const stale=store.snapshot();
-  await win.webContents.executeJavaScript(`changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:.13})`);
+  await win.webContents.executeJavaScript(`changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:240})`);
   win.webContents.send('notebook:cuts-updated',stale);
   const retained=await win.webContents.executeJavaScript(`new Promise(resolve=>setTimeout(()=>resolve(currentNote().cuts.find(c=>c.id===${JSON.stringify(cutId)}).width),30))`);
-  if(retained!==.13)throw new Error('Stale metadata notification overwrote the saved placement');
+  if(retained!==240)throw new Error('Stale metadata notification overwrote the saved placement');
   let timer;
   const closed=new Promise((resolve,reject)=>{win.once('closed',resolve);timer=setTimeout(()=>reject(new Error('Layout save did not finish before close')),5000);});
   try {
     await win.webContents.executeJavaScript(`(async()=>{
       state=await window.notebook.action('note:select',{id:${JSON.stringify(result.noteId)}});view='notes';indexFor=null;render();
-      changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:.11});
+      changeMediaLayout('mediaLayoutResize',{noteId:${JSON.stringify(result.noteId)},cutId:${JSON.stringify(cutId)},width:180});
     })()`);
     win.close();
     await closed;
-    if(layout.read({noteId:result.noteId}).find(card=>card.id===cutId).width!==.11)throw new Error('Close lost the pending layout save: '+JSON.stringify(layout.read({noteId:result.noteId})));
+    if(layout.read({noteId:result.noteId}).find(card=>card.id===cutId).width!==180)throw new Error('Close lost the pending layout save: '+JSON.stringify(layout.read({noteId:result.noteId})));
   } finally {clearTimeout(timer);}
   console.log('MEDIA_LAYOUT_CLOSE_FLUSH_OK');
 }

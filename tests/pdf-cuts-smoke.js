@@ -17,7 +17,7 @@
   assert(document.querySelector('.cut-open p').textContent.includes('Trecho inicial'), 'Trecho no cartão');
   assert($('#note-body').value.startsWith('Uma referência'), 'Texto da nota preservado');
   await window.notebook.openCut(cut.id);
-  await changeMediaLayout('mediaLayoutMove',{noteId:currentNote().id,cutId:cut.id,target:{kind:'block',side:'left',anchor:1}});await changeMediaLayout('mediaLayoutResize',{noteId:currentNote().id,cutId:cut.id,width:.42}); renderPage();
+  await changeMediaLayout('mediaLayoutMove',{noteId:currentNote().id,cutId:cut.id,target:{kind:'block',side:'left',anchor:1}});await changeMediaLayout('mediaLayoutResize',{noteId:currentNote().id,cutId:cut.id,width:280}); renderPage();
   await action('cut:trash', { id:cut.id });
   assert(state.trashCuts.some(item=>item.id===cut.id), 'PDF na lixeira');
   await action('cut:restore', { id:cut.id }); renderPage();

@@ -30,10 +30,9 @@
     if (target.kind === 'block') Object.assign(moving,{groupId:singleton,position:0,anchor:target.anchor,side:target.side});
     else if (target.edge.startsWith('beside')) {
       const members = result.filter(item => item.groupId === other.groupId && item.id !== cutId).sort((a,b) => a.position-b.position);
-      const space = Math.min(1, members.reduce((sum,item) => sum+item.width,0)+moving.width);
       const index = members.indexOf(other)+(target.edge === 'beside-after' ? 1 : 0);
       members.splice(index,0,moving);
-      members.forEach((item,i) => Object.assign(item,{groupId:other.groupId,position:i,anchor:other.anchor,side:other.side,width:space/members.length}));
+      members.forEach((item,i) => Object.assign(item,{groupId:other.groupId,position:i,anchor:other.anchor,side:other.side}));
     } else {
       const anchor = other.anchor + (target.edge === 'after' ? 1 : 0);
       for (const item of result) if (item.id !== cutId && item.anchor >= anchor) item.anchor++;
@@ -42,17 +41,15 @@
     return validateSaved(result);
   }
   function resize(items,cutId,width) {
-    if(!Number.isFinite(width)||width<=0||width>1)throw new Error('Largura do recorte inválida.');
-    const current=items.find(item=>item.id===cutId);
-    if(!current)throw new Error('Recorte não encontrado.');
-    const occupied=items.filter(item=>item.groupId===current.groupId&&item.id!==cutId).reduce((sum,item)=>sum+item.width,0);
-    return items.map(item=>item.id===cutId?{...item,width:Math.min(width,Math.max(.000001,1-occupied))}:{...item});
+    if(!Number.isInteger(width)||width<180||width>600)throw new Error('Largura do recorte inválida.');
+    if(!items.some(item=>item.id===cutId))throw new Error('Recorte não encontrado.');
+    return items.map(item=>item.id===cutId?{...item,width}:{...item});
   }
   function validateSaved(values) {
     if(!Array.isArray(values)||values.length>100)return invalid();
     const seen=new Set();
     return values.map(value=>{
-      if(!value||!identifier(value.id)||!identifier(value.groupId)||seen.has(value.id)||!Number.isInteger(value.position)||value.position<0||value.position>99||!Number.isFinite(value.width)||value.width<=0||value.width>1)return invalid();
+      if(!value||!identifier(value.id)||!identifier(value.groupId)||seen.has(value.id)||!Number.isInteger(value.position)||value.position<0||value.position>99||!Number.isInteger(value.width)||value.width<180||value.width>600)return invalid();
       placement({kind:'block',anchor:value.anchor,side:value.side});seen.add(value.id);
       return {id:value.id,groupId:value.groupId,position:value.position,anchor:value.anchor,side:value.side,width:value.width};
     });
@@ -73,13 +70,8 @@
     for(const group of groups(result)) {
       const historical=group.filter(item=>historicalIds.has(item.id));
       const retained=group.filter(item=>!historicalIds.has(item.id));
-      const historicalWidth=historical.reduce((sum,item)=>sum+item.width,0);
-      const remaining=1-retained.reduce((sum,item)=>sum+item.width,0),first=group[0];
-      if(historicalWidth>1.000001||remaining<0||group.some(item=>item.anchor!==first.anchor||item.side!==first.side))return invalid();
-      if(historicalWidth>remaining&&retained.length) {
-        if(remaining<=0)return invalid();
-        for(const item of historical)result.find(value=>value.id===item.id).width=item.width*remaining/historicalWidth;
-      }
+      const first=group[0];
+      if(group.some(item=>item.anchor!==first.anchor||item.side!==first.side))return invalid();
       const ordered=new Array(group.length);
       retained.forEach((item,i)=>{ordered[Math.min(item.position,group.length-retained.length+i)]=item;});
       let historicalIndex=0;
@@ -92,12 +84,9 @@
   }
   function project(items,available) {
     return groups(items).map(cards=>{
-      const total=cards.reduce((sum,card)=>sum+card.width,0), gap=18;
-      let width=Math.min(available,Math.max(total*available,Math.min(available,cards.length*180+(cards.length-1)*gap)));
+      const gap=18,width=Math.min(available,cards.reduce((sum,card)=>sum+card.width,0)+gap*(cards.length-1));
       const float=available-width-gap>=220?cards[0].side:'none';
-      if(float==='none')width=available;
-      const inner=width-gap*(cards.length-1);
-      return {groupId:cards[0].groupId,anchor:cards[0].anchor,side:cards[0].side,width,float,cards:cards.map(card=>({...card,pixels:Math.min(width,Math.max(180,inner*card.width/total))}))};
+      return {groupId:cards[0].groupId,anchor:cards[0].anchor,side:cards[0].side,width,float,cards:cards.map(card=>({...card,pixels:Math.min(available,card.width)}))};
     });
   }
   const api={identifier,placement,groups,move,resize,validateSaved,restore,project};

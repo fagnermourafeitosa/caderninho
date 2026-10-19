@@ -2,4 +2,4 @@
 .media-card-group .paper-cut{float:none;clear:none;flex:none;max-width:100%;margin:0;box-sizing:border-box;min-width:0}
 .media-card-group .cut-controls{flex-wrap:wrap}
 .media-card-group .cut-grip span{display:none}
-.media-insertion-indicator{position:fixed;z-index:1000;pointer-events:none;background:var(--ink);box-shadow:0 0 0 3px var(--accent-soft);border-radius:2px}
+.media-insertion-indicator{position:fixed;z-index:1000;pointer-events:none;box-sizing:border-box;background:var(--accent-soft);border:2px dashed var(--ink);border-radius:8px;opacity:.55}

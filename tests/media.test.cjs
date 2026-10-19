@@ -48,7 +48,7 @@ test('PDF copy, metadata, deduplication, persistence and trash lifecycle', async
   const noteId = store.snapshot().selected.notes;
   store.dispatch('cut:create', { id:'pdf', noteId, kind:'pdf', ...data });
   const layout=require('../src/main/media-layout/compose.cjs').createMediaLayout({store});
-  layout.move({noteId,cutId:'pdf',target:{kind:'block',side:'left',anchor:1}});layout.resize({noteId,cutId:'pdf',width:.42});
+  layout.move({noteId,cutId:'pdf',target:{kind:'block',side:'left',anchor:1}});layout.resize({noteId,cutId:'pdf',width:280});
   store.close(); store = new Store(directory); media.store = store;
   const cut = store.snapshot().notes.find(note => note.id === noteId).cuts[0];
   assert.equal(cut.kind, 'pdf'); assert.equal(cut.title, data.title); assert.equal(cut.description, data.description); assert.equal(cut.side, 'left');
