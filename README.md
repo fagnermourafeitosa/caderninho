@@ -23,6 +23,10 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/fagnermourafeitosa/caderninho/releases/latest"><img src="https://img.shields.io/github/downloads/fagnermourafeitosa/caderninho/total?label=Download%20for%20macOS&amp;style=for-the-badge&amp;color=6b624c" alt="Download for macOS — total release downloads"></a>
+</p>
+
+<p align="center">
   <a href="https://buymeacoffee.com/caderninho"><img src="site/img/bmc-button.svg" alt="Buy me a coffee" height="44"></a>
 </p>
 
