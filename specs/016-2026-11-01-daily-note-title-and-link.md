@@ -3,7 +3,7 @@
 - **Specification ID**: 016
 - **Date**: 2026-11-01
 - **Slug**: daily-note-title-and-link
-- **Status**: In Progress
+- **Status**: Implemented
 - **Owner**: Daily draft context (`src/main/daily-draft/`, `src/renderer/home/daily-draft-editor.js`)
 - **Related Specification**: [012 — Attached sidebar and daily home](012-2026-10-15-attached-sidebar-and-daily-home.md)
 
@@ -137,3 +137,4 @@ The user reports that ⌫ on a passage selected with Shift + arrows does nothing
 ## Further Notes
 
 - The deletion report could not be reproduced in the smoke runner. Its hidden window bypasses native menu accelerators and real window focus, which are the remaining differences from the running app. The root cause will be recorded here once the user's exact steps reproduce it.
+- Approved by the user on 2026-11-01 and released. Acceptance criterion 4 and user story 5 (⌫ over a Shift + arrows selection) remain open: the report is not reproduced yet, and its fix belongs to a new specification once the user's exact steps reproduce it.
