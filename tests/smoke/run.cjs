@@ -93,6 +93,33 @@ async function runPagesSmoke(win) {
   if (result.errors.length) throw new Error(result.errors.join('\n'));
   console.log('PAGES_SMOKE_OK');
 }
+// Real Backspace/Delete keys remove a passage of the daily note selected with Shift + Right or the mouse (spec 016).
+async function runHomeDraftDeletionSmoke(win) {
+  const js = code => win.webContents.executeJavaScript(`(async()=>{${code}})()`).catch(error => { throw new Error('Nota do dia: ' + (error?.message || JSON.stringify(error)) + ' em ' + code.slice(0, 120)); }), pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const key = (keyCode, modifiers = []) => { win.webContents.sendInputEvent({ type: 'keyDown', keyCode, modifiers }); win.webContents.sendInputEvent({ type: 'keyUp', keyCode, modifiers }); };
+  for (const [method, deletion] of [['keyboard', 'Backspace'], ['keyboard', 'Delete'], ['mouse', 'Backspace'], ['mouse', 'Delete']]) {
+    await js("state=await window.notebook.action('note:update',{id:state.dailyDraft.noteId,editorDoc:pageDocument.fromPlain('Início trecho apagável fim')});state=await window.notebook.action('view:select',{view:'home'});view='home';render();");
+    await pause(200);
+    const coords = await js("const host=document.querySelector('.home-draft .task-editor'),walker=document.createTreeWalker(host,NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())&&!node.textContent.includes('trecho apagável'));const at=node.textContent.indexOf('trecho apagável'),range=document.createRange();range.setStart(node,at);range.setEnd(node,at+1);const a=range.getBoundingClientRect();range.setStart(node,at+14);range.setEnd(node,at+15);const b=range.getBoundingClientRect();return {x1:Math.round(a.left+1),y:Math.round(a.top+a.height/2),x2:Math.round(b.right)};");
+    if (method === 'keyboard') {
+      // Click right before the passage, then extend the selection with Shift + Right, as the user does.
+      win.webContents.sendInputEvent({ type: 'mouseDown', button: 'left', clickCount: 1, x: coords.x1 - 1, y: coords.y });
+      win.webContents.sendInputEvent({ type: 'mouseUp', button: 'left', clickCount: 1, x: coords.x1 - 1, y: coords.y });
+      await pause(200);
+      for (let n = 0; n < 15; n++) key('Right', ['shift']);
+    } else {
+      win.webContents.sendInputEvent({ type: 'mouseDown', button: 'left', clickCount: 1, x: coords.x1, y: coords.y });
+      win.webContents.sendInputEvent({ type: 'mouseMove', modifiers: ['leftbuttondown'], x: coords.x2, y: coords.y });
+      win.webContents.sendInputEvent({ type: 'mouseUp', button: 'left', clickCount: 1, x: coords.x2, y: coords.y });
+    }
+    await pause(200);
+    const selected = await js('return getSelection().toString();');
+    if (selected !== 'trecho apagável') throw new Error(method + ' seleção do trecho na nota do dia: ' + JSON.stringify(selected));
+    key(deletion); await pause(900);
+    const result = await js("const id=state.dailyDraft.noteId,saved=(await window.notebook.state()).notes.find(note=>note.id===id);return {field:document.querySelector('.home-draft .task-editor').textContent,saved:saved?.body||''};");
+    if (result.field.includes('trecho apagável') || result.saved.includes('trecho apagável') || result.saved !== 'Início  fim') throw new Error(`${method} ${deletion} com seleção na nota do dia: ` + JSON.stringify(result));
+  }
+}
 // Home (spec 012): rows, graph card, folding, then a past day stays read-only without the daily note or graph.
 async function runHomeSmoke(win, store) {
   fs.mkdirSync(path.join(ROOT, 'artifacts'), { recursive: true });
@@ -103,6 +130,7 @@ async function runHomeSmoke(win, store) {
   homeStore.close();
   await new Promise(resolve => setTimeout(resolve, 100));
   fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());
+  await runHomeDraftDeletionSmoke(win);
   // Midnight with the app open: text typed just before is saved to that day's note, then the field is blank.
   const beforeMidnight = await win.webContents.executeJavaScript("(async()=>{state=await window.notebook.action('view:select',{view:'home'});view='home';render();const line=document.querySelector('.home-draft .task-editor .line-text');line.focus();putCaret(line,line.textContent.length);document.execCommand('insertText',false,' antes da meia-noite');return state.dailyDraft.noteId;})()");
   // The day-turn notice arrives while the 400 ms autosave is still pending, as the main process sends it.

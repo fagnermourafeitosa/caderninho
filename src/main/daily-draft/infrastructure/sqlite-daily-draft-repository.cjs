@@ -22,7 +22,7 @@ class SqliteDailyDraftRepository {
   createNote(notebookId) {
     if (this.store.db.prepare('SELECT count(*) AS total FROM notes').get().total >= NOTE_LIMIT) throw new Error('Limite de 3.000 páginas atingido.');
     const id = randomUUID(), stamp = this.stamp();
-    this.store.insert({ id, type: 'notes', title: 'Nova nota', body: '', notebookId, created: stamp, updated: stamp });
+    this.store.insert({ id, type: 'notes', title: '', body: '', notebookId, created: stamp, updated: stamp });
     return id;
   }
   save(notebookId, day, noteId) {

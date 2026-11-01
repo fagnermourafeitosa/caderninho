@@ -33,6 +33,7 @@ test('the first character creates one ordinary note without moving the selection
   const after = store.snapshot(), note = after.notes.find(item => item.id === noteId);
   assert.equal(noteCount(), count + 1);
   assert.equal(note.type, 'notes');
+  assert.equal(note.title, '', 'the daily note has no title until the user writes one');
   assert.equal(note.notebookId, notebookId);
   assert.equal(note.trashed, false);
   assert.deepEqual([after.activeView, after.activeNotebook, after.selected.notes], [before.activeView, before.activeNotebook, before.selected.notes]);

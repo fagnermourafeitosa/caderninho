@@ -16,9 +16,13 @@
   const typeDraft=async text=>{const line=document.querySelector('.home-draft .task-editor .line-text');assert(line,'Área de digitação da nota do dia');line.focus();putCaret(line,line.textContent.length);document.execCommand('insertText',false,text);await wait(900);while(pending)await wait(20);};
   const before=state.notes.length;
   assert(!state.dailyDraft.noteId,'Sem nota do dia antes de digitar');
+  const openLink=()=>document.querySelector('[data-strip="draft"] .home-strip-heading [data-home-draft-open]');
+  assert(openLink()&&openLink().textContent.includes('Ir para nota')&&openLink().disabled,'Link Ir para nota visível e desativado antes de digitar');
   await typeDraft('Ideia da manhã');
   const draftId=state.dailyDraft.noteId,draft=state.notes.find(note=>note.id===draftId);
   assert(draftId&&state.notes.length===before+1&&draft.body.includes('Ideia da manhã'),'Primeira letra cria uma nota e salva');
+  assert(draft.title==='','Nota do dia sem título até o usuário escrever um');
+  assert(!openLink().disabled,'Link Ir para nota ativo depois da primeira letra');
   await typeDraft(' e mais');
   assert(state.notes.length===before+1&&state.notes.find(note=>note.id===draftId).body.includes('Ideia da manhã e mais'),'Continua editando a mesma nota');
   const home=state.activeNotebook;
@@ -52,6 +56,11 @@
   document.querySelector('[data-fold="graph"]').click(); await wait(200);
   document.querySelector('.home-note-card').click(); await wait(100);
   assert(view==='notes' && $('#note-dates').textContent.includes('Atualizada em'),'Abrir última nota e ver sua atualização');
+  // The header link saves the pending edit, then opens the daily note page.
+  state=await window.notebook.action('view:select',{view:'home'}); view='home'; render();
+  const linkLine=document.querySelector('.home-draft .task-editor .line-text');linkLine.focus();putCaret(linkLine,linkLine.textContent.length);document.execCommand('insertText',false,' pelo link');
+  openLink().click(); await wait(400); while(pending) await wait(20);
+  assert(view==='notes'&&currentNote()?.id===state.dailyDraft.noteId&&currentNote().body.includes('pelo link'),'Ir para nota salva e abre a nota do dia');
   state=await window.notebook.action('view:select',{view:'home'}); view='home'; render();
   return {errors:window.smokeErrors,day:state.daily.day,taskId};
 })()
