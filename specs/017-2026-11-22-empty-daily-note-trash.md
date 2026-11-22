@@ -3,7 +3,7 @@
 - **Specification ID**: 017
 - **Date**: 2026-11-22
 - **Slug**: empty-daily-note-trash
-- **Status**: Waiting Approve
+- **Status**: Implemented
 - **Owner**: Daily draft context (`src/main/daily-draft/`, `src/renderer/home/home-page.js`)
 - **Related Specification**: [012 — Attached sidebar and daily home](012-2026-10-15-attached-sidebar-and-daily-home.md), [016 — Untitled daily note and link to the note](016-2026-11-01-daily-note-title-and-link.md)
 
@@ -183,3 +183,4 @@ sequenceDiagram
 - Supersedes nothing in 012 or 016; it adds the closing rule for past days.
 - **TDD deviation**: the emptiness rule (title, body, media) was written whole in the first red-green cycle, so the keep-rule tests passed on first run. Each was confirmed by a temporary mutation (body-only rule; `<=` instead of `<` on the day) that made it fail.
 - **Review round (2026-11-22)**: the user approved two review improvements. (1) The midnight smoke now starts from an empty saved note, so it proves the flush-then-sweep order. (2) The trash statement moved to `Store.trashNote`, guarded by a characterization test. A third finding (a queued note-page mutation at midnight) was not applied.
+- Approved by the user on 2026-11-22 and released in v1.11.10.
