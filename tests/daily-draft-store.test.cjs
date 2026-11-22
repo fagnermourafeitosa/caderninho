@@ -96,3 +96,80 @@ test('home sections fold under the new keys and the latest-note strip is gone', 
   t.after(() => reopened.close());
   assert.equal(reopened.getSetting('home_fold_latest'), undefined);
 });
+
+// Spec 017: empty daily notes of past days go to the trash.
+const DAY = 24 * 60 * 60 * 1000;
+const noteOf = (store, id) => store.snapshot().notes.find(note => note.id === id);
+
+test('an erased daily note goes to the trash once its day is over', t => {
+  const { store, drafts, notebookId, advance } = setup(t);
+  const { noteId } = drafts.startDailyDraft({ notebookId });
+  store.dispatch('note:update', { id: noteId, body: 'a' });
+  store.dispatch('note:update', { id: noteId, body: ' \n ' });
+  advance(DAY);
+  assert.deepEqual(drafts.closePastDailyDrafts(), { trashed: [noteId] });
+  const note = noteOf(store, noteId);
+  assert.equal(note.trashed, true);
+  assert.equal(note.deletedAt, new Date(Date.parse('2026-10-16T10:00:00')).toISOString());
+});
+
+test('past daily notes with text, a title or an active media card are kept; a trashed card does not count', t => {
+  const { store, drafts, notebookId, advance } = setup(t);
+  const notebook = name => { store.dispatch('notebook:create', { name, color: store.snapshot().notebookColors[1] }); return store.snapshot().activeNotebook; };
+  const withText = drafts.startDailyDraft({ notebookId }).noteId;
+  store.dispatch('note:update', { id: withText, body: 'reunião às 10' });
+  const withTitle = drafts.startDailyDraft({ notebookId: notebook('Título') }).noteId;
+  store.dispatch('note:update', { id: withTitle, title: 'Ideias', body: '' });
+  const withMedia = drafts.startDailyDraft({ notebookId: notebook('Mídia') }).noteId;
+  store.dispatch('cut:create', { id: 'kept-card', noteId: withMedia, kind: 'link' });
+  const trashedCard = drafts.startDailyDraft({ notebookId: notebook('Card na lixeira') }).noteId;
+  store.dispatch('cut:create', { id: 'gone-card', noteId: trashedCard, kind: 'link' });
+  store.dispatch('cut:trash', { id: 'gone-card' });
+  advance(DAY);
+  assert.deepEqual(drafts.closePastDailyDrafts(), { trashed: [trashedCard] });
+  for (const id of [withText, withTitle, withMedia]) assert.equal(noteOf(store, id).trashed, false, id);
+});
+
+test("today's daily note is never swept, even when empty", t => {
+  const { store, drafts, notebookId } = setup(t);
+  const { noteId } = drafts.startDailyDraft({ notebookId });
+  assert.deepEqual(drafts.closePastDailyDrafts(), { trashed: [] });
+  assert.equal(noteOf(store, noteId).trashed, false);
+  assert.deepEqual(drafts.openDailyDraft({ notebookId }), { day: '2026-10-15', noteId });
+});
+
+test('empty daily notes of every notebook and every past day are swept once', t => {
+  const { store, drafts, notebookId, advance } = setup(t);
+  const first = drafts.startDailyDraft({ notebookId }).noteId;
+  store.dispatch('notebook:create', { name: 'Trabalho', color: store.snapshot().notebookColors[1] });
+  const work = store.snapshot().activeNotebook;
+  const second = drafts.startDailyDraft({ notebookId: work }).noteId;
+  advance(DAY);
+  const third = drafts.startDailyDraft({ notebookId }).noteId;
+  advance(3 * DAY);
+  assert.deepEqual(new Set(drafts.closePastDailyDrafts().trashed), new Set([first, second, third]));
+  assert.deepEqual(drafts.closePastDailyDrafts(), { trashed: [] });
+});
+
+test('a swept daily note the user restores stays restored', t => {
+  const { store, drafts, notebookId, advance } = setup(t);
+  const { noteId } = drafts.startDailyDraft({ notebookId });
+  advance(DAY);
+  drafts.closePastDailyDrafts();
+  store.dispatch('note:restore', { id: noteId });
+  advance(DAY);
+  assert.deepEqual(drafts.closePastDailyDrafts(), { trashed: [] });
+  assert.equal(noteOf(store, noteId).trashed, false);
+});
+
+test('a swept daily note leaves the same trace as trashing a note by hand', t => {
+  const { store, drafts, notebookId, advance } = setup(t);
+  const swept = drafts.startDailyDraft({ notebookId }).noteId;
+  store.dispatch('note:create', {});
+  const manual = store.snapshot().selected.notes;
+  advance(DAY);
+  drafts.closePastDailyDrafts();
+  store.dispatch('note:trash', { id: manual });
+  const trace = id => { const note = noteOf(store, id); return { trashed: note.trashed, deletedAt: note.deletedAt, updated: note.updated, events: store.db.prepare("SELECT action, at FROM activity_events WHERE entity_type='note' AND entity_id=? AND action='trash'").all(id).map(row => ({ ...row })) }; };
+  assert.deepEqual(trace(swept), trace(manual));
+});

@@ -132,17 +132,18 @@ async function runHomeSmoke(win, store) {
   fs.writeFileSync(path.join(ROOT, 'artifacts', 'pagina-do-dia.png'), (await win.webContents.capturePage()).toPNG());
   await runHomeDraftDeletionSmoke(win);
   // Midnight with the app open: text typed just before is saved to that day's note, then the field is blank.
-  const beforeMidnight = await win.webContents.executeJavaScript("(async()=>{state=await window.notebook.action('view:select',{view:'home'});view='home';render();const line=document.querySelector('.home-draft .task-editor .line-text');line.focus();putCaret(line,line.textContent.length);document.execCommand('insertText',false,' antes da meia-noite');return state.dailyDraft.noteId;})()");
+  // Spec 017: the note is saved empty first, so sweeping before the pending save would trash it and lose the text.
+  const beforeMidnight = await win.webContents.executeJavaScript("(async()=>{state=await window.notebook.action('view:select',{view:'home'});view='home';render();const id=state.dailyDraft.noteId;await action('note:update',{id,body:'',editorDoc:[{type:'paragraph',runs:[{text:'',marks:{}}]}]},{history:false});render();const line=document.querySelector('.home-draft .task-editor .line-text');line.focus();putCaret(line,0);document.execCommand('insertText',false,'antes da meia-noite');return id;})()");
   // The day-turn notice arrives while the 400 ms autosave is still pending, as the main process sends it.
   const clockBefore = store.now;
   store.now = () => clockBefore() + 24 * 60 * 60 * 1000;
   store.setSetting('selected_day', store.dayKey());
   testHook.setObservedDay(store.dayKey()); win.webContents.send('notebook:day-updated', store.snapshot());
   await new Promise(resolve => setTimeout(resolve, 1500));
-  const midnight = await win.webContents.executeJavaScript(`(async()=>{const saved=(await window.notebook.state()).notes.find(note=>note.id===${JSON.stringify(beforeMidnight)});return {saved:saved?.body||'',noteId:state.dailyDraft.noteId,field:document.querySelector('.home-draft .task-editor')?.textContent.trim()};})()`);
+  const midnight = await win.webContents.executeJavaScript(`(async()=>{const saved=(await window.notebook.state()).notes.find(note=>note.id===${JSON.stringify(beforeMidnight)});return {saved:saved?.body||'',trashed:Boolean(saved?.trashed),noteId:state.dailyDraft.noteId,field:document.querySelector('.home-draft .task-editor')?.textContent.trim()};})()`);
   store.now = clockBefore; store.setSetting('selected_day', store.dayKey()); testHook.setObservedDay(store.dayKey());
   await win.webContents.executeJavaScript("(async()=>{state=await window.notebook.action('view:select',{view:'home'});view='home';render();})()");
-  if (!beforeMidnight || !midnight.saved.includes('antes da meia-noite') || midnight.noteId || midnight.field !== '') throw new Error('Virada do dia não salvou a nota do dia ou não limpou o campo: ' + JSON.stringify(midnight));
+  if (!beforeMidnight || !midnight.saved.includes('antes da meia-noite') || midnight.trashed || midnight.noteId || midnight.field !== '') throw new Error('Virada do dia não salvou a nota do dia ou não limpou o campo: ' + JSON.stringify(midnight));
   const actualNow=store.now;
   store.now=()=>actualNow()+24*60*60*1000;
   store.dispatch('view:select',{view:'home'}); testHook.setObservedDay(store.dayKey());

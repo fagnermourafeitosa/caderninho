@@ -52,8 +52,10 @@ function renderHome() {
   if ($('#daily-today')) $('#daily-today').onclick = () => select(daily.today);
   bindHomePanels($('#daily-overview')); renderHomeDraft(); renderHomePipeline(); refreshHomePanels(); updateTemporalLabels(); refreshHomeRelated();
 }
+// Spec 017: past days close only after the pending daily note edit is saved, so it is never swept mid-save.
 window.notebook.onDayUpdated(async next => {
   await flushHomeDraft();
-  state = next;
+  try { state = (await window.notebook.dailyDraftClosePastDays()).state; }
+  catch (error) { state = next; toast(error.message.replace(/^Error invoking remote method '[^']+': Error: /, '')); }
   if (view === 'home') renderHome();
 });

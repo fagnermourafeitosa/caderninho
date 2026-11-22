@@ -95,6 +95,8 @@ else {
     boards = createBoardUseCases({ store, media, events: { boardSaved: () => { saveFailed = false; services.scheduleRelated(); }, boardImageAttached: () => {} }, exportTarget: () => services.boardExportTarget });
     pipelines = createPipelineUseCases({ store });
     dailyDrafts = createDailyDraftUseCases({ store });
+    // Spec 017: empty daily notes of past days go to the trash before the window loads.
+    try { dailyDrafts.closePastDailyDrafts(); } catch (error) { reportSaveError(error); }
     registerMediaLayout(ipcMain,createMediaLayout({store}));
     settings = createSettingsUseCases({
       store,
@@ -196,9 +198,9 @@ registerBoards(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['
 // Pipeline use cases exist once SQLite is open; storage failures are reported like any other save.
 const pipelineCall = name => input => { try { const result = pipelines[name](input); saveFailed = false; return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
 registerPipelines(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: Object.fromEntries(['addColumn', 'renameColumn', 'moveColumn', 'removeColumn', 'createTask', 'updateTask', 'moveTask', 'trashTask', 'restoreTask', 'addComment', 'editComment', 'removeComment', 'attachImage', 'openTask'].map(name => [name, pipelineCall(name)])) });
-// Daily draft use cases exist once SQLite is open; the new note joins related indexing like any save.
-const dailyDraftCall = input => { try { const result = dailyDrafts.startDailyDraft(input); saveFailed = false; services.scheduleRelated(); return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
-registerDailyDraft(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: { startDailyDraft: dailyDraftCall } });
+// Daily draft use cases exist once SQLite is open; new and trashed notes join related indexing like any save.
+const dailyDraftCall = name => input => { try { const result = dailyDrafts[name](input); saveFailed = false; services.scheduleRelated(); return result; } catch (error) { if (/SQLITE/.test(error.code || '')) reportSaveError(error); throw error; } };
+registerDailyDraft(ipcMain, { getWindow: liveWindow, state: () => store.snapshot(), useCases: Object.fromEntries(['startDailyDraft', 'closePastDailyDrafts'].map(name => [name, dailyDraftCall(name)])) });
 // Settings use cases exist once SQLite is open.
 const settingsCall = name => input => settings[name](input);
 registerSettings(ipcMain, { getWindow: liveWindow, useCases: Object.fromEntries(['readSettings', 'updateSettings', 'testAlertSound', 'testNotification', 'openNotificationSettings'].map(name => [name, settingsCall(name)])), onUpdated: settingsUpdated });

@@ -86,6 +86,11 @@ class Store {
     try { const result = work(); this.db.exec('COMMIT'); return result; }
     catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
+  // Moves a note to the trash. Runs inside the caller's transaction; shared by note:trash and the daily draft sweep (spec 017).
+  trashNote(id, stamp) {
+    this.db.prepare('UPDATE notes SET trashed=1,deleted_at=?,updated=? WHERE id=?').run(stamp, stamp, id);
+    event(this, 'note', id, 'trash', stamp);
+  }
   insert(note) {
     this.db.prepare(`INSERT INTO notes(id,type,title,body,created,updated,trashed,scheduled_at,reminder_enabled,fired,notebook_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)`).run(
       note.id, note.type, text(note.title, 160), text(note.body, 200_000), note.created, note.updated,
@@ -265,7 +270,7 @@ class Store {
         case 'note:select': {
           const note = this.note(input.id); if (note.trashed) throw new Error('Esta nota está na lixeira.'); this.select(note); break;
         }
-        case 'note:trash': this.note(input.id); this.db.prepare('UPDATE notes SET trashed=1,deleted_at=?,updated=? WHERE id=?').run(stamp,stamp,input.id); event(this,'note',input.id,'trash',stamp); break;
+        case 'note:trash': this.note(input.id); this.trashNote(input.id, stamp); break;
         case 'note:restore': {
           const note = this.note(input.id);
           this.db.prepare('UPDATE notes SET trashed=0,deleted_at=NULL,updated=?,reminder_enabled=? WHERE id=?').run(stamp,Number(Boolean(note.reminder_enabled && (!note.scheduled_at || Date.parse(note.scheduled_at) > this.now()))), note.id);

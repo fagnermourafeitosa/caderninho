@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('notebook', {
   relatedRetry: () => ipcRenderer.invoke('related:retry'),
   relatedRefresh: () => ipcRenderer.invoke('related:refresh'),
   dailyDraftStart: notebookId => ipcRenderer.invoke('daily-draft:start', notebookId),
+  dailyDraftClosePastDays: () => ipcRenderer.invoke('daily-draft:close-past-days'),
   relatedSettings: () => ipcRenderer.invoke('settings:related-read'),
   updateRelatedSettings: changes => ipcRenderer.invoke('settings:related-update', changes),
   resetRelatedRanking: () => ipcRenderer.invoke('settings:related-reset'),

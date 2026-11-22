@@ -32,6 +32,19 @@ class SqliteDailyDraftRepository {
     const row = this.store.db.prepare('SELECT d.note_id, n.trashed FROM daily_drafts d JOIN notes n ON n.id = d.note_id WHERE d.notebook_id = ? AND d.day = ?').get(notebookId, day);
     return row ? { noteId: row.note_id, trashed: Boolean(row.trashed) } : null;
   }
+  // Live daily notes of days before `today`, with what decides whether they are empty.
+  pastDrafts(today) {
+    return this.store.db.prepare(`SELECT d.notebook_id, d.day, d.note_id, n.title, n.body,
+      (SELECT count(*) FROM cuts c WHERE c.note_id = d.note_id AND c.trashed = 0) AS media
+      FROM daily_drafts d JOIN notes n ON n.id = d.note_id WHERE d.day < ? AND n.trashed = 0 ORDER BY d.day, d.notebook_id`).all(today)
+      .map(row => ({ notebookId: row.notebook_id, day: row.day, noteId: row.note_id, title: row.title, body: row.body, media: row.media }));
+  }
+  // The same trash as the note:trash action. The mapping goes too, so a note the user restores is an
+  // ordinary note and is not swept again.
+  trash({ notebookId, day, noteId }) {
+    this.store.trashNote(noteId, this.stamp());
+    this.store.db.prepare('DELETE FROM daily_drafts WHERE notebook_id=? AND day=?').run(notebookId, day);
+  }
 }
 
 // Read model for the snapshot: today's daily note of a notebook.

@@ -2,12 +2,14 @@
 const { SqliteDailyDraftRepository } = require('./infrastructure/sqlite-daily-draft-repository.cjs');
 const { openDailyDraft } = require('./application/open-daily-draft.cjs');
 const { startDailyDraft } = require('./application/start-daily-draft.cjs');
+const { closePastDailyDrafts } = require('./application/close-past-daily-drafts.cjs');
 
 function createDailyDraftUseCases({ store }) {
   const repository = new SqliteDailyDraftRepository(store);
   return {
     openDailyDraft: openDailyDraft(repository),
     startDailyDraft: startDailyDraft(repository),
+    closePastDailyDrafts: closePastDailyDrafts(repository),
   };
 }
 
